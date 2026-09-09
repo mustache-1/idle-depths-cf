@@ -445,6 +445,33 @@
   .bj button:disabled{opacity:.4;cursor:not-allowed}
   .result{min-height:22px;font-weight:500;margin:0 0 10px;font-size:14px;text-align:center}
   .result.win{color:var(--green)}.result.lose{color:var(--red)}
+  /* game picker */
+  .gamesel{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+  .gamesel button{height:38px;border-radius:9px;border:1px solid var(--line);background:var(--panel2);color:var(--dim);font:inherit;font-size:13px;font-weight:500}
+  .gamesel button.on{border-color:var(--lamp);background:rgba(255,181,71,.12);color:var(--lamp2)}
+  .gview{display:none}.gview.on{display:block}
+  /* time at the table */
+  .sessbar{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--dim);margin-bottom:10px}
+  .sessbar .track{flex:1;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+  .sessbar .fill{height:100%;width:0;background:var(--green);transition:width .4s linear}
+  .sessbar.warn .fill{background:var(--lamp)}.sessbar.warn{color:var(--lamp)}
+  .sessbar.hot .fill{background:var(--red)}.sessbar.hot{color:var(--red)}
+  .tblock{display:none;text-align:center;padding:22px 6px 8px}
+  .tblock.on{display:block}
+  .tblock .big-ic{font-size:38px;line-height:1;margin-bottom:12px}
+  .tblock h4{font-size:17px;font-weight:600;margin-bottom:8px}
+  .tblock p{font-size:14px;color:var(--dim);margin-bottom:14px;line-height:1.55}
+  .tblock .cd{font-variant-numeric:tabular-nums;font-size:26px;font-weight:600;color:var(--lamp);letter-spacing:.02em}
+  /* slots */
+  .reels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px auto 4px;max-width:300px}
+  .reel{aspect-ratio:1;border-radius:12px;background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:min(42px,11vw);overflow:hidden}
+  .reel.rolling{border-color:var(--lamp);animation:reelshake .18s linear infinite}
+  .reel.hit{border-color:var(--lamp);box-shadow:0 0 0 2px rgba(255,181,71,.3),0 0 18px rgba(255,181,71,.25)}
+  @keyframes reelshake{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+  .paytable{width:100%;font-size:12px;color:var(--dim);border-collapse:collapse;margin-top:6px}
+  .paytable td{padding:3px 0}
+  .paytable td:last-child{text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+  @media(prefers-reduced-motion:reduce){.reel.rolling{animation:none}}
   /* modal */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:30;padding:16px}
   .modal.on{display:flex}
@@ -641,7 +668,7 @@
         <div class="grid">
           <button id="openMiner2"><i>🛏</i><b>Bunkhouse</b><small>Miner, record, trophies</small></button>
           <button id="openTour"><i>📖</i><b>How it works</b><small>Replay the tutorial</small></button>
-          <button id="openTable"><i>🃏</i><b>Warden's wheel</b><small>Spin for up to 50×</small></button>
+          <button id="openTable"><i>🃏</i><b>The warden's table</b><small>Wheel, slots &amp; blackjack</small></button>
           <button data-goto="leaderboard"><i>👑</i><b>Leaderboard</b><small>Who's dug furthest</small></button>
         </div>
       </div>
@@ -843,18 +870,65 @@
   </div>
 </div>
 <div class="modal" id="tableModal">
-  <div class="dlg tbl" role="dialog" aria-label="Warden's wheel">
-    <header><h3>Warden's wheel</h3><button class="x" id="tClose" aria-label="Close">×</button></header>
-    <div class="stakebar"><small>Stake</small><input type="range" id="stake" min="1" max="25" value="10" aria-label="Stake percent"><b id="stakeVal">$0</b></div>
-    <div class="wheelwrap">
-      <div class="pointer"></div>
-      <svg viewBox="0 0 200 200" id="wheelSvg" class="wheel"></svg>
-      <div class="wcenter" id="wCenter">SPIN</div>
+  <div class="dlg tbl" role="dialog" aria-label="The warden's table">
+    <header><h3 id="tblTitle">The warden's table</h3><button class="x" id="tClose" aria-label="Close">×</button></header>
+
+    <div class="tblock" id="tblLock">
+      <div class="big-ic">🏮</div>
+      <h4 id="lockHead">The warden's called it a night</h4>
+      <p id="lockText">You've been at the table a good while. Go swing a pick — the table reopens on its own.</p>
+      <div class="cd" id="lockCd">1:00:00</div>
+      <p class="note" style="margin-top:14px">Your crew keeps earning while you're away from the table.</p>
+      <button class="big" id="lockOut" style="margin-top:6px">Back to the mine</button>
     </div>
-    <div class="result" id="wRes"></div>
-    <div class="quickstakes" id="quickStakes"></div>
-    <button class="big" id="spinBtn">Spin</button>
-    <p class="note" style="margin-top:12px" id="tableNote">Stake at most 10% of your cash per round. Winnings don't count toward the leaderboard.</p>
+
+    <div id="tblPlay">
+      <div class="gamesel" id="gameSel">
+        <button data-game="wheel" class="on">Wheel</button>
+        <button data-game="slots">Slots</button>
+        <button data-game="bj">Blackjack</button>
+      </div>
+
+      <div class="sessbar" id="sessBar"><span id="sessTxt">Fresh at the table</span><span class="track"><i class="fill" id="sessFill"></i></span></div>
+
+      <div class="stakebar"><small>Stake</small><input type="range" id="stake" min="1" max="25" value="10" aria-label="Stake percent"><b id="stakeVal">$0</b></div>
+      <div class="quickstakes" id="quickStakes"></div>
+
+      <div class="gview on" id="gWheel">
+        <div class="wheelwrap">
+          <div class="pointer"></div>
+          <svg viewBox="0 0 200 200" id="wheelSvg" class="wheel"></svg>
+          <div class="wcenter" id="wCenter">SPIN</div>
+        </div>
+        <div class="result" id="wRes"></div>
+        <button class="big" id="spinBtn">Spin</button>
+      </div>
+
+      <div class="gview" id="gSlots">
+        <div class="reels">
+          <div class="reel" id="r0">🪨</div>
+          <div class="reel" id="r1">⚒️</div>
+          <div class="reel" id="r2">💎</div>
+        </div>
+        <div class="result" id="sRes"></div>
+        <button class="big" id="pullBtn">Pull</button>
+        <table class="paytable" id="payTable"></table>
+      </div>
+
+      <div class="gview" id="gBj">
+        <div class="hand"><small>The warden</small><div class="cards" id="dCards"></div></div>
+        <div class="hand"><small id="pLabel">You</small><div class="cards" id="pCards"></div></div>
+        <div class="result" id="bRes"></div>
+        <div class="bj" id="bjBtns">
+          <button class="p" id="bDeal">Deal</button>
+          <button id="bHit" disabled>Hit</button>
+          <button id="bStand" disabled>Stand</button>
+          <button id="bDouble" disabled>Double</button>
+        </div>
+      </div>
+
+      <p class="note" style="margin-top:12px" id="tableNote"></p>
+    </div>
   </div>
 </div>
 <div class="tour" id="tour"><div class="hole" id="hole"></div><div class="tip" id="tip"><div class="tiphead"><span class="tipic" id="tipIc">✦</span><div><small id="tipStep"></small><b id="tipTitle"></b></div></div><p id="tipText"></p><div class="tipdots" id="tipDots"></div><div class="btns"><button class="btn" id="tipSkip" style="margin-right:auto">Skip tour</button><button class="btn" id="tipBack">← Back</button><button class="btn p" id="tipNext">Next →</button></div></div></div>
@@ -1071,7 +1145,7 @@ function renderSwatches(){
   document.querySelectorAll("[data-hat]").forEach(b=>b.onclick=()=>{if(b.classList.contains("lock")){toast("Locked — "+b.title.replace("Unlock: ",""));return}draft.hat=b.dataset.hat;renderSwatches();previewSvg()});
 }
 function renderRecord(){
-  const rows=[["Total mined",fmt(S.lifetime)],["Deepest layer",LAYERS[S.deepest||0].name],["Swings",S.swings.toLocaleString()],["Best streak",(S.bestStreak||0)+" swings"],["Gems found",S.gems],["Rock faces cleared",S.clears||0],["Contracts completed",S.questsDone||0],["Stories finished",Object.keys((S.story&&S.story.done)||{}).length],["Keepsakes",(S.story&&S.story.keeps||[]).length],["Wyrms slain",S.bosses||0],["Debts paid",S.debts||0],["Lantern oil",S.oil],["Wheel spins won",S.wheelWins||0],["Big spins (4×+)",S.bigSpins||0],["Days played",S.days||0],["Shifts taken",S.shiftsUsed||0],["Crew on payroll",CREW.reduce((a,c,i)=>a+S.crew[i],0)]];
+  const rows=[["Total mined",fmt(S.lifetime)],["Deepest layer",LAYERS[S.deepest||0].name],["Swings",S.swings.toLocaleString()],["Best streak",(S.bestStreak||0)+" swings"],["Gems found",S.gems],["Rock faces cleared",S.clears||0],["Contracts completed",S.questsDone||0],["Stories finished",Object.keys((S.story&&S.story.done)||{}).length],["Keepsakes",(S.story&&S.story.keeps||[]).length],["Wyrms slain",S.bosses||0],["Debts paid",S.debts||0],["Lantern oil",S.oil],["Wheel spins won",S.wheelWins||0],["Big spins (4×+)",S.bigSpins||0],["Slot pulls",S.slotPulls||0],["Slot wins",S.slotWins||0],["Blackjack hands",S.bjHands||0],["Blackjack wins",S.bjWins||0],["Forced breaks",(S.gam&&S.gam.breaks)||0],["Days played",S.days||0],["Shifts taken",S.shiftsUsed||0],["Crew on payroll",CREW.reduce((a,c,i)=>a+S.crew[i],0)]];
   $("record").innerHTML=rows.map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join("");
   const ks=S.story.keeps||[];$("keepList").innerHTML=ks.length?ks.map(k=>{const st=STORIES.find(x=>x.keeps.some(y=>y.n===k)),kk=st.keeps.find(y=>y.n===k);return `<span style="display:inline-flex;align-items:center;gap:6px;margin:0 10px 6px 0"><i style="width:12px;height:12px;border-radius:3px;background:${kk.c};display:inline-block"></i>${k}</span>`}).join(""):"None yet. Finish a story in the Quests tab.";
 }
@@ -1274,7 +1348,7 @@ const TOUR=[
   {tab:"perks",el:"#perkList",ic:"✦",t:"Perks",p:"Spend lantern oil on permanent advantages: sharper steel, cheaper crew, more Wyrms, bigger stakes, a head start after paying. Oil spent here stops giving its +10%, so choose what fits how you play."},
   {tab:"leaderboard",el:"#tab-leaderboard .board",ic:"♛",t:"Leaderboard",p:"The weekly board resets every Monday — last week's top three are named and earn a title. There's an all-time board too. Avatar colors and keepsakes show, so people can see what you've earned."},
   {tab:"mine",el:"#account",ic:"🛏",t:"The Bunkhouse",p:"Your corner: change your shirt and helmet, set a display name and title, see your record, and collect 25+ trophies. Trophies pay cash and unlock rare colors."},
-  {tab:"mine",el:".around",ic:"🃏",t:"Around the mine",p:"The Warden's wheel (up to 50×, 25% max stake, the house always keeps a little), the Bunkhouse, this tour, and the board. The Support tab has the rules and how to reach me. Good luck down there."},
+  {tab:"mine",el:".around",ic:"🃏",t:"Around the mine",p:"The warden's table (wheel, slots and blackjack — 25% max stake, the house always keeps a little, and it shuts for an hour if you sit too long), the Bunkhouse, this tour, and the board. The Support tab has the rules and how to reach me. Good luck down there."},
 ];
 let tourI=0;
 function tourShow(){const prev=TOUR[tourI-1];if(prev&&prev.post)prev.post();const st=TOUR[tourI];if(!st){tourEnd();return}
@@ -1388,7 +1462,7 @@ function render(){
 }
 
 // ---- foreman's table ----
-let betReady=0,side="heads",bj=null;
+let betReady=0,bj=null;
 let streak=0,lastSwing=0,combo=0,lastManual=0,lastNudge=0,lastQNudge=Date.now()+120000,lastPNudge=Date.now()+180000;
 // ---- the Deep Wyrm (random boss) ----
 let boss=null,bossCooldown=Date.now()+3*60*1000,wasBuffed=false;
@@ -1403,18 +1477,89 @@ function bossEnd(win){$("bossbar").classList.remove("on");boss=null;bossCooldown
 const streakMult=()=>1+Math.min(50,Math.floor(streak/10)*5)/100;
 const comboMult=()=>autoOn()&&Date.now()-lastManual<2000?1+Math.min(100,Math.floor(combo/5)*10)/100:1;
 const stakeMax=()=>25+perkLv("pockets")*10;
-const stake=()=>Math.max(0,Math.floor(S.cash*(Math.min(+$("stake").value,stakeMax())/100)));
-function tableRender(){const st=stake(),wait=Math.max(0,betReady-Date.now());
+const stake=()=>{const cash=Math.floor(S.cash);if(cash<TABLE_MIN)return 0;
+  const raw=Math.floor(cash*(Math.min(+$("stake").value,stakeMax())/100));
+  return Math.min(cash,Math.max(TABLE_MIN,raw))};   // never below the table minimum if you can cover it
+const TABLE_MIN=10,TABLE_CD=900;
+
+/* ---- time at the table ----------------------------------------------------
+   Soft nudge at 15 min, a heads-up at 20, then the table shuts for an hour.
+   Stored on the save, so a refresh doesn't wipe the break.                   */
+const GAM_LIMIT=25*60*1000,GAM_LOCK=60*60*1000,GAM_IDLE=10*60*1000,GAM_WARN=15*60*1000;
+const gam=()=>(S.gam=S.gam||{start:0,last:0,lockUntil:0,warned:0,breaks:0});
+const gamLocked=()=>Date.now()<gam().lockUntil;
+const gamElapsed=()=>{const g=gam(),now=Date.now();
+  if(!g.start||now-g.last>GAM_IDLE)return 0;return Math.min(now-g.start,GAM_LIMIT)};
+function gamLock(){const g=gam();
+  g.lockUntil=Date.now()+GAM_LOCK;g.start=0;g.last=0;g.warned=0;g.breaks=(g.breaks||0)+1;
+  spinning=false;slotting=false;bj=null;slotTimers.forEach(clearInterval);slotTimers=[];
+  save();showLock();toast("The table's shut for an hour. Go work the seam.")}
+// gate every bet: returns false if the player shouldn't be staking right now
+function gamGate(){const g=gam(),now=Date.now();
+  if(now<g.lockUntil){showLock();return false}
+  if(!g.start||now-g.last>GAM_IDLE){g.start=now;g.warned=0}
+  if(now-g.start>=GAM_LIMIT){gamLock();return false}
+  g.last=now;const el=now-g.start;
+  if(el>=GAM_LIMIT-5*60*1000&&g.warned<2){g.warned=2;toast("Five minutes left before the warden shuts the table.")}
+  else if(el>=GAM_WARN&&g.warned<1){g.warned=1;toast("You've been at the table fifteen minutes. The warden's watching the clock.")}
+  return true}
+function showLock(){$("tblLock").classList.add("on");$("tblPlay").style.display="none";lockTick()}
+function hideLock(){$("tblLock").classList.remove("on");$("tblPlay").style.display=""}
+function lockTick(){const ms=Math.max(0,gam().lockUntil-Date.now());
+  $("lockCd").textContent=`${Math.floor(ms/36e5)}:${String(Math.floor(ms/6e4)%60).padStart(2,"0")}:${String(Math.floor(ms/1000)%60).padStart(2,"0")}`}
+
+/* ---- shared table shell ---- */
+let game="wheel",tblTimer=null;
+const GNAME={wheel:"Warden's wheel",slots:"The rattler",bj:"Warden's blackjack"};
+const GNOTE={
+  wheel:()=>`Stake up to ${stakeMax()}% of your cash per spin. Twelve wedges, up to 50×.`,
+  slots:()=>`Stake up to ${stakeMax()}% per pull. Three reels — two matching pays, three pays properly.`,
+  bj:()=>`Stake up to ${stakeMax()}% per hand. Blackjack pays 3:2, the warden stands on 17.`};
+function setGame(g){
+  if(bj&&!bj.over&&g!=="bj"){toast("Finish the hand first.");return}
+  if(spinning||slotting)return;
+  game=g;
+  document.querySelectorAll("[data-game]").forEach(b=>b.classList.toggle("on",b.dataset.game===g));
+  $("gWheel").classList.toggle("on",g==="wheel");
+  $("gSlots").classList.toggle("on",g==="slots");
+  $("gBj").classList.toggle("on",g==="bj");
+  $("tblTitle").textContent=GNAME[g];tableRender()}
+function tableRender(){
+  const st=stake(),wait=Math.max(0,betReady-Date.now()),locked=gamLocked(),live=!!(bj&&!bj.over);
   $("stake").max=stakeMax();$("stakeVal").textContent=$("stake").value+"% · "+fmt(st);
-  $("spinBtn").disabled=spinning||wait>0||st<WHEEL_MIN;
-  $("spinBtn").textContent=spinning?"Spinning…":st<WHEEL_MIN?`Need ${fmt(WHEEL_MIN)}`:`Spin ${fmt(st)}`;
+  $("stake").disabled=spinning||slotting||live;
   document.querySelectorAll("[data-qs]").forEach(b=>b.classList.toggle("on",+b.dataset.qs===+$("stake").value));
-  $("tableNote").textContent=`Stake up to ${stakeMax()}% of your cash per spin. The wheel keeps a small cut, so it's a thrill, not an income. Winnings don't count toward the leaderboard.`}
-function openTable(){if(termNow().id==="quiet"){toast("The warden's wheel is closed under the quiet shift.");return}$("stake").max=stakeMax();$("tableModal").classList.add("on");tableRender()}
-function closeTable(){$("tableModal").classList.remove("on")}
-$("openTable").onclick=openTable;$("openMiner2").onclick=openModal;$("tClose").onclick=closeTable;$("tableModal").onclick=e=>{if(e.target===$("tableModal"))closeTable()};
+  const poor=Math.floor(S.cash)<TABLE_MIN;
+  $("spinBtn").disabled=locked||spinning||wait>0||poor;
+  $("spinBtn").textContent=spinning?"Spinning…":poor?`Need ${fmt(TABLE_MIN)} to play`:`Spin ${fmt(st)}`;
+  $("pullBtn").disabled=locked||slotting||wait>0||poor;
+  $("pullBtn").textContent=slotting?"Rolling…":poor?`Need ${fmt(TABLE_MIN)} to play`:`Pull ${fmt(st)}`;
+  $("bDeal").disabled=locked||live||poor;
+  $("bDeal").textContent=live?"In hand":poor?`Need ${fmt(TABLE_MIN)} to play`:`Deal ${fmt(st)}`;
+  $("bHit").disabled=!live;$("bStand").disabled=!live;
+  $("bDouble").disabled=!live||bj.p.length!==2||Math.floor(S.cash)<bj.bet;
+  const el=gamElapsed(),pct=Math.min(100,el/GAM_LIMIT*100),sb=$("sessBar");
+  sb.classList.toggle("warn",pct>=60&&pct<88);sb.classList.toggle("hot",pct>=88);
+  $("sessFill").style.width=pct+"%";
+  $("sessTxt").textContent=el<60000?"Fresh at the table":`${Math.floor(el/60000)} min at the table`;
+  $("tableNote").textContent=GNOTE[game]()+" The house keeps a cut, so it's a thrill, not an income. Winnings don't count toward the leaderboard.";
+}
+function tableTick(){const l=gamLocked(),shown=$("tblLock").classList.contains("on");
+  if(l&&!shown)showLock();else if(!l&&shown)hideLock();
+  if(l)lockTick();else tableRender()}
+function openTable(){
+  if(termNow().id==="quiet"){toast("The warden's table is closed under the quiet shift.");return}
+  $("stake").max=stakeMax();$("tableModal").classList.add("on");
+  gamLocked()?showLock():hideLock();
+  tableRender();clearInterval(tblTimer);tblTimer=setInterval(tableTick,1000)}
+function closeTable(){$("tableModal").classList.remove("on");clearInterval(tblTimer);tblTimer=null}
+$("openTable").onclick=openTable;$("openMiner2").onclick=openModal;$("tClose").onclick=closeTable;
+$("lockOut").onclick=closeTable;
+$("tableModal").onclick=e=>{if(e.target===$("tableModal"))closeTable()};
 $("stake").oninput=tableRender;
-document.querySelectorAll("[data-side]").forEach(b=>b.onclick=()=>{side=b.dataset.side;document.querySelectorAll("[data-side]").forEach(x=>x.classList.toggle("on",x===b))});
+document.querySelectorAll("[data-game]").forEach(b=>b.onclick=()=>setGame(b.dataset.game));
+
+/* ---- wheel ---- */
 const WEDGES=[   // 12 equal slices, rare prizes spaced apart; odds come from .w, not slice size
   {m:0,   w:11,  label:"Bust", c:"#3a2a32"},
   {m:1.2, w:9,   label:"1.2×", c:"#2f4a3a"},
@@ -1428,8 +1573,7 @@ const WEDGES=[   // 12 equal slices, rare prizes spaced apart; odds come from .w
   {m:0,   w:9,   label:"Bust", c:"#3a2a32"},
   {m:4,   w:2.6, label:"4×",   c:"#5a5a2f"},
   {m:50,  w:0.28,label:"50×",  c:"#4a2f5a"},
-];  // ~0.95 expected return
-const WHEEL_MIN=10,WHEEL_CD=900;
+];  // ~0.94 expected return
 let spinning=false,wheelAngle=0;
 function buildWheel(){
   const n=WEDGES.length,sweep=360/n;let ang=-90-sweep/2,g="";const rad=d=>d*Math.PI/180;
@@ -1443,7 +1587,8 @@ function buildWheel(){
 }
 const pickWedge=()=>{const t=WEDGES.reduce((a,x)=>a+x.w,0);let r=Math.random()*t;for(const x of WEDGES){if(r<x.w)return x;r-=x.w}return WEDGES[0]};
 function spin(){
-  const st=stake();if(spinning||st<WHEEL_MIN||Date.now()<betReady)return;
+  const st=stake();if(spinning||st<TABLE_MIN||S.cash<st||Date.now()<betReady)return;
+  if(!gamGate())return;
   spinning=true;S.cash-=st;render();
   const win=pickWedge(),sweep=360/WEDGES.length;
   wheelAngle+=360*6+(((-win._mid-90)-(wheelAngle%360))%360+360)%360+(Math.random()-.5)*sweep*.55;
@@ -1451,7 +1596,7 @@ function spin(){
   document.querySelector(".wheelwrap").classList.add("spinning");
   $("wCenter").textContent="…";$("wRes").textContent="";$("wRes").className="result";tableRender();
   setTimeout(()=>{
-    spinning=false;betReady=Date.now()+WHEEL_CD;document.querySelector(".wheelwrap").classList.remove("spinning");
+    spinning=false;betReady=Date.now()+TABLE_CD;document.querySelector(".wheelwrap").classList.remove("spinning");
     $("wCenter").textContent=win.label;
     const back=Math.floor(st*win.m);
     if(back>0){S.cash+=back;S.wheelWins=(S.wheelWins||0)+1;if(win.m>=4)S.bigSpins=(S.bigSpins||0)+1;
@@ -1462,12 +1607,125 @@ function spin(){
       if(win.m>=10)toast(`${win.label} on the wheel — ${fmt(back)}!`);
     } else {$("wRes").textContent=`Bust. The warden keeps ${fmt(st)}.`;$("wRes").className="result lose"}
     render();save();tableRender();
+    setTimeout(tableRender,TABLE_CD+60);   // re-enable once the cooldown lapses
   },3450);
 }
 $("spinBtn").onclick=spin;
+
+/* ---- slots: "the rattler" — ~0.94 expected return ---- */
+const SLOTS=[
+  {k:"🪨",n:"Coal",   w:30, p:3},
+  {k:"⚒️",n:"Iron",   w:24, p:5},
+  {k:"🪙",n:"Silver", w:18, p:10},
+  {k:"💎",n:"Gem",    w:12, p:25},
+  {k:"🏮",n:"Lantern",w:8,  p:60},
+  {k:"🐉",n:"Wyrm",   w:3,  p:300},
+];
+const SLOT_PAIR=1.2;
+const slotPick=()=>{const t=SLOTS.reduce((a,s)=>a+s.w,0);let r=Math.random()*t;for(const s of SLOTS){if(r<s.w)return s;r-=s.w}return SLOTS[0]};
+let slotting=false,slotTimers=[];
+function pull(){
+  const st=stake();if(slotting||st<TABLE_MIN||S.cash<st||Date.now()<betReady)return;
+  if(!gamGate())return;
+  slotting=true;S.cash-=st;S.slotPulls=(S.slotPulls||0)+1;render();
+  const res=[slotPick(),slotPick(),slotPick()];
+  $("sRes").textContent="";$("sRes").className="result";
+  slotTimers.forEach(clearInterval);slotTimers=[];
+  [0,1,2].forEach(i=>{
+    const el=$("r"+i);el.classList.add("rolling");el.classList.remove("hit");
+    const iv=setInterval(()=>{el.textContent=SLOTS[Math.floor(Math.random()*SLOTS.length)].k},70);
+    slotTimers.push(iv);
+    setTimeout(()=>{clearInterval(iv);el.classList.remove("rolling");el.textContent=res[i].k;
+      if(i===2)slotSettle(res,st)},900+i*550)});
+  tableRender();
+}
+function slotSettle(res,st){
+  slotting=false;betReady=Date.now()+TABLE_CD;
+  const [a,b,c]=res;let mult=0,label="",hits=[];
+  if(a.k===b.k&&b.k===c.k){mult=a.p;label=`Three ${a.n.toLowerCase()}`;hits=[0,1,2]}
+  else if(a.k===b.k){mult=SLOT_PAIR;label=`Two ${a.n.toLowerCase()}`;hits=[0,1]}
+  else if(b.k===c.k){mult=SLOT_PAIR;label=`Two ${b.n.toLowerCase()}`;hits=[1,2]}
+  else if(a.k===c.k){mult=SLOT_PAIR;label=`Two ${a.n.toLowerCase()}`;hits=[0,2]}
+  const back=Math.floor(st*mult);
+  if(back>0){
+    S.cash+=back;S.slotWins=(S.slotWins||0)+1;
+    hits.forEach(i=>$("r"+i).classList.add("hit"));
+    const p=back-st;
+    $("sRes").textContent=p>0?`${label} — you win ${fmt(p)}.`:`${label} — ${fmt(back)} back.`;
+    $("sRes").className="result "+(mult>=25?"win jackpot":p>0?"win":"lose");
+    if(mult>=25)confetti(mult>=300?80:mult>=60?60:25);
+    if(mult>=60)toast(`${label} on the rattler — ${fmt(back)}!`);
+  } else {$("sRes").textContent=`Nothing. The warden keeps ${fmt(st)}.`;$("sRes").className="result lose"}
+  render();save();tableRender();
+  setTimeout(tableRender,TABLE_CD+60);
+}
+$("pullBtn").onclick=pull;
+$("payTable").innerHTML=SLOTS.map(s=>`<tr><td>${s.k} ${s.k} ${s.k} &nbsp;${s.n}</td><td>${s.p}×</td></tr>`).join("")
+  +`<tr><td>Any two matching</td><td>${SLOT_PAIR}×</td></tr>`;
+
+/* ---- blackjack: 6 decks, dealer stands on 17, blackjack pays 3:2 ---- */
+const BJ_SUITS=[["♠",0],["♥",1],["♦",1],["♣",0]],BJ_RANKS=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+let shoe=[];
+function newShoe(){shoe=[];
+  for(let d=0;d<6;d++)for(const [s,red] of BJ_SUITS)for(const r of BJ_RANKS)shoe.push({r,s,red});
+  for(let i=shoe.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shoe[i],shoe[j]]=[shoe[j],shoe[i]]}}
+const drawCard=()=>{if(shoe.length<60)newShoe();return shoe.pop()};
+function hval(h){let t=0,a=0;
+  for(const c of h){if(c.r==="A"){a++;t+=11}else if(c.r==="10"||c.r==="J"||c.r==="Q"||c.r==="K")t+=10;else t+=+c.r}
+  while(t>21&&a){t-=10;a--}return t}
+const isSoft=h=>{let t=0,a=0;for(const c of h){if(c.r==="A"){a++;t+=11}else if(c.r==="10"||c.r==="J"||c.r==="Q"||c.r==="K")t+=10;else t+=+c.r}
+  while(t>21&&a){t-=10;a--}return a>0};
+const cardHtml=c=>c?`<div class="cardf${c.red?" r":""}"><span>${c.r}${c.s}</span><span>${c.r}${c.s}</span></div>`:`<div class="cardf back"></div>`;
+function bjRender(){
+  if(!bj){$("dCards").innerHTML="";$("pCards").innerHTML="";$("pLabel").textContent="You";document.querySelector("#gBj .hand small").textContent="The warden";tableRender();return}
+  $("dCards").innerHTML=bj.hole?cardHtml(bj.d[0])+cardHtml(null):bj.d.map(cardHtml).join("");
+  $("pCards").innerHTML=bj.p.map(cardHtml).join("");
+  const pv=hval(bj.p);
+  $("pLabel").textContent=`You — ${pv}${isSoft(bj.p)&&pv<21?" (soft)":""} · ${fmt(bj.bet)} up`;
+  document.querySelector("#gBj .hand small").textContent=bj.hole?"The warden":`The warden — ${hval(bj.d)}`;
+  tableRender()}
+function bjDeal(){
+  const st=stake();if((bj&&!bj.over)||st<TABLE_MIN||S.cash<st)return;
+  if(!gamGate())return;
+  S.cash-=st;S.bjHands=(S.bjHands||0)+1;
+  bj={bet:st,p:[drawCard(),drawCard()],d:[drawCard(),drawCard()],over:false,hole:true};
+  $("bRes").textContent="";$("bRes").className="result";
+  render();
+  if(hval(bj.p)===21||hval(bj.d)===21){bjDealerPlay(true);return}
+  bjRender();save()}
+function bjHit(){if(!bj||bj.over)return;
+  bj.p.push(drawCard());bjRender();
+  if(hval(bj.p)>=21)bjDealerPlay()}
+function bjDouble(){if(!bj||bj.over||bj.p.length!==2||S.cash<bj.bet)return;
+  S.cash-=bj.bet;bj.bet*=2;bj.p.push(drawCard());render();bjRender();bjDealerPlay()}
+function bjDealerPlay(natural){
+  bj.hole=false;
+  if(!natural&&hval(bj.p)<=21){while(hval(bj.d)<17)bj.d.push(drawCard())}
+  bjSettle()}
+function bjSettle(){
+  bj.over=true;bj.hole=false;
+  const pv=hval(bj.p),dv=hval(bj.d),bet=bj.bet;
+  const pbj=pv===21&&bj.p.length===2,dbj=dv===21&&bj.d.length===2;
+  let back=0,msg,cls;
+  if(pv>21){msg=`Bust at ${pv}. The warden keeps ${fmt(bet)}.`;cls="lose"}
+  else if(pbj&&dbj){back=bet;msg="Both blackjack. Push — stake returned.";cls=""}
+  else if(pbj){back=Math.floor(bet*2.5);msg=`Blackjack! You win ${fmt(back-bet)}.`;cls="win jackpot"}
+  else if(dbj){msg=`The warden had blackjack. He keeps ${fmt(bet)}.`;cls="lose"}
+  else if(dv>21){back=bet*2;msg=`The warden busts at ${dv}. You win ${fmt(bet)}.`;cls="win"}
+  else if(pv>dv){back=bet*2;msg=`${pv} beats ${dv}. You win ${fmt(bet)}.`;cls="win"}
+  else if(pv<dv){msg=`${dv} beats ${pv}. The warden keeps ${fmt(bet)}.`;cls="lose"}
+  else {back=bet;msg=`Push at ${pv}. Stake returned.`;cls=""}
+  if(back>0)S.cash+=back;
+  if(back>bet){S.bjWins=(S.bjWins||0)+1;if(pbj)confetti(40)}
+  $("bRes").textContent=msg;$("bRes").className="result "+cls;
+  render();save();bjRender()}
+$("bDeal").onclick=bjDeal;$("bHit").onclick=bjHit;
+$("bStand").onclick=()=>{if(bj&&!bj.over)bjDealerPlay()};
+$("bDouble").onclick=bjDouble;
+
 $("quickStakes").innerHTML=[5,10,15,25].map(v=>`<button data-qs="${v}">${v}%</button>`).join("");
 document.querySelectorAll("[data-qs]").forEach(b=>b.onclick=()=>{$("stake").value=Math.min(+b.dataset.qs,stakeMax());tableRender()});
-buildWheel();
+buildWheel();newShoe();
 function chips(){const rk=$("rock"),r=rk.getBoundingClientRect(),sx=r.width/340,x=(200)*sx,y=(140)*sx;for(let i=0;i<6;i++){const c=document.createElement("i");c.className="chip";c.style.left=x+"px";c.style.top=y+"px";c.style.setProperty("--dx",(Math.random()*60-30)+"px");c.style.setProperty("--dy",(-20-Math.random()*40)+"px");c.style.background=Math.random()<.3?"#5ec9b6":"#8d8d94";rk.appendChild(c);setTimeout(()=>c.remove(),600)}}
 function confetti(n=40){const cols=["#f2b24c","#ffd27a","#8fdc6a","#5ec9b6","#c48cff","#f07a5b"];for(let i=0;i<n;i++){const c=document.createElement("i");c.className="conf";c.style.left="50%";c.style.top="40%";c.style.background=cols[i%cols.length];c.style.setProperty("--dx",(Math.random()*500-250)+"px");c.style.setProperty("--dy",(Math.random()*300-120)+"px");document.body.appendChild(c);setTimeout(()=>c.remove(),1200)}}
 function flash(){const f=$("flash");f.classList.remove("on");void f.offsetWidth;f.classList.add("on")}
