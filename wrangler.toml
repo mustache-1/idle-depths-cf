@@ -9,4 +9,4 @@ not_found_handling = "single-page-application"
 
 [[kv_namespaces]]
 binding = "SAVES"
-id = "PASTE_YOUR_KV_NAMESPACE_ID_HERE"
+id = "47d5c35a55934250bca5a29068c25a21"
