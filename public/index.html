@@ -36,7 +36,7 @@
   .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 
   /* top bar */
-  .top{position:sticky;top:0;z-index:5;background:rgba(13,16,23,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .top{position:sticky;top:0;z-index:60;isolation:isolate;background:rgba(10,12,18,.97);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);border-bottom:1px solid var(--line2);box-shadow:0 6px 20px rgba(0,0,0,.45)}
   .top .wrap{display:flex;align-items:center;justify-content:space-between;gap:10px;height:64px;flex-wrap:nowrap;min-width:0;overflow:hidden}
   .stats{flex:0 1 auto;min-width:0}
   #account{flex:none}
@@ -81,7 +81,7 @@
   @media(max-width:900px){.mine{grid-template-columns:minmax(0,1fr) 230px;gap:12px}}
   @media(max-width:560px){.mine{grid-template-columns:1fr}}
   .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 6px 20px rgba(0,0,0,.25)}
-  .hero{overflow:hidden;border-color:rgba(255,181,71,.35);box-shadow:0 0 0 1px rgba(255,181,71,.12),0 20px 60px rgba(0,0,0,.55),0 0 80px rgba(255,181,71,.08)}
+  .hero{position:relative;z-index:0;overflow:hidden;border-color:rgba(255,181,71,.35);box-shadow:0 0 0 1px rgba(255,181,71,.12),0 20px 60px rgba(0,0,0,.55),0 0 80px rgba(255,181,71,.08)}
   .rock{display:block;width:100%;aspect-ratio:340/190;background:#0f0c0a;border:0;padding:0;cursor:pointer;position:relative;image-rendering:pixelated}
   .rock svg{width:100%;height:100%;display:block;pointer-events:none}
   .rock .streak,.rock .bossbar,.rock .hp,.rock .flash{pointer-events:none}
@@ -225,19 +225,19 @@
   .pop.gem{color:var(--gem);font-size:20px}
   .pop.hit{color:var(--red)}
   @keyframes rise{to{transform:translateY(-50px);opacity:0}}
-  .toast{font-weight:500;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.4);color:var(--ink);padding:12px 18px;font-size:14px;max-width:90vw;display:none;z-index:20}
+  .toast{z-index:56;font-weight:500;position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line2);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.4);color:var(--ink);padding:12px 18px;font-size:14px;max-width:90vw;display:none;z-index:20}
   .toast.on{display:block}
   /* polish */
   .tab svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-right:7px;vertical-align:-3px;opacity:.85}
   .tab.on svg{opacity:1}
   .badge{display:none;min-width:18px;height:18px;border-radius:9px;background:var(--lamp);color:#1a1614;font-size:11px;font-weight:600;line-height:18px;text-align:center;padding:0 5px;margin-left:2px}
   .badge.on{display:inline-block;animation:pulse 1.6s ease-in-out infinite}
-  @media(max-width:560px){.badge{position:absolute;top:4px;right:calc(50% - 22px);margin:0}.tab{position:relative}}
+  @media(max-width:560px){.badge{position:absolute;top:6px;right:calc(50% - 26px);margin:0}.tab{position:relative}}
   .tsep{width:1px;height:18px;background:var(--line2);margin:0 8px;flex:none}
   .tab{transition:color .15s}
   .tab:hover{color:var(--ink)}
   .panel.on{animation:fadein .25s ease-out}
-  @keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
   .toast{align-items:center;gap:10px;border-left:3px solid var(--lamp)}
   .toast.on{display:flex;animation:toastin .25s ease-out}
   @keyframes toastin{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
@@ -319,11 +319,11 @@
   @media(max-width:560px){.dcfull{display:none}.dcshort{display:inline}}
   .helpbtn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--dim);font-weight:600}
   .lvl{font-size:12px;color:var(--dim);margin-left:6px}
-  .balbar{position:sticky;top:112px;z-index:4;display:flex;gap:22px;align-items:center;background:rgba(13,16,23,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line2);border-radius:12px;padding:12px 18px;margin-bottom:16px}
+  .balbar{position:sticky;top:112px;z-index:3;display:flex;gap:22px;align-items:center;background:rgba(13,16,23,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line2);border-radius:12px;padding:12px 18px;margin-bottom:16px}
   .balbar small{display:block;font-size:12px;color:var(--dim)}
   .balbar b{font-size:22px;font-weight:600;color:var(--green);font-variant-numeric:tabular-nums}
   .balbar div:not(:first-child) b{font-size:16px}
-  @media(max-width:560px){.balbar{top:calc(52px + env(safe-area-inset-top));gap:14px;padding:10px 14px}.balbar b{font-size:19px}.balbar div:not(:first-child) b{font-size:14px}}
+  @media(max-width:560px){.balbar{top:calc(4px);gap:14px;padding:10px 14px}.balbar b{font-size:19px}.balbar div:not(:first-child) b{font-size:14px}}
   .perk{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:8px}
   .perk .name{font-weight:500}
   .perk .desc{font-size:13px;color:var(--dim);margin-top:2px}
@@ -412,10 +412,19 @@
   .unl small{font-size:12px;color:var(--dim)}
   /* table */
   .tbl .seg{grid-template-columns:1fr 1fr}
-  .stakebar{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px}
+  .stakebar{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:4px}
   .stakebar input{flex:1;accent-color:var(--lamp)}
   .stakebar b{min-width:70px;text-align:right;font-variant-numeric:tabular-nums;color:var(--green)}
   .stakebar small{color:var(--dim);font-size:12px}
+  .wheelwrap{position:relative;width:min(300px,74vw);margin:10px auto 14px;aspect-ratio:1}
+  .wheel{width:100%;display:block;transition:transform 3.4s cubic-bezier(.17,.67,.16,1);transform-origin:50% 50%}
+  .pointer{position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:20px solid var(--lamp);filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));z-index:2}
+  .wcenter{position:absolute;inset:37%;border-radius:50%;background:linear-gradient(160deg,var(--panel2),var(--panel));border:2px solid var(--line2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--dim);letter-spacing:.04em}
+  .wheelwrap.spinning .wcenter{color:var(--lamp)}
+  .quickstakes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 10px}
+  .quickstakes button{height:34px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--dim);font:inherit;font-size:12px;font-weight:500}
+  .quickstakes button.on{border-color:var(--lamp);color:var(--lamp)}
+  .result.jackpot{color:var(--gem)}
   .coin{width:96px;height:96px;border-radius:50%;margin:10px auto 14px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;background:var(--lamp);color:#1a1614;border:4px solid #a5762c;transition:transform .1s}
   .coin.tails{background:#c9ccd1;border-color:#8d8d94}
   .coin.spin{animation:flip .9s ease-in-out}
@@ -434,7 +443,7 @@
   .bj button{flex:1;min-width:80px;height:42px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--ink);font-weight:500}
   .bj button.p{background:var(--lamp);border-color:var(--lamp);color:#1a1614}
   .bj button:disabled{opacity:.4;cursor:not-allowed}
-  .result{min-height:22px;font-weight:500;margin-top:8px;font-size:14px}
+  .result{min-height:22px;font-weight:500;margin:0 0 10px;font-size:14px;text-align:center}
   .result.win{color:var(--green)}.result.lose{color:var(--red)}
   /* modal */
   .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:30;padding:16px}
@@ -503,9 +512,10 @@
   @media(max-width:820px){.stat.rate{display:none}.stat{padding:0 10px}.stat b{font-size:15px}#account .uname{display:none}.pill{padding:0 10px;font-size:12px}}
   @media(max-width:600px){.stat:last-child{display:none}#account a.primary{padding:7px 9px;font-size:12px}}
   @media(max-width:560px){
-    body{padding-bottom:calc(64px + env(safe-area-inset-bottom))}
-    .top .wrap{height:52px;padding-top:env(safe-area-inset-top)}
-    .top{padding-top:env(safe-area-inset-top)}
+    body{padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+    .top{position:fixed;left:0;right:0;top:0;padding-top:env(safe-area-inset-top)}
+    .top .wrap{height:52px}
+    body{padding-top:calc(52px + env(safe-area-inset-top))}
     .stat.rate,.stat:last-child{display:none}
     .stat{padding:0 8px;border:0}.stat b{font-size:16px}.stat small{display:none}
     .brand{font-size:0;gap:0;margin-right:2px}.brand i{width:30px;height:30px;font-size:15px}
@@ -517,16 +527,18 @@
     #account .who .av{width:28px;height:28px}
     #account .who span:not(.av){display:none}
     #account a.primary{padding:0 12px;height:34px;display:inline-flex;align-items:center;border-radius:17px;font-size:12px;white-space:nowrap}
-    .tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:20;background:rgba(13,16,23,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);border-bottom:0;padding-bottom:env(safe-area-inset-bottom)}
-    .tabs .wrap{height:60px;padding:0 4px;gap:0;overflow:visible;justify-content:space-around}
-    .tab{flex:1;flex-direction:column;gap:3px;padding:0;height:60px;font-size:9.5px;font-weight:500;border-bottom:0;margin:0;min-width:0}
-    .tab i{display:flex!important;width:30px;height:24px;border-radius:8px;font-size:14px;opacity:.6}
-    .tab.on{color:var(--lamp2)}.tab.on i{background:rgba(255,181,71,.18);opacity:1}
+    .tabs{position:fixed;left:0;right:0;bottom:0;top:auto;z-index:55;background:rgba(10,12,18,.97);backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);border-top:1px solid var(--line2);border-bottom:0;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -8px 24px rgba(0,0,0,.55)}
+    .tabs .wrap{height:70px;padding:0 2px;gap:0;overflow:visible;justify-content:space-around}
+    .tab{flex:1;flex-direction:column;gap:4px;padding:0;height:70px;font-size:11.5px;font-weight:500;border-bottom:0;margin:0;min-width:0;color:var(--mute)}
+    .tab i{display:flex!important;width:42px;height:32px;border-radius:11px;font-size:19px;opacity:.75;transition:background .15s,opacity .15s}
+    .tab.on{color:var(--lamp2)}
+    .tab.on i{background:rgba(255,181,71,.22);opacity:1;box-shadow:0 0 14px rgba(255,181,71,.25)}
+    .tab.on::after{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:32px;height:3px;border-radius:0 0 2px 2px;background:var(--lamp)}
     .tsep,.saved{display:none}
     .wrap{padding:0 12px}
     .titlebar{margin-bottom:8px}.titlebar h2{font-size:22px}
     .panel{padding:12px 0 24px}
-    .hero{margin:0 -12px;border-radius:0;border-left:0;border-right:0}
+    .hero{margin:0 -12px;border-radius:0;border-left:0;border-right:0;z-index:0}
     .rock{aspect-ratio:340/190}
     .strip{grid-template-columns:1fr 1fr}
     .strip div{padding:9px 12px}.strip b{font-size:15px}
@@ -544,7 +556,7 @@
     .terms,.keeps,.trophies,.rec{grid-template-columns:1fr}
     .rec{grid-template-columns:1fr 1fr}
     .splash h1{font-size:30px}
-    .toast{bottom:calc(76px + env(safe-area-inset-bottom));font-size:13px}
+    .toast{bottom:calc(88px + env(safe-area-inset-bottom));font-size:13px}
     .tour .tip{width:calc(100vw - 24px)}
     footer{flex-direction:column;gap:8px}
     .titlebar h2{font-size:22px}
@@ -629,7 +641,7 @@
         <div class="grid">
           <button id="openMiner2"><i>🛏</i><b>Bunkhouse</b><small>Miner, record, trophies</small></button>
           <button id="openTour"><i>📖</i><b>How it works</b><small>Replay the tutorial</small></button>
-          <button id="openTable"><i>🃏</i><b>Warden's table</b><small>Coin flip, blackjack</small></button>
+          <button id="openTable"><i>🃏</i><b>Warden's wheel</b><small>Spin for up to 50×</small></button>
           <button data-goto="leaderboard"><i>👑</i><b>Leaderboard</b><small>Who's dug furthest</small></button>
         </div>
       </div>
@@ -755,7 +767,7 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free daily shift</b> — once a day an auto-swinger works for you. Start with a 3h shift (3 swings/sec); each shift you take unlocks the next: 6h (2/sec), 9h (1.5/sec), 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's table</b> is a house-edge gamble. Fun, not a strategy.</li></ul>
+    <ul><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free daily shift</b> — once a day an auto-swinger works for you. Start with a 3h shift (3 swings/sec); each shift you take unlocks the next: 6h (2/sec), 9h (1.5/sec), 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
@@ -831,24 +843,17 @@
   </div>
 </div>
 <div class="modal" id="tableModal">
-  <div class="dlg tbl" role="dialog" aria-label="Warden's table">
-    <header><h3>Warden's table</h3><button class="x" id="tClose" aria-label="Close">×</button></header>
-    <div class="stakebar"><small>Stake</small><input type="range" id="stake" min="1" max="10" value="5" aria-label="Stake percent"><b id="stakeVal">$0</b></div>
-    <div class="seg"><button class="on" data-game="flip">Coin flip</button><button data-game="bj">Blackjack</button></div>
-    <div class="sub on" id="game-flip">
-      <div class="coin" id="coin">HEADS</div>
-      <div class="pick2"><button class="on" data-side="heads">Heads</button><button data-side="tails">Tails</button></div>
-      <div class="bj"><button class="p" id="flipBtn">Flip</button></div>
-      <div class="result" id="flipRes"></div>
-      <p class="note" style="margin-top:8px">Pays 2× on a win. The warden's coin lands his way 52.5% of the time.</p>
+  <div class="dlg tbl" role="dialog" aria-label="Warden's wheel">
+    <header><h3>Warden's wheel</h3><button class="x" id="tClose" aria-label="Close">×</button></header>
+    <div class="stakebar"><small>Stake</small><input type="range" id="stake" min="1" max="25" value="10" aria-label="Stake percent"><b id="stakeVal">$0</b></div>
+    <div class="wheelwrap">
+      <div class="pointer"></div>
+      <svg viewBox="0 0 200 200" id="wheelSvg" class="wheel"></svg>
+      <div class="wcenter" id="wCenter">SPIN</div>
     </div>
-    <div class="sub" id="game-bj">
-      <div class="hand"><small id="dLabel">Dealer</small><div class="cards" id="dCards"></div></div>
-      <div class="hand"><small id="pLabel">You</small><div class="cards" id="pCards"></div></div>
-      <div class="bj"><button class="p" id="bjDeal">Deal</button><button id="bjHit" disabled>Hit</button><button id="bjStand" disabled>Stand</button><button id="bjDouble" disabled>Double</button></div>
-      <div class="result" id="bjRes"></div>
-      <p class="note" style="margin-top:8px">Blackjack pays 3:2. Dealer stands on 17. No splits at this table.</p>
-    </div>
+    <div class="result" id="wRes"></div>
+    <div class="quickstakes" id="quickStakes"></div>
+    <button class="big" id="spinBtn">Spin</button>
     <p class="note" style="margin-top:12px" id="tableNote">Stake at most 10% of your cash per round. Winnings don't count toward the leaderboard.</p>
   </div>
 </div>
@@ -910,7 +915,7 @@ const REBIRTH_BASE=5e7;const OFFLINE_EFF=0.5;
 const TERMS=[
   {id:"none",name:"Standard terms",desc:"The usual arrangement. No tricks.",fx:[]},
   {id:"double",name:"Double or nothing",desc:"Ashcombe fronts you better tools. Everything earns ×2 — but the next debt is ×3.",fx:["×2 all earnings","debt ×3","+2 oil"]},
-  {id:"quiet",name:"The quiet shift",desc:"No Wyrm, no warden's table. Just the work. Crew income +50%.",fx:["crew +50%","no Wyrm","table closed"]},
+  {id:"quiet",name:"The quiet shift",desc:"No Wyrm, no warden's wheel. Just the work. Crew income +50%.",fx:["crew +50%","no Wyrm","table closed"]},
   {id:"blood",name:"Blood money",desc:"Ashcombe wants gems, not rubble. Gems pay ×10, but your pick hits half as hard.",fx:["gems ×10","pick ×0.5"]},
 ];
 const termNow=()=>TERMS.find(t=>t.id===(S.terms||"none"))||TERMS[0];
@@ -924,7 +929,7 @@ const RANK_UNLOCKS=[
 ];
 const BET_MAX_PCT=.10,BET_MIN=10,BET_COOLDOWN=4000;
 
-const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,bjWins:0,flipWins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,last:Date.now()});
+const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,last:Date.now()});
 let S={...fresh(),oil:0,lifetime:0,profile:{name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a"}};
 const SHIRTS=[{c:"#f1e6d2"},{c:"#3aa0c8"},{c:"#c0553c"},{c:"#4f9e7a"},{c:"#b07acb"},{c:"#d1a34a"},{c:"#e0567a"},{c:"#2b2b2b",need:"gems25",label:"Gem hunter"},{c:"#ffd27a",need:"debt",label:"Paid the debt"},{c:"#5ec9b6",need:"glimmer",label:"Reached The Glimmer"},{c:"#e6b422",need:"debt5",label:"Paid the debt 5 times"}];
 const HATS=[{c:"#f3b24a"},{c:"#e8e8e8"},{c:"#c0553c"},{c:"#3aa0c8"},{c:"#4f9e7a"},{c:"#1a1614",need:"wyrm",label:"Slew the Wyrm"},{c:"#c48cff",need:"throne",label:"Reached the Hollow Throne"},{c:"#8fdc6a",need:"days7",label:"Played 7 days"}];
@@ -953,8 +958,8 @@ const ACH=[
   {id:"quest10",name:"Reliable",desc:"Complete 10 contracts.",ok:()=>(S.questsDone||0)>=10,r:.5},
   {id:"story1",name:"First page",desc:"Finish a story.",ok:()=>Object.keys((S.story&&S.story.done)||{}).length>=1,r:.6},
   {id:"story5",name:"Well read",desc:"Finish five stories.",ok:()=>Object.keys((S.story&&S.story.done)||{}).length>=5,r:1.5},
-  {id:"flip5",name:"Lucky coin",desc:"Win 5 coin flips.",ok:()=>(S.flipWins||0)>=5,r:.3},
-  {id:"bj5",name:"Card sharp",desc:"Win 5 blackjack hands.",ok:()=>(S.bjWins||0)>=5,r:.4},
+  {id:"flip5",name:"Lucky spin",desc:"Win 5 spins on the wheel.",ok:()=>(S.wheelWins||0)>=5,r:.3},
+  {id:"bj5",name:"High roller",desc:"Hit 4× or better on the wheel.",ok:()=>(S.bigSpins||0)>=1,r:.6},
   {id:"wyrm",name:"Wyrmslayer",desc:"Slay the Deep Wyrm.",ok:()=>(S.bosses||0)>=1,r:1},
   {id:"wyrm5",name:"Wyrm bane",desc:"Slay the Deep Wyrm 5 times.",ok:()=>(S.bosses||0)>=5,r:2},
   {id:"debt",name:"Debt-free",desc:"Pay Lord Ashcombe in full.",ok:()=>(S.debts||0)>=1,r:1},
@@ -965,7 +970,7 @@ const ACH=[
 const RANKSN=["Debtor","Pit hand","Marked man","Gang boss","Deep hand","Warden's bane","Free miner","Collateral"];
 const has=id=>!!(S.ach&&S.ach[id]);
 function checkAch(){if(!S.ach)S.ach={};for(const a of ACH){if(!S.ach[a.id]&&a.ok()){S.ach[a.id]=Date.now();const v=nice(Math.max(50,(clickPower()*120+cps()*300)*a.r*(1+perkLv("favor")*.25)));earn(v);toast(`Trophy: ${a.name} — +${fmt(v)}`);confetti(24)}}}
-const TITLES=[{id:"",name:"No title",ok:()=>true},{id:"coalhand",name:"Coalhand",ok:()=>S.depth>=2},{id:"ironjaw",name:"Ironjaw",ok:()=>S.depth>=3},{id:"silverback",name:"Gravewalker",ok:()=>S.depth>=4},{id:"abyssal",name:"Throne-touched",ok:()=>S.depth>=6},{id:"gemhunter",name:"Gem hunter",ok:()=>S.gems>=25},{id:"sealed",name:"Debt-free",ok:()=>S.oil>=1},{id:"lamplighter",name:"Lamplighter",ok:()=>S.oil>=10},{id:"wyrmslayer",name:"Wyrmslayer",ok:()=>(S.bosses||0)>=1},{id:"cardsharp",name:"Card sharp",ok:()=>(S.bjWins||0)>=5},{id:"regular",name:"Regular",ok:()=>(S.days||0)>=7},{id:"champion",name:"Weekly champion",ok:()=>has("weekly")},{id:"beneath",name:"Throne-keeper",ok:()=>!!S.throne}];
+const TITLES=[{id:"",name:"No title",ok:()=>true},{id:"coalhand",name:"Coalhand",ok:()=>S.depth>=2},{id:"ironjaw",name:"Ironjaw",ok:()=>S.depth>=3},{id:"silverback",name:"Gravewalker",ok:()=>S.depth>=4},{id:"abyssal",name:"Throne-touched",ok:()=>S.depth>=6},{id:"gemhunter",name:"Gem hunter",ok:()=>S.gems>=25},{id:"sealed",name:"Debt-free",ok:()=>S.oil>=1},{id:"lamplighter",name:"Lamplighter",ok:()=>S.oil>=10},{id:"wyrmslayer",name:"Wyrmslayer",ok:()=>(S.bosses||0)>=1},{id:"cardsharp",name:"High roller",ok:()=>(S.bigSpins||0)>=1},{id:"regular",name:"Regular",ok:()=>(S.days||0)>=7},{id:"champion",name:"Weekly champion",ok:()=>has("weekly")},{id:"beneath",name:"Throne-keeper",ok:()=>!!S.throne}];
 const displayName=()=>S.profile.name||(USER?USER.name:"Miner");
 
 const $=id=>document.getElementById(id);
@@ -988,7 +993,7 @@ const PERKS=[
   {id:"lucky",name:"Lucky strike",desc:"Gems turn up more often.",max:4,cost:l=>2+l,fx:l=>`+${l*25}% gem chance`},
   {id:"bait",name:"Wyrm bait",desc:"The Deep Wyrm surfaces more often.",max:3,cost:l=>3+l*2,fx:l=>`×${(1+l*.5).toFixed(1)} Wyrm spawns`},
   {id:"shift",name:"Long shift",desc:"Crew keeps working longer while you're away.",max:3,cost:l=>2+l,fx:l=>`+${l*4}h offline cap`},
-  {id:"pockets",name:"Deep pockets",desc:"Stake more at the warden's table.",max:2,cost:l=>3+l*2,fx:l=>`stake up to ${10+l*5}% of cash`},
+  {id:"pockets",name:"Deep pockets",desc:"Stake more at the warden's wheel.",max:2,cost:l=>3+l*2,fx:l=>`stake up to ${25+l*10}% of cash`},
   {id:"headstart",name:"Head start",desc:"After paying the debt, begin the next run deeper down.",max:3,cost:l=>4+l*3,fx:l=>`start at ${LAYERS[l].name}`},
 ];
 const perkLv=id=>(S.perks&&S.perks[id])||0;
@@ -1066,7 +1071,7 @@ function renderSwatches(){
   document.querySelectorAll("[data-hat]").forEach(b=>b.onclick=()=>{if(b.classList.contains("lock")){toast("Locked — "+b.title.replace("Unlock: ",""));return}draft.hat=b.dataset.hat;renderSwatches();previewSvg()});
 }
 function renderRecord(){
-  const rows=[["Total mined",fmt(S.lifetime)],["Deepest layer",LAYERS[S.deepest||0].name],["Swings",S.swings.toLocaleString()],["Best streak",(S.bestStreak||0)+" swings"],["Gems found",S.gems],["Rock faces cleared",S.clears||0],["Contracts completed",S.questsDone||0],["Stories finished",Object.keys((S.story&&S.story.done)||{}).length],["Keepsakes",(S.story&&S.story.keeps||[]).length],["Wyrms slain",S.bosses||0],["Debts paid",S.debts||0],["Lantern oil",S.oil],["Coin flips won",S.flipWins||0],["Blackjack hands won",S.bjWins||0],["Days played",S.days||0],["Shifts taken",S.shiftsUsed||0],["Crew on payroll",CREW.reduce((a,c,i)=>a+S.crew[i],0)]];
+  const rows=[["Total mined",fmt(S.lifetime)],["Deepest layer",LAYERS[S.deepest||0].name],["Swings",S.swings.toLocaleString()],["Best streak",(S.bestStreak||0)+" swings"],["Gems found",S.gems],["Rock faces cleared",S.clears||0],["Contracts completed",S.questsDone||0],["Stories finished",Object.keys((S.story&&S.story.done)||{}).length],["Keepsakes",(S.story&&S.story.keeps||[]).length],["Wyrms slain",S.bosses||0],["Debts paid",S.debts||0],["Lantern oil",S.oil],["Wheel spins won",S.wheelWins||0],["Big spins (4×+)",S.bigSpins||0],["Days played",S.days||0],["Shifts taken",S.shiftsUsed||0],["Crew on payroll",CREW.reduce((a,c,i)=>a+S.crew[i],0)]];
   $("record").innerHTML=rows.map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join("");
   const ks=S.story.keeps||[];$("keepList").innerHTML=ks.length?ks.map(k=>{const st=STORIES.find(x=>x.keeps.some(y=>y.n===k)),kk=st.keeps.find(y=>y.n===k);return `<span style="display:inline-flex;align-items:center;gap:6px;margin:0 10px 6px 0"><i style="width:12px;height:12px;border-radius:3px;background:${kk.c};display:inline-block"></i>${k}</span>`}).join(""):"None yet. Finish a story in the Quests tab.";
 }
@@ -1127,7 +1132,7 @@ const CTYPES=[
   {t:"crew",name:"Payroll",text:v=>`Hire ${v} crew or machines`,n:()=>[3,6,10][Math.floor(Math.random()*3)],base:()=>CREW.reduce((a,c,i)=>a+S.crew[i],0),prog:c=>CREW.reduce((a,c,i)=>a+S.crew[i],0)-c.base},
   {t:"crewearn",name:"Let them work",text:v=>`Earn ${fmt(v)} from the crew`,n:()=>nice(Math.max(100,cps()*2400+clickPower()*100)),base:()=>S.crewEarned||0,prog:c=>(S.crewEarned||0)-c.base,show:(p,n)=>`${fmt(p)} / ${fmt(n)}`,needs:()=>cps()>0},
   {t:"gems",name:"Bright spots",text:v=>`Find ${v} gems`,n:()=>[2,4,8][Math.floor(Math.random()*3)],base:()=>S.gems,prog:c=>S.gems-c.base},
-  {t:"flips",name:"Warden's luck",text:v=>`Win ${v} coin flips`,n:()=>[2,3,5][Math.floor(Math.random()*3)],base:()=>S.flipWins||0,prog:c=>(S.flipWins||0)-c.base},
+  {t:"flips",name:"Warden's luck",text:v=>`Win ${v} spins on the wheel`,n:()=>[2,3,5][Math.floor(Math.random()*3)],base:()=>S.wheelWins||0,prog:c=>(S.wheelWins||0)-c.base},
 ];
 const cWindow=()=>Math.floor(Date.now()/(6*3600*1000));
 const cNext=()=>(cWindow()+1)*6*3600*1000;
@@ -1259,7 +1264,7 @@ const TOUR=[
   {tab:"mine",el:".stats",ic:"$",t:"Cash, income, oil",p:"Cash is what you spend. Per second is what your crew earns without you. Lantern oil is your permanent bonus from paying the debt — and the currency for perks."},
   {tab:"mine",el:".side .card:nth-child(2)",ic:"⚒",t:"Equipment",p:"Better pickaxes hit harder. Crew and machines earn every second, even while you're away — at half pace, for up to 8 hours (longer with a better bunk)."},
   {tab:"mine",el:".side .card:first-child",ic:"↓",t:"Descend",p:"Save up to break into the next layer. Each layer pays more, changes the ore, and unlocks a story. Seven layers down is the Hollow Throne; what's beneath it needs a paid debt to reach."},
-  {tab:"mine",el:".quest",ic:"✎",t:"Contracts",p:"Three contracts at a time, fresh every six hours: swing counts, mining totals, hires, gems, coin flips. Progress counts while you're away."},
+  {tab:"mine",el:".quest",ic:"✎",t:"Contracts",p:"Three contracts at a time, fresh every six hours: swing counts, mining totals, hires, gems, wheel spins. Progress counts while you're away."},
   {tab:"mine",el:"#rationPill",ic:"⛏",t:"Free daily shift",p:"Once a day, for free, an auto-swinger works the pick for you. Start with 3 hours; each shift you take unlocks a longer one, up to 12. It keeps swinging even when the game is closed. When this glows gold, tap it."},
   {tab:"upgrades",el:"#tab-upgrades .cols",ic:"⚒",t:"Upgrades",p:"The full shop: every pickaxe, every crew type, and your bunk. Crew get 20% pricier with each hire. The bunk stretches offline earnings from 8 hours up to 48. Every 20 of the same crew doubles their power — 20, 40, 60, 80, 100 — so stacking one type pays off."},
   {tab:"quests",el:"#sList",ic:"📖",t:"Stories",p:"Every layer has a story with a character and four clues. Pick one as your active story and ordinary mining uncovers it. Finishing earns a keepsake that shows beside your name on the leaderboard."},
@@ -1269,7 +1274,7 @@ const TOUR=[
   {tab:"perks",el:"#perkList",ic:"✦",t:"Perks",p:"Spend lantern oil on permanent advantages: sharper steel, cheaper crew, more Wyrms, bigger stakes, a head start after paying. Oil spent here stops giving its +10%, so choose what fits how you play."},
   {tab:"leaderboard",el:"#tab-leaderboard .board",ic:"♛",t:"Leaderboard",p:"The weekly board resets every Monday — last week's top three are named and earn a title. There's an all-time board too. Avatar colors and keepsakes show, so people can see what you've earned."},
   {tab:"mine",el:"#account",ic:"🛏",t:"The Bunkhouse",p:"Your corner: change your shirt and helmet, set a display name and title, see your record, and collect 25+ trophies. Trophies pay cash and unlock rare colors."},
-  {tab:"mine",el:".around",ic:"🃏",t:"Around the mine",p:"The Warden's table for coin flips and blackjack (10% max stake, the house always keeps a little), the Bunkhouse, this tour, and the board. The Support tab has the rules and how to reach me. Good luck down there."},
+  {tab:"mine",el:".around",ic:"🃏",t:"Around the mine",p:"The Warden's wheel (up to 50×, 25% max stake, the house always keeps a little), the Bunkhouse, this tour, and the board. The Support tab has the rules and how to reach me. Good luck down there."},
 ];
 let tourI=0;
 function tourShow(){const prev=TOUR[tourI-1];if(prev&&prev.post)prev.post();const st=TOUR[tourI];if(!st){tourEnd();return}
@@ -1397,43 +1402,72 @@ function bossEnd(win){$("bossbar").classList.remove("on");boss=null;bossCooldown
   drawScene();render();save()}
 const streakMult=()=>1+Math.min(50,Math.floor(streak/10)*5)/100;
 const comboMult=()=>autoOn()&&Date.now()-lastManual<2000?1+Math.min(100,Math.floor(combo/5)*10)/100:1;
-const stakeMax=()=>10+perkLv("pockets")*5;
+const stakeMax=()=>25+perkLv("pockets")*10;
 const stake=()=>Math.max(0,Math.floor(S.cash*(Math.min(+$("stake").value,stakeMax())/100)));
-function tableRender(){const st=stake(),wait=Math.max(0,betReady-Date.now());$("stakeVal").textContent=$("stake").value+"% · "+fmt(st);
-  const busy=wait>0||st<BET_MIN;$("flipBtn").disabled=busy;$("flipBtn").textContent=wait>0?Math.ceil(wait/1000)+"s":"Flip";
-  if(!bj){$("bjDeal").disabled=busy;$("bjDeal").textContent=wait>0?Math.ceil(wait/1000)+"s":"Deal"}
-  $("tableNote").textContent=st<BET_MIN?`You need at least ${fmt(BET_MIN)} on the table. Mine a little more.`:`Stake at most ${stakeMax()}% of your cash per round. Winnings don't count toward the leaderboard.`}
-function openTable(){if(termNow().id==="quiet"){toast("The warden's table is closed under the quiet shift.");return}$("stake").max=stakeMax();$("tableModal").classList.add("on");tableRender()}
+function tableRender(){const st=stake(),wait=Math.max(0,betReady-Date.now());
+  $("stake").max=stakeMax();$("stakeVal").textContent=$("stake").value+"% · "+fmt(st);
+  $("spinBtn").disabled=spinning||wait>0||st<WHEEL_MIN;
+  $("spinBtn").textContent=spinning?"Spinning…":st<WHEEL_MIN?`Need ${fmt(WHEEL_MIN)}`:`Spin ${fmt(st)}`;
+  document.querySelectorAll("[data-qs]").forEach(b=>b.classList.toggle("on",+b.dataset.qs===+$("stake").value));
+  $("tableNote").textContent=`Stake up to ${stakeMax()}% of your cash per spin. The wheel keeps a small cut, so it's a thrill, not an income. Winnings don't count toward the leaderboard.`}
+function openTable(){if(termNow().id==="quiet"){toast("The warden's wheel is closed under the quiet shift.");return}$("stake").max=stakeMax();$("tableModal").classList.add("on");tableRender()}
 function closeTable(){$("tableModal").classList.remove("on")}
 $("openTable").onclick=openTable;$("openMiner2").onclick=openModal;$("tClose").onclick=closeTable;$("tableModal").onclick=e=>{if(e.target===$("tableModal"))closeTable()};
 $("stake").oninput=tableRender;
-document.querySelectorAll("[data-game]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-game]").forEach(x=>x.classList.toggle("on",x===b));$("game-flip").classList.toggle("on",b.dataset.game==="flip");$("game-bj").classList.toggle("on",b.dataset.game==="bj")});
 document.querySelectorAll("[data-side]").forEach(b=>b.onclick=()=>{side=b.dataset.side;document.querySelectorAll("[data-side]").forEach(x=>x.classList.toggle("on",x===b))});
-function settle(win,st,msg,el){if(win>0){S.cash+=win;el.textContent=msg+` You win ${fmt(win-st)}.`;el.className="result win"}else{el.textContent=msg+` The warden pockets ${fmt(st)}.`;el.className="result lose"}render();save();tableRender()}
-$("flipBtn").onclick=()=>{const st=stake();if(st<BET_MIN||Date.now()<betReady)return;S.cash-=st;betReady=Date.now()+BET_COOLDOWN;render();
-  const landed=Math.random()<.475?side:(side==="heads"?"tails":"heads");
-  const c=$("coin");c.classList.remove("spin");void c.offsetWidth;c.classList.add("spin");$("flipRes").textContent="";$("flipBtn").disabled=true;
-  setTimeout(()=>{c.textContent=landed.toUpperCase();c.classList.toggle("tails",landed==="tails");if(landed===side)S.flipWins=(S.flipWins||0)+1;settle(landed===side?st*2:0,st,`It's ${landed}.`,$("flipRes"))},900);tableRender()};
-// blackjack
-const SUITS=["♠","♥","♦","♣"],RANKS=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-const deck=()=>{const d=[];for(const su of SUITS)for(const r of RANKS)d.push({r,su});for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]]}return d};
-const val=h=>{let t=0,a=0;for(const c of h){if(c.r==="A"){a++;t+=11}else t+=["J","Q","K"].includes(c.r)?10:+c.r}while(t>21&&a){t-=10;a--}return t};
-const cardHtml=(c,hide)=>hide?`<div class="cardf back"></div>`:`<div class="cardf ${c.su==="♥"||c.su==="♦"?"r":""}"><span>${c.r}</span><span>${c.su}</span></div>`;
-function bjRender(reveal){$("pCards").innerHTML=bj.p.map(c=>cardHtml(c)).join("");$("dCards").innerHTML=bj.d.map((c,i)=>cardHtml(c,!reveal&&i===1)).join("");
-  $("pLabel").textContent="You · "+val(bj.p);$("dLabel").textContent="Dealer · "+(reveal?val(bj.d):val([bj.d[0]])+"+?");
-  const live=bj.live;$("bjHit").disabled=!live;$("bjStand").disabled=!live;$("bjDouble").disabled=!live||bj.p.length!==2||S.cash<bj.st;$("bjDeal").disabled=live}
-$("bjDeal").onclick=()=>{const st=stake();if(st<BET_MIN||Date.now()<betReady||bj&&bj.live)return;S.cash-=st;render();
-  bj={deck:deck(),p:[],d:[],st,live:true};bj.p.push(bj.deck.pop());bj.d.push(bj.deck.pop());bj.p.push(bj.deck.pop());bj.d.push(bj.deck.pop());$("bjRes").textContent="";$("bjRes").className="result";
-  if(val(bj.p)===21){bj.live=false;bjRender(true);betReady=Date.now()+BET_COOLDOWN;if(val(bj.d)===21)settle(st,st,"Both blackjack. Push.",$("bjRes"));else{S.bjWins=(S.bjWins||0)+1;settle(Math.floor(st*2.5),st,"Blackjack!",$("bjRes"))}}
-  else bjRender(false)};
-function bjEnd(){bj.live=false;while(val(bj.d)<17)bj.d.push(bj.deck.pop());bjRender(true);betReady=Date.now()+BET_COOLDOWN;
-  const p=val(bj.p),d=val(bj.d),st=bj.st,r=$("bjRes");
-  if(p>21)settle(0,st,`Bust with ${p}.`,r);else if(d>21){S.bjWins=(S.bjWins||0)+1;settle(st*2,st,`Dealer busts with ${d}.`,r)}else if(p>d){S.bjWins=(S.bjWins||0)+1;settle(st*2,st,`${p} beats ${d}.`,r)}else if(p<d)settle(0,st,`${d} beats ${p}.`,r);else settle(st,st,`Push at ${p}.`,r)}
-$("bjHit").onclick=()=>{if(!bj||!bj.live)return;bj.p.push(bj.deck.pop());if(val(bj.p)>21)bjEnd();else bjRender(false)};
-$("bjStand").onclick=()=>{if(bj&&bj.live)bjEnd()};
-$("bjDouble").onclick=()=>{if(!bj||!bj.live||bj.p.length!==2||S.cash<bj.st)return;S.cash-=bj.st;bj.st*=2;bj.p.push(bj.deck.pop());bjEnd()};
-setInterval(()=>{if($("tableModal").classList.contains("on"))tableRender();if(Date.now()-lastSwing>1500&&streak){streak=0;$("streak").classList.remove("on")}
-  if(Date.now()-lastManual>2000&&combo){combo=0;if(autoOn())$("streakN").textContent="×"+streakMult().toFixed(2)+" auto";$("streak").classList.remove("hot")}},500);
+const WEDGES=[   // 12 equal slices, rare prizes spaced apart; odds come from .w, not slice size
+  {m:0,   w:11,  label:"Bust", c:"#3a2a32"},
+  {m:1.2, w:9,   label:"1.2×", c:"#2f4a3a"},
+  {m:0,   w:11,  label:"Bust", c:"#3a2a32"},
+  {m:1.8, w:6,   label:"1.8×", c:"#2f5a46"},
+  {m:0,   w:11,  label:"Bust", c:"#3a2a32"},
+  {m:10,  w:1.3, label:"10×",  c:"#5a3f2f"},
+  {m:0,   w:11,  label:"Bust", c:"#3a2a32"},
+  {m:1.2, w:8,   label:"1.2×", c:"#2f4a3a"},
+  {m:2.5, w:4.4, label:"2.5×", c:"#3a5a2f"},
+  {m:0,   w:9,   label:"Bust", c:"#3a2a32"},
+  {m:4,   w:2.6, label:"4×",   c:"#5a5a2f"},
+  {m:50,  w:0.28,label:"50×",  c:"#4a2f5a"},
+];  // ~0.95 expected return
+const WHEEL_MIN=10,WHEEL_CD=900;
+let spinning=false,wheelAngle=0;
+function buildWheel(){
+  const n=WEDGES.length,sweep=360/n;let ang=-90-sweep/2,g="";const rad=d=>d*Math.PI/180;
+  WEDGES.forEach(x=>{const end=ang+sweep,r=96,cx=100,cy=100;
+    const x1=cx+r*Math.cos(rad(ang)),y1=cy+r*Math.sin(rad(ang)),x2=cx+r*Math.cos(rad(end)),y2=cy+r*Math.sin(rad(end));
+    g+=`<path d="M${cx} ${cy} L${x1} ${y1} A${r} ${r} 0 0 1 ${x2} ${y2} Z" fill="${x.c}" stroke="#0d1017" stroke-width="1.5"/>`;
+    const mid=ang+sweep/2,tr=r*.68,tx=cx+tr*Math.cos(rad(mid)),ty=cy+tr*Math.sin(rad(mid));
+    g+=`<text x="${tx}" y="${ty}" fill="${x.m>=4?"#ffd98a":x.m?"#dff5e6":"#a08a92"}" font-size="${x.m>=10?11:10}" font-weight="600" text-anchor="middle" dominant-baseline="middle" font-family="Inter,sans-serif" transform="rotate(${mid+90} ${tx} ${ty})">${x.label}</text>`;
+    x._mid=mid;ang=end});
+  $("wheelSvg").innerHTML=g+`<circle cx="100" cy="100" r="97" fill="none" stroke="#34405a" stroke-width="3"/>`;
+}
+const pickWedge=()=>{const t=WEDGES.reduce((a,x)=>a+x.w,0);let r=Math.random()*t;for(const x of WEDGES){if(r<x.w)return x;r-=x.w}return WEDGES[0]};
+function spin(){
+  const st=stake();if(spinning||st<WHEEL_MIN||Date.now()<betReady)return;
+  spinning=true;S.cash-=st;render();
+  const win=pickWedge(),sweep=360/WEDGES.length;
+  wheelAngle+=360*6+(((-win._mid-90)-(wheelAngle%360))%360+360)%360+(Math.random()-.5)*sweep*.55;
+  $("wheelSvg").style.transform=`rotate(${wheelAngle}deg)`;
+  document.querySelector(".wheelwrap").classList.add("spinning");
+  $("wCenter").textContent="…";$("wRes").textContent="";$("wRes").className="result";tableRender();
+  setTimeout(()=>{
+    spinning=false;betReady=Date.now()+WHEEL_CD;document.querySelector(".wheelwrap").classList.remove("spinning");
+    $("wCenter").textContent=win.label;
+    const back=Math.floor(st*win.m);
+    if(back>0){S.cash+=back;S.wheelWins=(S.wheelWins||0)+1;if(win.m>=4)S.bigSpins=(S.bigSpins||0)+1;
+      const p=back-st;
+      $("wRes").textContent=p>0?`${win.label} — you win ${fmt(p)}.`:`${win.label} — ${fmt(back)} back.`;
+      $("wRes").className="result "+(win.m>=4?"win jackpot":p>0?"win":"lose");
+      if(win.m>=4)confetti(win.m>=10?60:25);
+      if(win.m>=10)toast(`${win.label} on the wheel — ${fmt(back)}!`);
+    } else {$("wRes").textContent=`Bust. The warden keeps ${fmt(st)}.`;$("wRes").className="result lose"}
+    render();save();tableRender();
+  },3450);
+}
+$("spinBtn").onclick=spin;
+$("quickStakes").innerHTML=[5,10,15,25].map(v=>`<button data-qs="${v}">${v}%</button>`).join("");
+document.querySelectorAll("[data-qs]").forEach(b=>b.onclick=()=>{$("stake").value=Math.min(+b.dataset.qs,stakeMax());tableRender()});
+buildWheel();
 function chips(){const rk=$("rock"),r=rk.getBoundingClientRect(),sx=r.width/340,x=(200)*sx,y=(140)*sx;for(let i=0;i<6;i++){const c=document.createElement("i");c.className="chip";c.style.left=x+"px";c.style.top=y+"px";c.style.setProperty("--dx",(Math.random()*60-30)+"px");c.style.setProperty("--dy",(-20-Math.random()*40)+"px");c.style.background=Math.random()<.3?"#5ec9b6":"#8d8d94";rk.appendChild(c);setTimeout(()=>c.remove(),600)}}
 function confetti(n=40){const cols=["#f2b24c","#ffd27a","#8fdc6a","#5ec9b6","#c48cff","#f07a5b"];for(let i=0;i<n;i++){const c=document.createElement("i");c.className="conf";c.style.left="50%";c.style.top="40%";c.style.background=cols[i%cols.length];c.style.setProperty("--dx",(Math.random()*500-250)+"px");c.style.setProperty("--dy",(Math.random()*300-120)+"px");document.body.appendChild(c);setTimeout(()=>c.remove(),1200)}}
 function flash(){const f=$("flash");f.classList.remove("on");void f.offsetWidth;f.classList.add("on")}
@@ -1467,7 +1501,7 @@ function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
-  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,bjWins:S.bjWins,flipWins:S.flipWins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
+  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
   toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);drawScene();render();save();
 }
