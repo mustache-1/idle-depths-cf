@@ -1152,9 +1152,20 @@ let earn=function(n){S.cash+=n;S.lifetime+=n};
 
 let USER=null;
 const local={get:()=>{try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}},set:v=>localStorage.setItem(KEY,JSON.stringify(v)),del:()=>localStorage.removeItem(KEY)};
+let saveErr=null,saveWarned=0;
 async function save(){
   S.last=Date.now();local.set(S);
-  if(USER){try{await fetch("/api/save",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(S)})}catch(e){}}
+  if(!USER)return;
+  try{
+    const r=await fetch("/api/save",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(S)});
+    if(r.ok){saveErr=null;return}
+    const j=await r.json().catch(()=>null);
+    saveErr=(j&&j.error)||`server said ${r.status}`;
+  }catch(e){saveErr="couldn't reach the server"}
+  // your mine is still safe in this browser — say so once every 5 minutes, not every save
+  if(Date.now()-saveWarned>3e5){saveWarned=Date.now();
+    toast(`Cloud save failed (${saveErr}). Your progress is still saved in this browser.`)}
+  renderAccount();
 }
 async function load(){
   try{const u=await fetch("/api/me").then(r=>r.json());USER=u&&u.id?u:null}catch(e){USER=null}
@@ -1190,7 +1201,7 @@ function renderAccount(){
     ?`<button class="who" id="openMiner"><span class="av">${esc(displayName().slice(0,1).toUpperCase())}</span><span class="uname">${esc(displayName())}</span><span style="color:var(--dim);font-weight:400;font-size:12px">Bunkhouse ›</span></button>`
     :`<button class="who" id="openMiner"><span class="av" style="background:var(--line2);color:var(--ink)">?</span><span class="uname">Bunkhouse</span><span style="color:var(--dim);font-weight:400;font-size:12px">›</span></button><a href="/api/login" class="primary"><span class="dcfull">Sign in with Discord</span><span class="dcshort">Sign in</span></a>`;
   $("openMiner").onclick=openModal;
-  $("boardNote").textContent=USER?"Your mine saves to the cloud automatically.":"Sign in with Discord to save your mine to the cloud and appear on the board under your Discord name.";
+  $("boardNote").textContent=USER?(saveErr?`Cloud saving is failing (${saveErr}). Progress is safe in this browser.`:"Your mine saves to the cloud automatically."):"Anyone can read the board — no account needed. Sign in with Discord only if you want your own mine saved and your name up here.";
 }
 // ---- in-page confirm (browser confirm() can be blocked) ----
 function ask(title,text,yes="Confirm"){return new Promise(res=>{$("askTitle").textContent=title;$("askText").textContent=text;$("askYes").textContent=yes;$("ask").classList.add("on");
@@ -1481,7 +1492,7 @@ document.querySelectorAll("[data-hs]").forEach(b=>b.onclick=()=>openHelp(b.datas
 document.querySelectorAll("[data-help]").forEach(a=>a.onclick=e=>{e.preventDefault();openHelp(a.dataset.help)});
 $("helpTour").onclick=tourStart;$("helpTour2").onclick=tourStart;
 document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-q]").forEach(x=>x.classList.toggle("on",x===b));$("q-stories").classList.toggle("on",b.dataset.q==="stories");$("q-contracts").classList.toggle("on",b.dataset.q==="contracts")});
-function switchTab(t){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests")renderStories()}
+function switchTab(t){if(t==="leaderboard")loadBoard();document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests")renderStories()}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 function eta2(ms){const s=Math.ceil(ms/1000);return s<3600?Math.floor(s/60)+"m":Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m"}
 function eta(cost){const need=cost-S.cash;if(need<=0)return "Ready now";const r=cps();if(r<=0)return "Keep swinging";const s=need/r;if(s<60)return Math.ceil(s)+"s";if(s<3600)return Math.floor(s/60)+"m "+Math.ceil(s%60)+"s";if(s<86400)return Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m";return Math.floor(s/86400)+"d "+Math.floor(s%86400/3600)+"h"}
@@ -1885,12 +1896,28 @@ async function rebirth(){
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let boardMode="week",boardData=null;
 document.querySelectorAll("[data-board]").forEach(b=>b.onclick=()=>{boardMode=b.dataset.board;document.querySelectorAll("[data-board]").forEach(x=>x.classList.toggle("on",x===b));renderBoard()});
-async function loadBoard(){try{boardData=await fetch("/api/board").then(r=>r.json())}catch(e){}if(!boardData||!Array.isArray(boardData.all))boardData={all:[],week:[],champs:[],weekEnds:0};renderBoard()}
+let boardErr=null;
+async function loadBoard(){
+  boardErr=null;
+  try{
+    const r=await fetch("/api/board");
+    const j=await r.json().catch(()=>null);
+    if(!r.ok||!j||j.error)boardErr=(j&&j.error)||`server said ${r.status}`;
+    else boardData=j;
+  }catch(e){boardErr="couldn't reach the server"}
+  if(!boardData||!Array.isArray(boardData.all))boardData={all:[],week:[],champs:[],weekEnds:0};
+  renderBoard();
+}
 function renderBoard(){
   const rows=$("boardRows"),list=boardMode==="week"?boardData.week:boardData.all;
   $("boardSub").textContent=boardMode==="week"?"Most mined since Monday · resets in "+(boardData.weekEnds?eta2(boardData.weekEnds-Date.now()):"—"):"Every debtor, ranked by lifetime cash mined";
   $("champs").innerHTML=boardData.champs&&boardData.champs.length?"Last week's champions: "+boardData.champs.map((c,i)=>`<b style="color:${["#ffd27a","#c9ccd1","#d08a4a"][i]}">${esc(c.name)}</b>`).join(", "):"";
   if(USER&&boardData.champs&&boardData.champs.some(c=>c.id===USER.id)&&!has("weekly")){S.ach.weekly=Date.now();toast("Weekly champion! A new title and the trophy are yours.");save()}
+  if(boardErr){
+    rows.innerHTML=`<tr><td colspan="3" style="color:var(--red)">The leaderboard couldn't be loaded &mdash; ${esc(boardErr)}</td></tr>`;
+    $("nudge").innerHTML=`<button class="btn" id="boardRetry" style="height:32px;padding:0 14px">Try again</button>`;
+    const rb=$("boardRetry");if(rb)rb.onclick=loadBoard;
+    return}
   if(!list.length){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">${boardMode==="week"?"Nobody has mined this week yet. Sign in and be first.":"No one has mined yet. Sign in and be the first."}</td></tr>`;$("nudge").textContent="";return}
   rows.innerHTML=list.map((p,i)=>`<tr data-p="${i}" class="${USER&&p.id===USER.id?'me':''}"><td>${i+1}</td><td><svg viewBox="0 0 34 34" width="26" height="26" style="vertical-align:middle;margin-right:8px;image-rendering:pixelated"><rect width="34" height="34" rx="6" fill="#1a1512"/>${miner(2,1,"",p.shirt||"#f1e6d2",p.hat||"#f3b24a",null)}</svg>${esc(p.name)}${p.title?` <span style="color:var(--lamp);font-size:12px">${esc(p.title)}</span>`:""}${p.keeps?` <span title="${p.keeps} keepsakes" style="color:var(--gem);font-size:12px">◆${p.keeps}</span>`:""}<em>depth ${p.depth} · ${p.oil} oil</em></td><td>${fmt(p.score)}</td></tr>`).join("");
   rows.querySelectorAll("[data-p]").forEach(tr=>tr.onclick=()=>openRival(list[+tr.dataset.p]));
@@ -2059,7 +2086,9 @@ function drawScene(){
 }
 document.addEventListener("gesturestart",e=>e.preventDefault(),{passive:false});
 let loginNag=Date.now()+5*60*1000;
-function maybeNagLogin(){if(USER||Date.now()<loginNag)return;if(document.querySelector(".modal.on")||$("tour").classList.contains("on")||$("splash").style.display!=="none"||boss)return;
+function maybeNagLogin(){if(USER||Date.now()<loginNag)return;
+  if($("tab-leaderboard").classList.contains("on"))return;   // the board is public — let people read it
+  if(document.querySelector(".modal.on")||$("tour").classList.contains("on")||$("splash").style.display!=="none"||boss)return;
   $("lmCash").textContent=fmt(S.lifetime||0);$("loginModal").classList.add("on");loginNag=Date.now()+5*60*1000}
 $("lmLater").onclick=()=>{$("loginModal").classList.remove("on");loginNag=Date.now()+5*60*1000};
 $("loginModal").onclick=e=>{if(e.target===$("loginModal"))$("lmLater").click()};
