@@ -83,7 +83,8 @@
   .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 6px 20px rgba(0,0,0,.25)}
   .hero{overflow:hidden;border-color:rgba(255,181,71,.35);box-shadow:0 0 0 1px rgba(255,181,71,.12),0 20px 60px rgba(0,0,0,.55),0 0 80px rgba(255,181,71,.08)}
   .rock{display:block;width:100%;aspect-ratio:340/190;background:#0f0c0a;border:0;padding:0;cursor:pointer;position:relative;image-rendering:pixelated}
-  .rock svg{width:100%;height:100%;display:block}
+  .rock svg{width:100%;height:100%;display:block;pointer-events:none}
+  .rock .streak,.rock .bossbar,.rock .hp,.rock .flash{pointer-events:none}
   .rock:focus{outline:none}
   .rock:focus-visible{box-shadow:inset 0 0 0 2px var(--line2)}
   .rock .hp{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(0,0,0,.5)}
@@ -770,7 +771,7 @@
   <div class="hsec" id="hs-privacy">
     <h4>Privacy</h4>
     <p><b>What we store:</b> when you sign in with Discord we keep your Discord user ID and display name, and your game save (cash, upgrades, progress, the display name and colors you choose). That's it — no email, no messages, no friends list. The Discord login only asks for the <b>identify</b> scope.</p>
-    <p><b>Where it lives:</b> on Netlify's servers. A signed cookie keeps you logged in for 90 days.</p>
+    <p><b>Where it lives:</b> on Cloudflare's servers. A signed cookie keeps you logged in for 90 days.</p>
     <p><b>What's public:</b> your display name, title, avatar colors, keepsake count, depth, oil, and lifetime cash appear on the leaderboard for anyone playing.</p>
     <p><b>Not signed in?</b> Your save stays in your browser's local storage and never leaves your device.</p>
     <p><b>Deleting your data:</b> use "Reset progress" in the Bunkhouse to wipe your save, or email us to remove your account entirely.</p>
@@ -795,7 +796,7 @@
       </div>
       <div class="card">
         <h3>Quick links</h3>
-        <div class="eq"><div><b>Replay the tutorial</b><small>Eight steps, two minutes</small></div><button id="helpTour2">Start</button></div>
+        <div class="eq"><div><b>Replay the tutorial</b><small>Sixteen steps, a few minutes</small></div><button id="helpTour2">Start</button></div>
         <div class="eq"><div><b>Version</b><small id="verText">2026.09</small></div></div>
       </div>
     </div>
@@ -1486,7 +1487,17 @@ function renderBoard(){
   const me=USER?list.findIndex(p=>p.id===USER.id):-1;
   $("nudge").textContent=me>0?`You're ${fmt(list[me-1].score-list[me].score)} behind ${list[me-1].name}. Keep swinging.`:me===0?"You're on top. Everyone below is coming for you.":USER?"You're not on the board yet. Mine a little and check back.":"";
 }
-$("rock").onclick=mine;
+(function(){const r=$("rock");let sx=0,sy=0,st=0,moved=false,lastFire=0;
+  r.style.touchAction="none";
+  const fire=e=>{if(Date.now()-lastFire<30)return;lastFire=Date.now();mine(e)};
+  r.addEventListener("pointerdown",e=>{if(!e.isPrimary)return;sx=e.clientX;sy=e.clientY;st=Date.now();moved=false;
+    if(e.pointerType==="touch")fire(e);                       // touch: fire immediately on contact
+    try{r.setPointerCapture(e.pointerId)}catch(_){}} ,{passive:true});
+  r.addEventListener("pointermove",e=>{if(Math.abs(e.clientX-sx)>16||Math.abs(e.clientY-sy)>16)moved=true},{passive:true});
+  r.addEventListener("pointerup",e=>{if(e.pointerType==="touch")return;                 // touch already fired
+    if(!moved&&Date.now()-st<700)fire(e)},{passive:true});
+  r.addEventListener("contextmenu",e=>e.preventDefault());
+})();
 $("rock").onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();mine({})}};
 $("descend").onclick=descend;
 $("eqPickBtn").onclick=()=>buyPick(S.pick+1);
@@ -1608,7 +1619,6 @@ function drawScene(){
   $("scene").innerHTML=g;drawFace();
 }
 document.addEventListener("gesturestart",e=>e.preventDefault(),{passive:false});
-let lastTouch=0;document.addEventListener("touchend",e=>{const now=Date.now();if(now-lastTouch<300&&e.target.closest&&!e.target.closest("input,select,textarea"))e.preventDefault();lastTouch=now},{passive:false});
 let loginNag=Date.now()+5*60*1000;
 function maybeNagLogin(){if(USER||Date.now()<loginNag)return;if(document.querySelector(".modal.on")||$("tour").classList.contains("on")||$("splash").style.display!=="none"||boss)return;
   $("lmCash").textContent=fmt(S.lifetime||0);$("loginModal").classList.add("on");loginNag=Date.now()+5*60*1000}
