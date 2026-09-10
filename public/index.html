@@ -948,7 +948,7 @@
       </div>
       <nav class="card links">
         <h3 class="lhead">The camp</h3>
-        <button id="openMiner2" data-k="bunk"><i class="ti ti-bed" data-fb="&#128716;"></i><span><b>Bunkhouse</b><small>Your miner, record &amp; trophies</small></span></button>
+        <button id="openMiner2" data-k="bunk"><i class="ti ti-bed" data-fb="&#128716;"></i><span><b>Bunkhouse</b><small>Your miner, your shelf &amp; your record</small></span></button>
         <button id="openTable" data-k="bet"><i class="ti ti-cards" data-fb="&#127183;"></i><span><b>Gamble</b><small>Wheel, slots &amp; blackjack</small></span></button>
         <button data-goto="leaderboard" data-k="board"><i class="ti ti-crown" data-fb="&#128081;"></i><span><b>Leaderboard</b><small>Who's dug the furthest</small></span></button>
         <button id="openTour" data-k="rules"><i class="ti ti-compass" data-fb="&#128214;"></i><span><b>Rules</b><small>How the mine works</small></span></button>
@@ -1199,7 +1199,7 @@
 <div class="modal" id="modal">
   <div class="dlg" role="dialog" aria-label="The Bunkhouse">
     <header><h3>The Bunkhouse</h3><button class="x" id="mClose" aria-label="Close">×</button></header>
-    <div class="promo"><svg viewBox="0 0 34 34" id="mPreview"></svg><div><b id="mWho">Your miner</b><p id="mSub">Your corner of the mine. Your look, your record, your trophies.</p></div></div>
+    <div class="promo"><svg viewBox="0 0 34 34" id="mPreview"></svg><div><b id="mWho">Your miner</b><p id="mSub">Your corner of the mine. Your look, your shelf, your record.</p></div></div>
     <div class="seg seg4"><button class="on" data-sub="look">Miner</button><button data-sub="shelf">Shelf <span id="shelfCount"></span></button><button data-sub="record">Record</button><button data-sub="trophies">Trophies <span id="trophyCount"></span></button></div>
     <div class="sub on" id="sub-look">
       <div class="fld"><label>Shirt</label><div class="swatches" id="shirts"></div></div>
@@ -1683,7 +1683,8 @@ function renderShelf(){
 }
 function openModal(){
   draft={...S.profile};renderSwatches();previewSvg();renderRecord();renderTrophies();renderShelf();
-  $("mWho").textContent=displayName();const tt=TITLES.find(t=>t.id===S.profile.title);$("mSub").textContent=(tt&&tt.id?tt.name+" · ":"")+RANKSN[Math.min(RANKSN.length-1,S.depth)]+(S.oil?` · ${S.oil} lantern oil`:"");
+  $("mWho").textContent=displayName();const tt=TITLES.find(t=>t.id===S.profile.title);{const kept=((S.story&&S.story.keeps)||[]).length,out=(S.shelf||[]).length;
+    $("mSub").textContent=(tt&&tt.id?tt.name+" · ":"")+RANKSN[Math.min(RANKSN.length-1,S.depth)]+(S.oil?` · ${S.oil} lantern oil`:"")+(kept?` · ${out}/${shelfCap()} on the shelf`:"");}
   $("mName").value=draft.name;$("nameCount").textContent=draft.name.length+"/24";$("nameErr").style.display="none";
   $("mTitle").innerHTML=TITLES.map(t=>`<option value="${t.id}" ${t.ok()?"":"disabled"} ${draft.title===t.id?"selected":""}>${t.name}${t.ok()?"":" (locked)"}</option>`).join("");
   $("mAcct").textContent=USER?`Signed in with Discord as ${USER.name}. Your saved mine stays with your account.`:"You're not signed in. Progress only lives in this browser until you sign in with Discord.";
