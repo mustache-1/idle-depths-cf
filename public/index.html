@@ -655,6 +655,16 @@
   .spager button:not(:disabled):hover{border-color:var(--lamp);color:var(--lamp)}
   @media(max-width:700px){.sgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:380px){.sgrid{grid-template-columns:1fr}}
+  .newbuild{position:fixed;left:50%;bottom:-90px;transform:translateX(-50%);z-index:200;
+    display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);
+    background:var(--panel2);border:1px solid var(--lamp);border-radius:12px;
+    padding:11px 13px;box-shadow:0 10px 30px rgba(0,0,0,.55);
+    transition:bottom .35s ease;font-size:14px}
+  .newbuild.on{bottom:18px}
+  .newbuild span{color:var(--ink);min-width:0}
+  .newbuild button{flex:none;height:36px;padding:0 14px;border:0;border-radius:8px;
+    background:var(--lamp);color:#20180a;font:inherit;font-weight:500;cursor:pointer}
+  @media(max-width:480px){.newbuild{font-size:13px;padding:10px 11px;gap:9px}}
   .ct .asks{font-style:normal;font-size:11px;color:var(--lamp);opacity:.85;margin-left:6px}
   .ct{padding:14px 0;border-top:1px solid var(--line)}
   .ct:first-child{border-top:0;padding-top:0}
@@ -992,6 +1002,11 @@
 
 <div id="strata" aria-hidden="true"></div>
 
+<div class="newbuild" id="newBuild" role="status">
+  <span>A new shift has been posted. Your progress is saved.</span>
+  <button id="newBuildGo">Reload</button>
+</div>
+
 <div class="splash" id="splash" style="display:none"><div class="in">
   <h1>Fifty million. Good luck.</h1>
   <p class="lead">You couldn't pay Lord Ashcombe, so you're in his mine. Swing the pick, hire a crew, dig deeper than the ledger — and find what's under the throne.</p>
@@ -1288,7 +1303,7 @@
       <div class="card">
         <h3>Developer</h3>
         <div class="eq" style="border:0;padding:6px 0"><div><b>Avila</b><small>Designer, developer, overseer</small></div></div>
-        <div class="eq"><div><b>Discord</b><small>mustache.net</small></div></div>
+        <div class="eq"><div><b>Discord</b><small><a href="https://discord.gg/JeGy88BvY" target="_blank" rel="noopener" style="color:var(--lamp);text-decoration:none">discord.gg/JeGy88BvY</a></small></div><button onclick="window.open('https://discord.gg/JeGy88BvY','_blank','noopener')">Join</button></div>
         <div class="eq"><div><b>Email</b><small><a href="mailto:info.avila@icloud.com" style="color:var(--lamp);text-decoration:none">info.avila@icloud.com</a></small></div></div>
         <p class="note" style="margin-top:12px">Bug reports, name changes, and data removal requests all go here. Include your Discord name so I can find your mine.</p>
       </div>
@@ -1758,7 +1773,9 @@ function renderRecord(){
 }
 function renderTrophies(){
   const n=ACH.filter(a=>has(a.id)).length;$("trophyCount").textContent=`${n}/${ACH.length}`;
-  $("trophies").innerHTML=ACH.map(a=>`<div class="tr ${has(a.id)?'on':''}"><div class="ic">${has(a.id)?'★':'☆'}</div><div><b>${a.name}</b><small>${a.desc}</small></div></div>`).join("");
+  // Earned first, so the page you land on shows what you've actually got.
+  const ord=[...ACH].sort((x,y)=>(has(y.id)?1:0)-(has(x.id)?1:0));
+  paged("trophies",ord,8,"trophies",a=>`<div class="tr ${has(a.id)?'on':''}"><div class="ic">${has(a.id)?'★':'☆'}</div><div><b>${a.name}</b><small>${a.desc}</small></div></div>`,renderTrophies);
 }
 function renderShelf(){
   const owned=(S.story&&S.story.keeps)||[],on=S.shelf||[],cap=shelfCap();
@@ -1879,9 +1896,9 @@ function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("on");c
 const nice=v=>{const m=Math.pow(10,Math.max(0,Math.floor(Math.log10(v))-1));return Math.round(v/m)*m};
 function renderPerks(){
   $("perkOil").textContent=S.oil||0;
-  $("perkList").innerHTML=PERKS.map(pk=>{const l=perkLv(pk.id),max=l>=pk.max,c=max?0:pk.cost(l);
-    return `<div class="perk"><div><div class="name">${pk.name}</div><div class="desc">${pk.desc}</div><div class="fx">${l?pk.fx(l):"Not learned"}${!max?` → ${pk.fx(l+1)}`:""}</div><div class="pips">${Array.from({length:pk.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join("")}</div></div><button data-perk="${pk.id}" ${max||(S.oil||0)<c?"disabled":""}>${max?"Maxed":`${c} oil`}</button></div>`}).join("");
-  document.querySelectorAll("[data-perk]").forEach(b=>b.onclick=async()=>{const pk=PERKS.find(x=>x.id===b.dataset.perk),l=perkLv(pk.id);if(l>=pk.max||(S.oil||0)<pk.cost(l))return;
+  paged("perks",PERKS,PER_PAGE,"perkList",pk=>{const l=perkLv(pk.id),max=l>=pk.max,c=max?0:pk.cost(l);
+    return `<div class="perk"><div><div class="name">${pk.name}</div><div class="desc">${pk.desc}</div><div class="fx">${l?pk.fx(l):"Not learned"}${!max?` → ${pk.fx(l+1)}`:""}</div><div class="pips">${Array.from({length:pk.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join("")}</div></div><button data-perk="${pk.id}" ${max||(S.oil||0)<c?"disabled":""}>${max?"Maxed":`${c} oil`}</button></div>`},renderPerks);
+  document.querySelectorAll("#perkList [data-perk]").forEach(b=>b.onclick=async()=>{const pk=PERKS.find(x=>x.id===b.dataset.perk),l=perkLv(pk.id);if(l>=pk.max||(S.oil||0)<pk.cost(l))return;
     if(!await ask(pk.name,`Spend ${pk.cost(l)} lantern oil? Oil spent no longer gives its +10% bonus. This can't be undone.`,"Spend oil"))return;
     S.oil-=pk.cost(l);S.perks=S.perks||{};S.perks[pk.id]=l+1;toast(`${pk.name}: ${pk.fx(l+1)}.`);render();save()});
 }
@@ -2208,7 +2225,7 @@ function renderStories(){
       <div class="keeps">${st.keeps.map((k,i)=>`<div class="keep ${(S.story.pick[st.id]||0)===i&&!first?'on':''} ${S.story.keeps.includes(k.n)?'got':''}"><i style="background:${k.c}"></i><b>${k.n}</b><small>${k.d} · ${i?"Follow-up":"First"} keepsake</small>${S.story.keeps.includes(k.n)?'<span>Earned</span>':first?(i?'<span>Next up</span>':''):`<button data-pick="${i}" class="btn" ${(S.story.pick[st.id]||0)===i?'disabled':''}>${(S.story.pick[st.id]||0)===i?'✓ Selected first':'Choose first'}</button>`}</div>`).join("")}</div>`:both?`<p class="note" style="margin-top:12px">Both keepsakes earned.</p>`:""}
       ${open&&!both?`<div class="btns"><button class="btn p" id="sStart" ${active?"disabled":""}>${active?"Story in progress":S.story.active?"Switch to this story":"Start this story"}</button></div>`:""}`;
     $("sBack").onclick=()=>{openStory=null;renderStories()};
-    document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{S.story.pick[st.id]=+b.dataset.pick;renderStories();save()});
+    $("sDetail").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{S.story.pick[st.id]=+b.dataset.pick;renderStories();save()});
     const sb=$("sStart");if(sb)sb.onclick=()=>{S.story.active=st.id;toast(`${st.title} is your active story. Keep mining to uncover clues.`);renderStories();save()};
     return}
   $("sList").style.display="";$("sDetail").style.display="none";
@@ -2422,20 +2439,43 @@ document.querySelectorAll("[data-help]").forEach(a=>a.onclick=e=>{e.preventDefau
 $("helpTour").onclick=tourStart;$("helpTour2").onclick=tourStart;
 document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-q]").forEach(x=>x.classList.toggle("on",x===b));["ledger","stories","contracts"].forEach(k=>$("q-"+k).classList.toggle("on",b.dataset.q===k));if(b.dataset.q==="ledger")renderLedger()});
 $("lgClaim").onclick=ledgerSign;
+$("newBuildGo").onclick=async()=>{await save();location.reload()};
 function switchTab(t){document.body.classList.toggle("minetab",t==="mine");document.documentElement.classList.toggle("minetab",t==="mine");if(t==="leaderboard")loadBoard();document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests"){renderLedger();renderStories()}}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 function eta2(ms){const s=Math.ceil(ms/1000);return s<3600?Math.floor(s/60)+"m":Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m"}
 function eta(cost){const need=cost-S.cash;if(need<=0)return "Ready now";const r=cps();if(r<=0)return "Keep swinging";const s=need/r;if(s<60)return Math.ceil(s)+"s";if(s<3600)return Math.floor(s/60)+"m "+Math.ceil(s%60)+"s";if(s<86400)return Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m";return Math.floor(s/86400)+"d "+Math.floor(s%86400/3600)+"h"}
+// ---- reusable list pager ----
+// Renders one page of a list into a mount, plus Back/Next. Hides itself at one page.
+const PAGERS={};
+function paged(key,items,per,mountId,rowHtml,redraw){
+  const el=$(mountId);if(!el)return;
+  const pages=Math.max(1,Math.ceil(items.length/per));
+  PAGERS[key]=Math.min(Math.max(0,PAGERS[key]||0),pages-1);
+  const start=PAGERS[key]*per;
+  el.innerHTML=items.slice(start,start+per).map((it,j)=>rowHtml(it,start+j)).join("")+
+    (pages>1?`<div class="spager"><button data-pg="-1" ${PAGERS[key]===0?"disabled":""}>&lsaquo; Back</button>`+
+      `<span>Page ${PAGERS[key]+1} of ${pages}</span>`+
+      `<button data-pg="1" ${PAGERS[key]>=pages-1?"disabled":""}>Next &rsaquo;</button></div>`:"");
+  el.querySelectorAll("[data-pg]").forEach(b=>b.onclick=()=>{
+    PAGERS[key]+=+b.dataset.pg;
+    if(redraw)redraw();
+  });
+}
+const PER_PAGE=6;
+
 function buildUI(){
     if(S.crew.length<CREW.length)S.crew=[...S.crew,...CREW.map(()=>0)].slice(0,CREW.length);
-  $("picks").innerHTML=PICKS.slice(1).map((p,i)=>`<div class="row" id="pick${i+1}">
+  const redraw=()=>{buildUI();render()};
+  paged("picks",PICKS.slice(1),PER_PAGE,"picks",(p,i)=>`<div class="row" id="pick${i+1}">
       <div><div class="name">${p.name}<em>${fmt(p.power)}/swing</em></div><div class="desc">Swing harder, break more rock.</div></div>
-      <button class="buy" data-pick="${i+1}"></button></div>`).join("");
-  $("crew").innerHTML=CREW.map((c,i)=>`<div class="row" id="crew${i}">
-      <div><div class="name">${c.name}<em id="crewN${i}"></em><em id="crewM${i}" class="mile"></em></div><div class="desc">${c.desc} <span id="crewR${i}"></span></div><div class="mprog" id="crewP${i}"><i></i></div><div class="desc" id="crewT${i}"></div></div>
-      <button class="buy" data-crew="${i}"></button></div>`).join("");
-  document.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>buyPick(+b.dataset.pick));
-  document.querySelectorAll("[data-crew]").forEach(b=>b.onclick=()=>buyCrew(+b.dataset.crew));
+      <button class="buy" data-pick="${i+1}"></button></div>`,redraw);
+  // Crew locked behind a debt rank are hidden entirely, so page over what's actually shown.
+  const shownCrew=CREW.map((c,i)=>({c,i})).filter(x=>!(x.c.rank&&(S.debts||0)<x.c.rank));
+  paged("crew",shownCrew,PER_PAGE,"crew",x=>`<div class="row" id="crew${x.i}">
+      <div><div class="name">${x.c.name}<em id="crewN${x.i}"></em><em id="crewM${x.i}" class="mile"></em></div><div class="desc">${x.c.desc} <span id="crewR${x.i}"></span></div><div class="mprog" id="crewP${x.i}"><i></i></div><div class="desc" id="crewT${x.i}"></div></div>
+      <button class="buy" data-crew="${x.i}"></button></div>`,redraw);
+  document.querySelectorAll("#picks [data-pick]").forEach(b=>b.onclick=()=>buyPick(+b.dataset.pick));
+  document.querySelectorAll("#crew [data-crew]").forEach(b=>b.onclick=()=>buyCrew(+b.dataset.crew));
 }
 
 function render(){
@@ -2502,13 +2542,13 @@ function render(){
    if(canPerk&&!$("tab-perks").classList.contains("on")&&Date.now()>lastPNudge){lastPNudge=Date.now()+600000;toast(`You're holding ${o} lantern oil — spend it on a perk.`)}}
   if($("sealBtn")){$("sealBtn").disabled=S.cash<debtCost();$("sealBtn").textContent=S.cash<debtCost()?"Need "+fmt(debtCost()-S.cash)+" more":"Pay & go back down";
   $("sealInfo").textContent=S.cash<debtCost()?`The lord wants ${fmt(debtCost())} · ${S.oil} oil held`:`+${oilOnSeal()} lantern oil if you pay now`;}
-  PICKS.forEach((p,i)=>{if(!i)return;const row=$("pick"+i),b=row.querySelector("button");
+  PICKS.forEach((p,i)=>{if(!i)return;const row=$("pick"+i);if(!row)return;const b=row.querySelector("button");
     const lk=p.rank&&(S.debts||0)<p.rank;
     if(i<=S.pick){row.classList.add("locked");b.disabled=true;b.textContent="Owned"}
     else if(lk){row.classList.add("locked");b.disabled=true;b.textContent="Debt ×"+p.rank}
     else if(i>S.pick+1){row.classList.add("locked");b.disabled=true;b.textContent=fmt(p.cost)}
     else{row.classList.remove("locked");b.disabled=S.cash<p.cost;b.textContent=fmt(p.cost)}});
-  CREW.forEach((c,i)=>{const row=$("crew"+i);row.style.display=c.rank&&(S.debts||0)<c.rank?"none":"";const b=row.querySelector("button"),cost=crewCost(i);
+  CREW.forEach((c,i)=>{const row=$("crew"+i);if(!row)return;row.style.display=c.rank&&(S.debts||0)<c.rank?"none":"";const b=row.querySelector("button"),cost=crewCost(i);
     b.disabled=S.cash<cost;b.textContent=fmt(cost);
     const n=S.crew[i]||0,m=crewMult(n),nm=nextMile(n);
     $("crewN"+i).textContent=n?"×"+n:"";$("crewM"+i).textContent=m>1?`×${m} power`:"";
@@ -2943,10 +2983,33 @@ function descend(){const L=LAYERS[S.depth],nx=LAYERS[S.depth+1];if(L.rank&&(S.de
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
-  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
+  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
   toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);feedPost("debt",S.debts);drawScene();render();save();
 }
+
+// ---- new build watch ----
+// The Worker reports the ETag of index.html, which Cloudflare changes on every deploy.
+// We never reload mid-swing: we save first, and only reload while the tab is hidden
+// or when the player says so.
+let BUILD=null,buildPrompted=false;
+async function checkBuild(){
+  try{
+    const r=await fetch("/api/version",{cache:"no-store"});
+    const d=await r.json();
+    if(!d||!d.build)return;
+    if(BUILD===null){BUILD=d.build;return}
+    if(d.build===BUILD)return;
+    await save();
+    if(document.hidden){location.reload();return}
+    if(buildPrompted)return;
+    buildPrompted=true;
+    const bar=$("newBuild");
+    if(bar)bar.classList.add("on");
+  }catch(e){}
+}
+setInterval(checkBuild,4*60*1000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkBuild()});
 
 // ---- leaderboard ----
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
