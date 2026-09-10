@@ -251,6 +251,7 @@
   .coffee small{display:block;color:var(--dim);font-size:11.5px;line-height:1.35}
   .coffee:hover{background:rgba(255,176,31,.2);box-shadow:0 0 16px rgba(255,176,31,.18)}
   .fcoffee{max-width:340px;margin:14px 0}
+  .links .coffee{margin:6px 4px 2px}
   .pit .titlebar,.pit .strip,.pit .quest{flex:none}
   .eqcard{display:flex;flex-direction:column;min-height:0}
   .eqlist{min-height:0;overflow-y:auto;scrollbar-width:thin}
@@ -262,7 +263,8 @@
     .stat{padding:0 14px}
     .stat b{font-size:15px}
     .stat small{font-size:11px}
-    #tab-mine{width:min(1460px,calc(100vw - 32px));margin-left:calc(520px - min(730px,calc(50vw - 16px)));padding:12px 0 12px}
+    #tab-mine{width:min(1460px,calc(100vw - 32px));margin-left:calc((100% - min(1460px,calc(100vw - 32px))) / 2);padding:12px 0}
+    #tab-mine.on ~ footer{display:none}
     .pit{display:grid;grid-template-columns:236px minmax(0,1fr) 286px;gap:13px;align-items:stretch;
       height:calc(100vh - 108px);min-height:0}
     .pit .side,.pit .stage{height:100%;min-height:0}
@@ -271,7 +273,6 @@
     .pit .hero{flex:1;min-height:0;display:flex;flex-direction:column}
     .pit .rock{flex:1;min-height:0;aspect-ratio:auto}
     .pit .links{flex:none}
-    .pit .coffee{margin-top:auto;flex:none}
     .pit .eqcard{flex:1;min-height:0}
     .pit .titlebar h2{font-size:20px}
     .pit .titlebar span{font-size:13px}
@@ -802,8 +803,8 @@
         <button id="openTable" data-k="bet"><i class="ti ti-cards" data-fb="&#127183;"></i><span><b>Gamble</b><small>Wheel, slots &amp; blackjack</small></span></button>
         <button data-goto="leaderboard" data-k="board"><i class="ti ti-crown" data-fb="&#128081;"></i><span><b>Leaderboard</b><small>Who's dug the furthest</small></span></button>
         <button id="openTour" data-k="rules"><i class="ti ti-compass" data-fb="&#128214;"></i><span><b>Rules</b><small>How the mine works</small></span></button>
+        <a class="coffee" href="https://buymeacoffee.com/idledepths" target="_blank" rel="noopener"><i class="ti ti-coffee" data-fb="&#9749;"></i><span><b>Buy me a coffee</b><small>Keeps the lanterns lit</small></span></a>
       </nav>
-      <a class="coffee" href="https://www.buymeacoffee.com/" target="_blank" rel="noopener"><i class="ti ti-coffee" data-fb="&#9749;"></i><span><b>Buy me a coffee</b><small>Keeps the lanterns lit</small></span></a>
     </aside>
 
     <main class="stage">
@@ -1023,7 +1024,7 @@
 </div>
 <footer>
   <span id="lifeStats"></span><span id="awayNote"></span>
-  <a class="coffee fcoffee" href="https://www.buymeacoffee.com/" target="_blank" rel="noopener"><i class="ti ti-coffee" data-fb="&#9749;"></i><span><b>Buy me a coffee</b><small>Keeps the lanterns lit and the server running</small></span></a>
+  <a class="coffee fcoffee" href="https://buymeacoffee.com/idledepths" target="_blank" rel="noopener"><i class="ti ti-coffee" data-fb="&#9749;"></i><span><b>Buy me a coffee</b><small>Keeps the lanterns lit and the server running</small></span></a>
   <nav class="flinks"><a href="#" data-help="terms">Terms</a><a href="#" data-help="privacy">Privacy</a><span class="credit" style="width:auto;margin-left:auto">© 2026 Avila · Idle Depths</span></nav>
 </footer>
 </div>
@@ -2056,11 +2057,10 @@ function mine(e,auto){
 function buyPick(i){if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cost;S.pick=i;drawScene();render();save();toast(`You picked up the ${PICKS[i].name}.`)}}
 let eqSig="";
 function eqCrewRender(){
-  const vis=[];let tail=0;
+  const vis=[];
   for(let i=0;i<CREW.length;i++){
     if(CREW[i].rank&&(S.debts||0)<CREW[i].rank)continue;
-    if((S.crew[i]||0)>0||S.cash>=crewCost(i)*.2){vis.push(i);tail=0}
-    else if(tail<2){vis.push(i);tail++}
+    vis.push(i);
   }
   const host=$("eqCrew"),sig=vis.join(",");
   if(sig!==eqSig){
