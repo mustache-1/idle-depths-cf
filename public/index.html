@@ -575,48 +575,86 @@
   .mini i b{display:block;height:100%;background:var(--blue)}
   .mini.ready i b{background:var(--green)}.mini.ready span{color:var(--green)}
   .mini.done span{color:var(--mute);text-decoration:line-through}.mini.done i b{background:var(--mute)}
-  /* ---- the ledger: a lit page of Ashcombe's book against the dark mine ---- */
-  .book{background:#e6dcc4;color:#2b2118;border-radius:2px;padding:0;overflow:hidden;
-    box-shadow:0 18px 44px rgba(0,0,0,.55),0 0 0 1px #4a3a24;position:relative;
-    font-family:Georgia,"Times New Roman",serif}
-  .book::before{content:"";position:absolute;left:52px;top:0;bottom:0;width:1px;background:#b04a3a;opacity:.5}
+  /* ---- the ledger: a page of Ashcombe's book, read by lamplight ---- */
+  .seg.three{grid-template-columns:repeat(3,1fr)}
+  .book{position:relative;max-width:100%;overflow:hidden;border-radius:14px;
+    background:linear-gradient(180deg,#1a1610,#12100c);
+    border:1px solid #3a2f1f;box-shadow:0 1px 0 rgba(255,214,150,.05) inset,0 10px 30px rgba(0,0,0,.5);
+    font-family:Georgia,"Times New Roman",serif;color:#ded3bd}
+  .book::before{content:"";position:absolute;left:56px;top:0;bottom:0;width:1px;background:#7a3326;opacity:.55}
   .book::after{content:"";position:absolute;inset:0;pointer-events:none;
-    background:repeating-linear-gradient(180deg,transparent 0 27px,rgba(58,44,28,.16) 27px 28px)}
-  .bookhead{position:relative;z-index:2;padding:18px 22px 12px;border-bottom:2px solid #3a2c1c}
-  .bookhead b{display:block;font-size:19px;font-weight:400;letter-spacing:.01em}
-  .bookhead small{display:block;font-size:13px;color:#6b5a44;margin-top:2px}
-  .bookhead .stamp{position:absolute;right:16px;top:14px;transform:rotate(-7deg);
-    border:2px solid #b04a3a;color:#b04a3a;padding:4px 9px;font-size:12px;letter-spacing:.06em;opacity:.8}
-  .bookbody{position:relative;z-index:2;padding:6px 22px 20px}
-  .lrow{display:flex;gap:14px;align-items:flex-start;padding:11px 0;border-bottom:1px solid rgba(58,44,28,.22)}
+    background:repeating-linear-gradient(180deg,transparent 0 27px,rgba(222,211,189,.055) 27px 28px)}
+  .bookhead{position:relative;z-index:2;padding:18px 22px 13px;border-bottom:1px solid #3a2f1f}
+  .bookhead b{display:block;font-size:20px;font-weight:400;color:#f0e6d0}
+  .bookhead small{display:block;font-size:13px;color:#93856c;margin-top:3px}
+  .bookhead .stamp{position:absolute;right:18px;top:16px;transform:rotate(-6deg);
+    border:1px solid #a8452f;color:#c9604a;padding:3px 9px;border-radius:2px;
+    font-size:11px;letter-spacing:.08em;opacity:.9}
+  .bookbody{position:relative;z-index:2;padding:4px 22px 20px}
+  .lrow{display:flex;gap:14px;align-items:flex-start;padding:13px 0;border-bottom:1px solid rgba(222,211,189,.09)}
   .lrow:last-child{border-bottom:0}
-  .lrow .lhand{flex:none;width:34px;font-size:12px;color:#6b5a44;padding-top:2px;min-height:0}
-  .lrow .said{flex:1;min-width:0;font-size:14px;line-height:1.55}
-  .lrow .said em{font-style:italic;color:#6b5a44}
-  .lrow .said b{font-weight:400;display:block;font-size:13px;color:#6b5a44;margin-bottom:3px}
-  .lrow .amt{flex:none;font-size:15px;font-variant-numeric:tabular-nums;text-align:right;min-width:76px}
-  .lrow .amt.debit{color:#a33b2a}
-  .lrow.settled{opacity:.5}
-  .lrow.settled .amt::after{content:" ✓"}
-  .lbar{height:6px;background:rgba(58,44,28,.18);margin:8px 0 0;position:relative;z-index:2}
-  .lbar i{display:block;height:100%;background:#3a2c1c}
-  .lstreak{display:flex;gap:5px;margin-top:10px;position:relative;z-index:2;flex-wrap:wrap}
-  .lstreak i{width:13px;height:17px;background:rgba(58,44,28,.16);display:block;border-radius:0}
-  .lstreak i.on{background:#3a2c1c}
-  .lstreak i.gold{background:#b8842c}
-  .bookbtn{position:relative;z-index:2;width:100%;margin-top:14px;padding:13px;font:inherit;
-    font-size:15px;cursor:pointer;background:#3a2c1c;color:#e6dcc4;border:0;border-radius:2px}
-  .bookbtn:disabled{background:rgba(58,44,28,.22);color:#6b5a44;cursor:default}
-  .bookbtn:focus-visible{outline:2px solid #b04a3a;outline-offset:2px}
-  .seamnote{position:relative;z-index:2;margin-top:12px;font-size:13px;color:#6b5a44;line-height:1.5}
-  .seamnote b{color:#8a5a18;font-weight:400}
-  .digwrap{margin-top:12px;position:relative;z-index:2}
-  .digwrap h4{font-size:15px;font-weight:400;margin:0 0 3px}
-  .digmem{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;
-    border-bottom:1px solid rgba(58,44,28,.16)}
-  .digmem span:last-child{font-variant-numeric:tabular-nums}
-  .digmem.idle{color:#a33b2a}
-  @media(max-width:560px){.book::before{left:40px}.bookhead,.bookbody{padding-left:16px;padding-right:16px}.lrow .lhand{width:26px}}
+  .lrow .lhand{flex:none;width:34px;min-height:0;font-size:12px;color:#8a7c63;padding-top:3px}
+  .lrow .said{flex:1;min-width:0;font-size:15px;line-height:1.6;color:#ded3bd}
+  .lrow .said em{font-style:italic;color:#93856c}
+  .lrow .said b{font-weight:400;display:block;font-size:12px;color:#93856c;margin-bottom:4px;
+    letter-spacing:.03em;font-family:var(--ui)}
+  .lrow .amt{flex:none;font-size:15px;font-variant-numeric:tabular-nums;text-align:right;min-width:74px;color:#e8dcc2}
+  .lrow .amt.debit{color:#c9604a}
+  .lrow.settled{opacity:.45}
+  .lbar{height:5px;background:rgba(222,211,189,.10);margin-top:9px;border-radius:2px;overflow:hidden}
+  .lbar i{display:block;height:100%;background:var(--lamp)}
+  .lstreak{display:flex;gap:5px;margin-top:16px;position:relative;z-index:2;flex-wrap:wrap}
+  .lstreak i{width:12px;height:16px;background:rgba(222,211,189,.10);display:block;border-radius:1px}
+  .lstreak i.on{background:#8a7c63}
+  .lstreak i.gold{background:var(--lamp)}
+  .bookbtn{position:relative;z-index:2;width:100%;margin-top:14px;padding:14px;border:0;border-radius:10px;
+    font-family:var(--ui);font-size:15px;font-weight:500;cursor:pointer;
+    background:var(--lamp);color:#20180a}
+  .bookbtn:disabled{background:rgba(222,211,189,.07);color:#7a6e58;cursor:default}
+  .bookbtn:focus-visible{outline:2px solid var(--lamp2);outline-offset:2px}
+  .seamnote{position:relative;z-index:2;margin-top:13px;font-size:14px;color:#93856c;line-height:1.55}
+  .seamnote b{color:var(--lamp2);font-weight:400}
+  .digwrap{margin-top:18px;padding-top:16px;border-top:1px solid #3a2f1f;position:relative;z-index:2}
+  .digwrap h4{font-size:16px;font-weight:400;margin:0 0 4px;color:#f0e6d0}
+  .digmem{display:flex;justify-content:space-between;gap:10px;font-size:14px;padding:7px 0;
+    border-bottom:1px solid rgba(222,211,189,.08)}
+  .digmem:last-child{border-bottom:0}
+  .digmem span:last-child{font-variant-numeric:tabular-nums;color:#93856c;flex:none}
+  .digmem.idle span:last-child{color:#c9604a}
+  @media(max-width:560px){
+    .seg.three{grid-template-columns:repeat(3,1fr)!important}
+    .seg.three button{font-size:13px;padding:0 4px}
+    .book::before{left:38px}
+    .bookhead,.bookbody{padding-left:15px;padding-right:15px}
+    .bookhead .stamp{right:12px;top:13px}
+    .lrow .lhand{width:22px}
+    .lrow{gap:9px}
+  }
+  /* ---- stories as a paged grid ---- */
+  .sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .stile{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);
+    border-radius:12px;padding:13px 13px 14px;cursor:pointer;display:flex;flex-direction:column;
+    gap:9px;min-width:0;text-align:left;transition:border-color .15s}
+  .stile:hover{border-color:var(--line2)}
+  .stile.active{border-color:var(--lamp)}
+  .stile.locked{opacity:.5;cursor:default}
+  .stile .sthead{display:flex;align-items:center;gap:9px;min-width:0}
+  .stile .sthead svg{flex:none}
+  .stile small{display:block;font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .stile b{display:block;font-size:14px;font-weight:600;line-height:1.3;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .stile .st8{font-size:12px;color:var(--dim);margin-top:auto}
+  .stile.active .st8{color:var(--lamp)}
+  .stile .sp{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+  .stile .sp i{display:block;height:100%;background:var(--lamp)}
+  .spager{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px}
+  .spager span{font-size:12.5px;color:var(--dim);font-variant-numeric:tabular-nums;min-width:96px;text-align:center}
+  .spager button{height:38px;min-width:38px;padding:0 14px;border-radius:9px;border:1px solid var(--line2);
+    background:transparent;color:var(--ink);font-size:14px}
+  .spager button:disabled{color:var(--mute);border-color:var(--line);cursor:default}
+  .spager button:not(:disabled):hover{border-color:var(--lamp);color:var(--lamp)}
+  @media(max-width:700px){.sgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:380px){.sgrid{grid-template-columns:1fr}}
   .ct .asks{font-style:normal;font-size:11px;color:var(--lamp);opacity:.85;margin-left:6px}
   .ct{padding:14px 0;border-top:1px solid var(--line)}
   .ct:first-child{border-top:0;padding-top:0}
@@ -1100,7 +1138,7 @@
 
 <div class="panel" id="tab-quests">
   <div class="titlebar"><h2>Quests</h2><span>Stories from the depths, and contracts from the overseer</span></div>
-  <div class="seg" style="max-width:440px;margin:0 0 16px"><button class="on" data-q="ledger">The ledger</button><button data-q="stories">Stories</button><button data-q="contracts">Contracts</button></div>
+  <div class="seg three" style="max-width:440px;margin:0 0 16px"><button class="on" data-q="ledger">The ledger</button><button data-q="stories">Stories</button><button data-q="contracts">Contracts</button></div>
   <div class="sub on" id="q-ledger">
     <div class="book">
       <div class="bookhead"><b id="lgTitle">Ashcombe&rsquo;s book</b><small id="lgDate"></small><span class="stamp" id="lgStamp">unpaid</span></div>
@@ -2091,6 +2129,60 @@ const STORIES=[
     "It comes up when the digging slows. It leaves when the digging is fast. You start to understand what the Wyrm is for, and you don't like it.",
     "The last time it surfaces it doesn't fight. It just looks at you, and then down, past the floor, at the thing under the throne. Then it goes back to tell it you're coming."],
     keeps:[{n:"A Wyrm scale",d:"Bedside",c:"#5ec9b6"},{n:"A Wyrm tooth",d:"Bunkhouse shelf",c:"#e8e8e8"}]},
+  {id:"cutting2",layer:0,who:"Nel the Runner",face:{skin:"#c98a5a",hair:"#c8a44a",shirt:"#4a5a3a"},title:"Fast Feet, Slow Debt",cost:0.5,beats:[
+    "Nel is eleven and runs messages between the galleries because she is small enough for the crawl. She knows every shaft in the Cutting and charges a penny to draw you a map she has never written down.",
+    "Her debt isn't hers. It's her father's, and when he died the ledger simply moved the number down a line. \"Same ink,\" she says. \"Different name on top.\"",
+    "She shows you the crawl nobody uses, the one that comes out behind the overseer's post. \"Don't take it. I'm telling you so you know it's there. That's different from telling you to use it.\"",
+    "The week she turns twelve they put her on a pick. She gives you the map anyway, drawn at last, in a child's hand, on the back of a pay slip that was never paid."],
+    keeps:[{n:"Nel's map",d:"Bedside",c:"#c8a44a"},{n:"An unpaid slip",d:"Bunkhouse shelf",c:"#d8d0bc"}]},
+  {id:"rust2",layer:1,who:"Garrow the Smith",face:{skin:"#b87a4a",hair:"#5a3a2a",shirt:"#6a2a1a"},title:"What Copper Costs",cost:0.5,beats:[
+    "Garrow repairs picks at the mouth of Rustveins and charges nothing, which the overseers permit because a broken pick digs nothing. \"I'm not kind,\" he tells you. \"I'm useful. Learn the difference or they'll price you wrong.\"",
+    "He was brought down for debt like everyone, but his was six shillings. Six. \"The size doesn't matter,\" he says, hammering. \"Only that there is one. A hook doesn't need to be big.\"",
+    "You watch him refuse to fix a guard's blade. He takes the beating without a sound and fixes three miners' picks that night by candle.",
+    "He puts a copper band around the haft of your pick. \"So it's yours,\" he says. \"They can write your name in their book. This is you writing it back.\""],
+    keeps:[{n:"A copper band",d:"Bedside",c:"#b06a3a"},{n:"Garrow's file",d:"Bunkhouse shelf",c:"#8a8a90"}]},
+  {id:"coal2",layer:2,who:"The Singing Shift",face:{skin:"#d9a06e",hair:"#2a2a2a",shirt:"#3a3a44"},title:"Nine Voices",cost:0.6,beats:[
+    "The Coalworks night shift sings. Not for cheer — for counting. One verse is one full cart, and a man who stops singing has stopped working, and the overseers can hear it from the surface.",
+    "You learn the verses. They are older than the mine and mention places nobody down here has been: a river, a market, a woman selling apples in the rain.",
+    "One night the song has an extra verse. Nobody will say who added it. It counts nine of something and does not say what.",
+    "You count the singers. There are eight. The ninth voice comes in on the ninth count, every time, from the direction of the bricked gallery, and every man keeps singing as though he cannot hear it."],
+    keeps:[{n:"The ninth verse",d:"Bedside",c:"#5a6a8a"},{n:"A counting stone",d:"Bunkhouse shelf",c:"#3a3a3a"}]},
+  {id:"iron2",layer:3,who:"Merrin the Surveyor",face:{skin:"#e2b48c",hair:"#7a5a3a",shirt:"#2a3a4a"},title:"The Map That Doesn't Close",cost:0.7,beats:[
+    "Merrin measures the mine for the lord and has done for nineteen years. Her chains and levels are the finest instruments below ground and she does not let you touch them.",
+    "She shows you the fault: the mine is deeper on paper than it is in the rock, by four hundred feet, and has been since before she started. \"Someone surveyed a place that isn't there. Carefully.\"",
+    "\"I have measured Ironjaw eleven times,\" she says. \"Eleven different numbers. The rock is not moving. My chains are not wrong.\"",
+    "She gives you her oldest level, the wooden one. \"When you get to where the numbers stop agreeing, set this down and watch the bubble. Then come back up and tell no one, including me.\""],
+    keeps:[{n:"Merrin's level",d:"Bedside",c:"#7a5a3a"},{n:"A folded survey",d:"Bunkhouse shelf",c:"#c8c0a8"}]},
+  {id:"silver2",layer:4,who:"The Name-Cutter",face:{skin:"#c8a084",hair:"#c8c8c8",shirt:"#4a4a52"},title:"Whoever Is Left",cost:0.8,beats:[
+    "Someone has been carving the names in Silvergrave for longer than any living miner. The letters change hand every few decades. The work never stops.",
+    "You find him: an old man with a chisel and no debt on any page, who came down voluntarily and stayed. \"Someone has to. The lord won't write them. His book only holds the ones who still owe.\"",
+    "He lets you cut one. Your hands shake and the letters come out crooked. \"Good,\" he says. \"They should look like they cost something.\"",
+    "He shows you a blank stretch of wall he's been saving. \"That's mine, when it's time. You'll cut it. And then you'll save yourself a stretch, and find whoever's next.\""],
+    keeps:[{n:"A worn chisel",d:"Bedside",c:"#9aa0a6"},{n:"One crooked letter",d:"Bunkhouse shelf",c:"#d9d9e6"}]},
+  {id:"glimmer2",layer:5,who:"Ivet Who Listens",face:{skin:"#d8a878",hair:"#2a4a48",shirt:"#2f4a48"},title:"The Tone",cost:0.9,beats:[
+    "Ivet went deaf in the Coalworks and came to the Glimmer because it is the one place she can still feel sound. She puts your palm on the crystal so you can feel it too.",
+    "The hum is a single note and it never changes. She has felt it for six years. \"Everything that hums is hollow,\" she signs. \"Ask what's inside.\"",
+    "She has been mapping the note's strength through the seam. It gets louder downward, which is expected, and louder in one horizontal direction, which is not.",
+    "She points the way. It is not toward the throne. It is past it, and slightly under, and she will not go herself. \"I've felt enough of it. You go and feel the rest.\""],
+    keeps:[{n:"A humming shard",d:"Bedside",c:"#6fd3c4"},{n:"Ivet's tuning fork",d:"Bunkhouse shelf",c:"#a8b0b8"}]},
+  {id:"throne2",layer:6,who:"The Last Steward",face:{skin:"#c8a890",hair:"#8a8a8a",shirt:"#3a2a4a"},title:"Whose Chair",cost:1.0,beats:[
+    "There is a man in livery at the Hollow Throne, keeping a room nobody visits. His coat is two hundred years out of fashion and perfectly brushed.",
+    "\"I serve the seat,\" he says, when you ask whose steward he is. \"Not the man. The man is a tenant. Tenants change.\"",
+    "He shows you the household accounts. Ashcombe's name appears as a line item — paid, quarterly, by the estate, for services rendered. The lord is on someone's payroll.",
+    "\"You've been asking who you owe,\" the steward says, and folds the ledger shut. \"The correct question is who is owed. They are not the same, and only one of them is down here.\""],
+    keeps:[{n:"A household page",d:"Bedside",c:"#c8b8d8"},{n:"The steward's key",d:"Bunkhouse shelf",c:"#8a7a4a"}]},
+  {id:"under2",layer:7,who:"Casp the Digger",face:{skin:"#b8846a",hair:"#4a2a1a",shirt:"#5a2a2a"},title:"Warm to the Touch",cost:1.1,beats:[
+    "Casp has been in the Undercroft eight years and has not been up once. He says the walls keep him warm and he means it literally; he sleeps against them.",
+    "He doesn't dig for the lord anymore. Nobody has sent instructions down here in years. He digs because the warmth is stronger in some directions than others and he is following it.",
+    "\"Ashcombe stopped paying me in year three,\" he says, cheerfully. \"Year four, something else started. I don't know what it is. The coin is good and it's never short.\"",
+    "He shows you the coins. They are not the lord's mint. They are not any mint. They are warm, like the walls, and they do not cool down in your hand."],
+    keeps:[{n:"A warm coin",d:"Bedside",c:"#ffb340"},{n:"Casp's blanket",d:"Bunkhouse shelf",c:"#7a3a2a"}]},
+  {id:"warm2",layer:8,who:"The Reckoning",face:{skin:"#e8dcc2",hair:"#e8dcc2",shirt:"#1c0d06"},title:"Settled in Full",cost:1.2,beats:[
+    "There is no person here. There is a place where a person should be, and it is keeping accounts, and the accounts are correct.",
+    "Every name you have read is in it. Brannock. Sable. The nine from the east gallery. Every one marked paid, on the day they stopped, in full, without argument.",
+    "Your own line is there, and it is current, and the balance is not what Ashcombe's book says. It has never been what Ashcombe's book says.",
+    "You understand, finally, what the lord was doing: standing between you and this, taking a cut, for four hundred years. The debt was always going to be settled. He was only ever the delay."],
+    keeps:[{n:"A settled line",d:"Bedside",c:"#ffd27a"},{n:"Ashcombe's last page",d:"Bunkhouse shelf",c:"#2a1a10"}]}
 ];
 const sOpen=st=>st.need?st.need():(S.deepest||0)>=st.layer;
 const sCost=st=>st.layer<0?5e6*st.cost:Math.max(400,(st.layer?LAYERS[st.layer-1].cost:800)*st.cost);  // cash mined per clue = about half the price of reaching that layer
@@ -2102,6 +2194,7 @@ function storyClue(amt){const id=S.story.active;if(!id)return;const st=STORIES.f
 let openStory=null;
 function face(f,size=40){if(!f)return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" style="image-rendering:pixelated;border-radius:8px;background:#1a1512"><rect x="3" y="3" width="10" height="10" fill="#4a4a50"/><text x="8" y="11" font-size="7" text-anchor="middle" fill="#d9d9e6" font-family="Inter">✕</text></svg>`;
   return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" style="image-rendering:pixelated;border-radius:8px;background:#1a1512"><rect x="3" y="11" width="10" height="5" fill="${f.shirt}"/><rect x="4" y="3" width="8" height="8" fill="${f.skin}"/><rect x="4" y="2" width="8" height="3" fill="${f.hair}"/><rect x="6" y="6" width="1" height="2" fill="#1a1614"/><rect x="9" y="6" width="1" height="2" fill="#1a1614"/></svg>`}
+let storyPage=0;const SPP=6;   // tiles per page
 function renderStories(){
   const done=Object.keys(S.story.done).length;$("sCount").textContent=`${done}/${STORIES.length} stories`;$("sKeeps").textContent=`${S.story.keeps.length}/${STORIES.length*2} keepsakes · yours forever`;
   if(openStory){const st=STORIES.find(x=>x.id===openStory);$("sList").style.display="none";$("sDetail").style.display="";const open=sOpen(st),active=S.story.active===st.id,prog=S.story.prog[st.id]||0,clues=open?Math.min(4,Math.floor(prog/sCost(st))):0,pct=Math.min(100,prog/(sCost(st)*4)*100);
@@ -2119,9 +2212,29 @@ function renderStories(){
     const sb=$("sStart");if(sb)sb.onclick=()=>{S.story.active=st.id;toast(`${st.title} is your active story. Keep mining to uncover clues.`);renderStories();save()};
     return}
   $("sList").style.display="";$("sDetail").style.display="none";
-  $("sList").innerHTML=STORIES.map(st=>{const open=sOpen(st),active=S.story.active===st.id,d=S.story.done[st.id],clues=open?Math.min(4,Math.floor((S.story.prog[st.id]||0)/sCost(st))):0;
-    return `<div class="story ${open?'':'locked'} ${active?'active':''}" data-story="${st.id}">${face(st.face,44)}<div><small>${st.layer<0?"Below":LAYERS[st.layer].name} · ${st.who}</small><b>${st.title}</b><span>${!open?"Opens at "+(st.open||LAYERS[st.layer].name):d?"Finished · "+(S.story.keeps.filter(k=>st.keeps.some(x=>x.n===k)).length)+"/2 keepsakes":active?clues+"/4 clues · active":"Ready to begin"}</span></div><i>${!open?"🔒":d?"✓":active?"●":"›"}</i></div>`}).join("");
-  document.querySelectorAll("[data-story]").forEach(el=>el.onclick=()=>{openStory=el.dataset.story;renderStories()});
+  // Open stories first, so a page of tiles is always the ones you can actually read.
+  const ordered=[...STORIES].sort((a,b)=>(sOpen(b)?1:0)-(sOpen(a)?1:0)||a.layer-b.layer);
+  const pages=Math.max(1,Math.ceil(ordered.length/SPP));
+  storyPage=Math.min(Math.max(0,storyPage),pages-1);
+  const slice=ordered.slice(storyPage*SPP,storyPage*SPP+SPP);
+  $("sList").innerHTML=`<div class="sgrid">`+slice.map(st=>{
+    const open=sOpen(st),active=S.story.active===st.id,d=S.story.done[st.id],
+      prog=S.story.prog[st.id]||0,clues=open?Math.min(4,Math.floor(prog/sCost(st))):0,
+      pct=open?Math.min(100,prog/(sCost(st)*4)*100):0;
+    const state=!open?"Opens at "+(st.open||LAYERS[st.layer].name)
+      :d?"Finished · "+S.story.keeps.filter(k=>st.keeps.some(x=>x.n===k)).length+"/2 keepsakes"
+      :active?clues+"/4 clues · active":"Ready to begin";
+    return `<div class="stile ${open?'':'locked'} ${active?'active':''}" ${open?`data-story="${st.id}"`:''}>
+      <div class="sthead">${face(st.face,38)}<div style="min-width:0"><small>${st.layer<0?"Below":LAYERS[st.layer].name}</small><small>${esc(st.who)}</small></div></div>
+      <b>${esc(st.title)}</b>
+      ${open&&!d?`<div class="sp"><i style="width:${pct}%"></i></div>`:""}
+      <span class="st8">${state}</span></div>`}).join("")+`</div>
+    <div class="spager"><button id="sPrev" ${storyPage===0?"disabled":""}>&lsaquo; Back</button>
+    <span>Page ${storyPage+1} of ${pages}</span>
+    <button id="sNext" ${storyPage>=pages-1?"disabled":""}>Next &rsaquo;</button></div>`;
+  document.querySelectorAll("[data-story]").forEach(el=>el.onclick=()=>{openStory=el.dataset.story;renderStories();window.scrollTo({top:0,behavior:"smooth"})});
+  $("sPrev").onclick=()=>{storyPage--;renderStories()};
+  $("sNext").onclick=()=>{storyPage++;renderStories()};
 }
 // story clues also uncover from plain mining
 const _earn=earn;earn=function(n){_earn(n);if(S.story&&S.story.active&&n>0)storyClueRaw(n);digGain(n)};
@@ -2179,19 +2292,34 @@ async function digSync(amount){
 }
 setInterval(()=>{if(!PARTY||digBuf<=0)return;const a=Math.floor(digBuf);digBuf=0;digSync(a)},30000);
 
+// Crew standing: the one thing a crew builds that a single player can't.
+const CREW_RANKS=[[0,"A new"],[1,"A working"],[3,"A steady"],[6,"A named"],[12,"A famous"],[24,"A legendary"]];
+function crewRank(c){const d=(c&&c.digsDone)||0;let r=CREW_RANKS[0];for(const x of CREW_RANKS)if(d>=x[0])r=x;
+  const nx=CREW_RANKS.find(x=>x[0]>d);
+  return {name:r[1],next:nx?nx[0]-d:0,nextName:nx?nx[1]:null}}
+const agoShort=t=>{if(!t)return "not seen yet";const s=Math.floor((Date.now()-t)/1000);
+  if(s<3600)return "here now";const hr=Math.floor(s/3600);if(hr<24)return hr+"h ago";
+  const d=Math.floor(hr/24);return d+"d ago"};
+
 function renderDig(){
   const el=$("lgDig");if(!el)return;
   if(!USER){el.innerHTML='<h4>The crew dig</h4><p class="seamnote">Sign in with Discord and join a crew to take a share of the weekly dig.</p>';return}
-  if(!PARTY){el.innerHTML='<h4>The crew dig</h4><p class="seamnote">You have no crew. Four of you working one seam clears it in a week; one of you does not.</p>';return}
+  if(!PARTY){el.innerHTML='<h4>The crew dig</h4><p class="seamnote">You have no crew. Four of you working one seam clears it in a week; one of you does not. A crew keeps its own standing, and it only goes up while people keep showing up.</p><p class="seamnote"><a href="#" id="lgCrewGo" style="color:var(--lamp)">Find a crew &rsaquo;</a></p>';const g=$("lgCrewGo");if(g)g.onclick=e=>{e.preventDefault();switchTab("gang")};return}
   if(!DIG){el.innerHTML='<h4>The crew dig</h4><p class="seamnote">Fetching this week&rsquo;s job from the overseer&hellip;</p>';digSync(0);return}
   const pct=Math.min(100,DIG.total/DIG.need*100);
   const rows=(PARTY.members||[]).map(m=>{
-    const v=(DIG.by&&DIG.by[m.id])||0;
-    return `<div class="digmem ${v<=0?'idle':''}"><span>${logEsc(m.name)}${m.id===(USER&&USER.id)?" (you)":""}</span><span>${v>0?DIG.verb+" "+fmt(v):"nothing yet"}</span></div>`;
+    const v=(DIG.by&&DIG.by[m.id])||0,seen=(PARTY.seen&&PARTY.seen[m.id])||0;
+    return `<div class="digmem ${v<=0?'idle':''}"><span>${logEsc(m.name)}${m.id===(USER&&USER.id)?" (you)":""} <em style="font-style:normal;color:#7a6e58;font-size:12px">${agoShort(seen)}</em></span><span>${v>0?DIG.verb+" "+fmt(v):"nothing yet"}</span></div>`;
   }).join("");
+  const rank=crewRank(PARTY);
+  const everyone=(PARTY.members||[]).every(m=>((DIG.by||{})[m.id]||0)>0);
   el.innerHTML=`<h4>${logEsc(DIG.name)}</h4>`+
+    `<p class="seamnote">${rank.name} crew · ${PARTY.digsDone||0} dig${(PARTY.digsDone||0)===1?"":"s"} cleared`+
+      `${PARTY.fullWeeks?` · ${PARTY.fullWeeks} with every hand on it`:""}</p>`+
     `<p class="seamnote">The crew owes ${fmt(DIG.need)} this week. ${DIG.total>=DIG.need?"Cleared.":fmt(Math.max(0,DIG.need-DIG.total))+" left."}</p>`+
-    `<div class="lbar"><i style="width:${pct}%"></i></div>${rows}`;
+    `<div class="lbar"><i style="width:${pct}%"></i></div>${rows}`+
+    (everyone?`<p class="seamnote"><b>Every hand on it this week.</b> Clear it and the week counts double toward the crew's standing.</p>`
+      :`<p class="seamnote">A week where all of you put something in counts double toward the crew's standing.</p>`);
 }
 setInterval(async()=>{if(!PARTY||partyXpBuf<=0)return;const amt=partyXpBuf;partyXpBuf=0;
   try{const r=await fetch("/api/crew/xp",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({amount:amt})});
