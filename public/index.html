@@ -729,11 +729,18 @@
     .top{position:fixed;left:0;right:0;top:0;padding-top:env(safe-area-inset-top)}
     .top .wrap{height:52px}
     body{padding-top:calc(52px + env(safe-area-inset-top))}
-    .stat.rate,.stat:last-child{display:none}
-    .stat{padding:0 8px;border:0}.stat b{font-size:16px}.stat small{display:none}
-    .brand{font-size:0;gap:0;margin-right:2px}.brand i{width:30px;height:30px;font-size:15px}
-    .stat.cash{padding:0 6px}
-    .pill{padding:0 12px;font-size:12px;height:34px;border-radius:17px;max-width:none;white-space:nowrap;margin-left:auto}
+    .stat:last-child{display:none}
+    .stat{padding:0 6px;border:0}.stat b{font-size:16px}.stat small{display:none}
+    .brand{font-size:0;gap:0;margin-right:0}.brand i{width:30px;height:30px;font-size:15px}
+    .top .wrap{gap:6px}
+    .stats{margin-right:auto;align-items:baseline}
+    .stat.cash{padding:0 4px 0 8px}
+    .stat.cash b{font-size:17px}
+    /* per second is worth the space on mobile; the label is dropped so the unit goes on the number */
+    .stat.rate{display:block;padding:0}
+    .stat.rate b{font-size:11.5px;font-weight:500}
+    .stat.rate b::after{content:"/sec";color:var(--dim);font-weight:400}
+    .pill{padding:0 11px;font-size:12px;height:34px;border-radius:17px;max-width:none;white-space:nowrap;margin-left:0}
     .helpbtn{display:none}
     #account{gap:6px}
     #account .who{padding:3px;border:0;background:none}
@@ -1868,7 +1875,11 @@ function render(){
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
   document.querySelectorAll(".eq button,button.buy[data-pick],button.buy[data-crew]").forEach(b=>b.classList.toggle("can",!b.disabled));
   $("rankName").textContent="· "+RANKSN[Math.min(7,S.depth)]+(S.oil?` · ${S.oil} oil`:"");
-  {const rp=$("rationPill");if(autoOn()){rp.classList.add("wait");rp.textContent="⛏ Swinging · "+eta2(S.autoUntil-Date.now())}else if(autoReady()){rp.classList.remove("wait");rp.textContent="⛏ Hire for "+fmt(AUTO_COST)}else{rp.classList.add("wait");rp.textContent="⛏ Hire ("+fmt(AUTO_COST)+")"}}
+  {const rp=$("rationPill"),sm=innerWidth<=560;
+   // "Hire ($10.0M)" eats half a phone's top bar, so drop to the bare essentials there
+   if(autoOn()){rp.classList.add("wait");rp.textContent=(sm?"⛏ ":"⛏ Swinging · ")+eta2(S.autoUntil-Date.now())}
+   else if(autoReady()){rp.classList.remove("wait");rp.textContent=sm?"⛏ Hire":"⛏ Hire for "+fmt(AUTO_COST)}
+   else{rp.classList.add("wait");rp.textContent=sm?"⛏ "+fmt(AUTO_COST):"⛏ Hire ("+fmt(AUTO_COST)+")"}}
   {const np=PICKS[S.pick+1];let n=0;if(np&&S.cash>=np.cost)n++;CREW.forEach((c,i)=>{if(i>2&&!(c.rank&&(S.debts||0)<c.rank)&&S.cash>=crewCost(i))n++});const nb=BUNKS[(S.bunk||0)+1];if(nb&&S.cash>=nb.cost)n++;
    const badge=$("upBadge");badge.textContent=n;badge.classList.toggle("on",n>0&&!$("tab-upgrades").classList.contains("on"));
    if(n>0&&!$("tab-upgrades").classList.contains("on")&&Date.now()-lastNudge>180000&&S.lifetime>500){lastNudge=Date.now();toast(`You can afford ${n} more upgrade${n>1?"s":""} — don't sit on your cash. Check Upgrades.`)}}
@@ -2184,25 +2195,31 @@ function mine(e,auto){
   render();
 }
 function buyPick(i){if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cost;S.pick=i;drawScene();render();save();toast(`You picked up the ${PICKS[i].name}.`)}}
-// The scene had a fixed height derived from 100vh, so when the column needed more room
-// than the viewport had, it overflowed and (with overflow hidden) clipped the footer.
-// Drive it the other way: measure everything that isn't the scene, give the scene the
-// remainder, and derive its width from that height via the 340:190 ratio.
+// The scene used to get whatever was left after the title, story card and feed, so on a
+// short window (a 1366x768 laptop) it collapsed to a sliver while the feed kept its full
+// height. Priority is inverted now: the scene claims its share first, the feed absorbs
+// the remainder down to a floor, and only then does anything clip.
 function fitPage(){
   const pit=document.querySelector("#tab-mine .pit"),f=document.querySelector("footer");
   if(!pit||!f)return;
   const stage=pit.querySelector(".stage"),hero=pit.querySelector(".hero"),
-        strip=hero&&hero.querySelector(".strip"),rails=pit.querySelectorAll(".rail");
-  if(innerWidth<1100||!stage||!hero){pit.style.height="";if(hero)hero.style.width="";return}
-  if(rails.length>1)rails[1].style.height="";      // inline heights would skew the measurement
-  pit.style.height="auto";hero.style.width="";
+        log=pit.querySelector(".log"),strip=hero&&hero.querySelector(".strip"),
+        rails=pit.querySelectorAll(".rail");
+  if(innerWidth<1100||!stage||!hero){pit.style.height="";hero&&(hero.style.width="");log&&(log.style.maxHeight="");return}
+  if(rails.length>1)rails[1].style.height="";
+  pit.style.height="auto";hero.style.width="";if(log)log.style.maxHeight="";
   const top=pit.getBoundingClientRect().top;
   const avail=Math.max(420,innerHeight-top-f.offsetHeight-18);
-  const others=stage.scrollHeight-hero.offsetHeight;          // titlebar + story + feed + gaps
-  const rockH=Math.max(150,avail-others-(strip?strip.offsetHeight:0));
-  hero.style.width=Math.round(rockH*340/190)+"px";            // max-width:100% keeps it in column
+  const stripH=strip?strip.offsetHeight:0;
+  // everything that isn't the scene or the feed: title, story card, gaps
+  const others=stage.scrollHeight-hero.offsetHeight-(log?log.offsetHeight:0);
+  const room=avail-others-stripH;
+  const maxRock=stage.clientWidth*190/340;              // can't be wider than the column
+  const rock=Math.max(160,Math.min(maxRock,room-96));   // 96px floor reserved for the feed
+  if(log)log.style.maxHeight=Math.max(96,Math.min(225,room-rock))+"px";
+  hero.style.width=Math.round(rock*340/190)+"px";
   pit.style.height=Math.min(stage.scrollHeight,avail)+"px";
-  railH=-1;                                                   // rails must be re-matched after this
+  railH=-1;
 }
 let eqSig="",railH=-1,eqPg=0;
 const EQ_PER=6;
