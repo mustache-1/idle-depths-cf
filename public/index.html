@@ -274,7 +274,16 @@
   .links .coffee{margin:6px 4px 2px}
   .pit .titlebar,.pit .strip,.pit .quest{flex:none}
   .eqcard{display:flex;flex-direction:column;min-height:0}
-  .eqlist{min-height:0;overflow-y:auto;scrollbar-width:thin}
+  .eqlist{min-height:0;overflow:hidden}
+  .eqpage{display:flex;align-items:center;justify-content:center;gap:12px;padding:9px 0 1px;margin-top:auto;border-top:1px solid var(--line)}
+  .eqpage span{font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums;min-width:82px;text-align:center}
+  .eqpage button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line2);background:transparent;
+    color:var(--ink);font-size:15px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+  .eqpage button:not(:disabled):hover{border-color:var(--lamp);color:var(--lamp)}
+  .eqpage button:disabled{color:var(--mute);border-color:var(--line);cursor:not-allowed}
+  #logList{scrollbar-width:none}
+  #logList::-webkit-scrollbar{display:none}
+  .pit .side::-webkit-scrollbar{display:none}
 
   @media(min-width:1100px){
     .top .wrap{height:54px}
@@ -294,7 +303,7 @@
     .pit{display:grid;grid-template-columns:236px minmax(0,1fr) 286px;gap:13px;align-items:stretch;
       height:calc(100vh - 166px);min-height:0}
     .pit .stage{height:100%;min-height:0}
-    .pit .side{align-self:start;max-height:100%;min-height:0;overflow-y:auto;scrollbar-width:thin}
+    .pit .side{align-self:start;max-height:100%;min-height:0;overflow-y:auto;scrollbar-width:none}
     .pit .side .card{padding:11px 13px}
     .pit .hero{flex:none;width:min(100%,calc((100vh - 500px) * 1.79));margin:0 auto;display:flex;flex-direction:column}
     .pit .rock{flex:none;aspect-ratio:340/190;min-height:0}
@@ -874,6 +883,11 @@
         <div class="eqlist">
           <div class="eq"><div><b id="eqPickName">Wooden pick</b><small id="eqPickInfo"></small></div><button id="eqPickBtn">$60</button></div>
           <div id="eqCrew"></div>
+        </div>
+        <div class="eqpage" id="eqPage">
+          <button id="eqPrev" aria-label="Previous equipment page">&lsaquo;</button>
+          <span id="eqNum">Page 1 of 2</span>
+          <button id="eqNext" aria-label="Next equipment page">&rsaquo;</button>
         </div>
       </div>
       <div class="card" id="throneCard" style="display:none;border-color:rgba(196,140,255,.4)">
@@ -2147,25 +2161,22 @@ function mine(e,auto){
   render();
 }
 function buyPick(i){if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cost;S.pick=i;drawScene();render();save();toast(`You picked up the ${PICKS[i].name}.`)}}
-let eqSig="",railH=-1;
-function fitRails(){
-  const rails=document.querySelectorAll("#tab-mine .rail");
-  if(rails.length<2)return;
-  if(innerWidth<1100){if(railH!==-1){rails[1].style.height="";railH=-1}return}
-  const h=Math.round(rails[0].getBoundingClientRect().height);
-  if(h&&h!==railH){railH=h;rails[1].style.height=h+"px"}
-}
-addEventListener("resize",()=>{railH=-1;fitRails()});
+let eqSig="",railH=-1,eqPg=0;
+const EQ_PER=6;
 function eqCrewRender(){
   const vis=[];
   for(let i=0;i<CREW.length;i++)vis.push(i);
-  const host=$("eqCrew"),sig=vis.join(",")+"|"+(S.debts||0);
+  const pages=Math.max(1,Math.ceil(vis.length/EQ_PER));
+  if(eqPg>=pages)eqPg=pages-1;
+  if(eqPg<0)eqPg=0;
+  const slice=vis.slice(eqPg*EQ_PER,eqPg*EQ_PER+EQ_PER);
+  const host=$("eqCrew"),sig=slice.join(",")+"|"+(S.debts||0)+"|"+eqPg;
   if(sig!==eqSig){
     eqSig=sig;
-    host.innerHTML=vis.map(i=>`<div class="eq" id="eqR${i}"><div><b><span id="eqC${i}n"></span><em id="eqC${i}l"></em></b><small id="eqC${i}i"></small></div><button id="eqC${i}b" data-crew="${i}"></button></div>`).join("");
+    host.innerHTML=slice.map(i=>`<div class="eq" id="eqR${i}"><div><b><span id="eqC${i}n"></span><em id="eqC${i}l"></em></b><small id="eqC${i}i"></small></div><button id="eqC${i}b" data-crew="${i}"></button></div>`).join("");
     host.querySelectorAll("[data-crew]").forEach(b=>b.onclick=()=>buyCrew(+b.dataset.crew));
   }
-  vis.forEach(i=>{
+  slice.forEach(i=>{
     const c=CREW[i],cost=crewCost(i),n=S.crew[i]||0,nm=nextMile(n),lk=c.rank&&(S.debts||0)<c.rank;
     $("eqR"+i).classList.toggle("lk",!!lk);
     $("eqC"+i+"n").textContent=c.name;
@@ -2175,7 +2186,21 @@ function eqCrewRender(){
     if(lk){b.textContent="Debt ×"+c.rank;b.disabled=true}
     else{b.textContent=fmt(cost);b.disabled=S.cash<cost}
   });
+  $("eqPage").style.display=pages>1?"":"none";
+  $("eqNum").textContent=`Page ${eqPg+1} of ${pages}`;
+  $("eqPrev").disabled=eqPg===0;
+  $("eqNext").disabled=eqPg>=pages-1;
 }
+$("eqPrev").onclick=()=>{eqPg--;eqCrewRender()};
+$("eqNext").onclick=()=>{eqPg++;eqCrewRender()};
+function fitRails(){
+  const rails=document.querySelectorAll("#tab-mine .rail");
+  if(rails.length<2)return;
+  if(innerWidth<1100){if(railH!==-1){rails[1].style.height="";railH=-1}return}
+  const h=Math.round(rails[0].getBoundingClientRect().height);
+  if(h&&h!==railH){railH=h;rails[1].style.height=h+"px"}
+}
+addEventListener("resize",()=>{railH=-1;fitRails()});
 function buyCrew(i){const c=crewCost(i);if(S.cash>=c){S.cash-=c;S.crew[i]++;if(MILES.includes(S.crew[i])){toast(`${CREW[i].name}s hit ${S.crew[i]}: they now work at ×${crewMult(S.crew[i])} power.`);confetti(30)}drawScene();render();save()}}
 function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}if(S.cash>=L.cost&&LAYERS[S.depth+1]){S.cash-=L.cost;S.depth++;const rec=S.depth>(S.deepest||0);S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);if(rec)feedPost("depth",S.depth+1);confetti(40);drawScene();render();save()}}
 async function rebirth(){
