@@ -92,7 +92,26 @@ async function handle(request, env) {
     };
 
     if (p === "/api/feed" && request.method === "GET") {
-      return json({ feed: await readFeed() });
+      const feed = await readFeed();
+      // A brand-new feed reads as broken. Top it up with where people actually are,
+      // derived from the board records that already exist — no invented entries.
+      if (feed.length < 8) {
+        let seed = await env.SAVES.get("cache:feedseed", { type: "json" });
+        if (!Array.isArray(seed)) {
+          const rows = [];
+          const page = await env.SAVES.list({ prefix: "board:", limit: 1000 });
+          for (const k of page.keys) {
+            const v = await env.SAVES.get(k.name, { type: "json" });
+            if (v && v.name) rows.push({ id: v.id, name: String(v.name).slice(0, 24), n: v.depth || 1, s: v.score || 0 });
+          }
+          seed = rows.sort((a, b) => b.n - a.n || b.s - a.s).slice(0, 10).map(r => ({ kind: "at", id: r.id, name: r.name, n: r.n }));
+          // Cached hard: this costs a list + a read per player, so it must not run per request.
+          await env.SAVES.put("cache:feedseed", JSON.stringify(seed), { expirationTtl: 600 });
+        }
+        const seen = new Set(feed.map(e => e.id));
+        for (const e of seed) { if (feed.length >= 12) break; if (!seen.has(e.id)) { feed.push(e); seen.add(e.id); } }
+      }
+      return json({ feed });
     }
 
     // ---- everything below needs a session ----
