@@ -568,6 +568,11 @@
   .ck{width:34px;height:34px;border-radius:8px;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--dim);flex:none}
   .ct.done .ck{background:rgba(43,239,139,.15);border-color:var(--green);color:var(--green)}
   .ct.hard .ck{color:var(--lamp)}
+  .ct.demand .ck{color:var(--red);border-color:rgba(255,82,82,.5);background:rgba(255,82,82,.08)}
+  .ct.demand.done .ck{color:var(--green);border-color:var(--green);background:rgba(43,239,139,.15)}
+  .cthead b em.dem{color:var(--red);background:rgba(255,82,82,.15)}
+  .ctfoot .due{color:var(--red)}
+  .ct.done .ctfoot .due{color:var(--dim)}
   .cthead b{display:block;font-weight:500}
   .cthead b em{font-style:normal;font-size:11px;color:var(--lamp);background:rgba(255,176,31,.15);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
   .cthead small{color:var(--dim);font-size:13px}
@@ -712,6 +717,24 @@
   .dlg .note{margin-bottom:10px}
   .btns{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
   .seg3{grid-template-columns:1fr 1fr 1fr}
+  .seg4{grid-template-columns:repeat(4,1fr)}
+  .shsurf{margin:16px 0 8px;font-size:13px;color:var(--dim);font-weight:500;letter-spacing:.04em}
+  .kp{display:flex;gap:12px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:8px}
+  .kp.up{border-color:rgba(255,176,31,.45);background:linear-gradient(90deg,rgba(255,176,31,.09),transparent)}
+  .kp i{flex:none;width:26px;height:26px;border-radius:7px;box-shadow:0 0 14px rgba(255,255,255,.08)}
+  .kp div{flex:1;min-width:0}
+  .kp b{display:block;font-size:14px;font-weight:500}
+  .kp small{display:block;font-size:12px;color:var(--dim)}
+  .kp small em{font-style:normal;color:var(--lamp2)}
+  .kp button{flex:none;height:32px;min-width:76px;font-size:12.5px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--ink)}
+  .kp button:not(:disabled):hover{border-color:var(--lamp);color:var(--lamp)}
+  .kp button:disabled{color:var(--mute);border-color:var(--line);cursor:not-allowed}
+  .kp.up button{border-color:var(--lamp);color:var(--lamp2)}
+  .setrow{display:flex;gap:10px;align-items:baseline;padding:8px 12px;border:1px solid rgba(43,239,139,.35);background:rgba(43,239,139,.07);border-radius:9px;margin-bottom:8px;font-size:13px}
+  .setrow b{color:var(--green);font-weight:500}
+  .setrow span{margin-left:auto;color:var(--dim);font-size:12px}
+  .fxsum{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 2px}
+  .fxsum span{font-size:12px;padding:3px 9px;border-radius:999px;background:rgba(255,176,31,.13);color:var(--lamp2)}
   .seg button span{color:var(--lamp);font-size:12px}
   .swatches button{position:relative}
   .swatches button.lock{opacity:.35;cursor:not-allowed}
@@ -835,6 +858,40 @@
   .puff{animation:puff 2.6s ease-out infinite}
   @keyframes puff{0%{transform:translate(0,0) scale(.6);opacity:.45}100%{transform:translate(-4px,-16px) scale(1.5);opacity:0}}
   @keyframes bore{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
+  /* ---- wall-prop idles: the rank-tier crew earn some motion of their own ---- */
+  .voice{animation:sing 1.8s ease-in-out infinite}
+  @keyframes sing{0%,100%{transform:scaleY(.6)}50%{transform:scaleY(1.25)}}
+  .hum{animation:humfly 2.6s ease-out infinite;opacity:0}
+  @keyframes humfly{0%{transform:translateY(0);opacity:0}25%{opacity:.9}100%{transform:translateY(-13px);opacity:0}}
+  .jaw{animation:chew 1.4s ease-in-out infinite}
+  @keyframes chew{0%,100%{transform:rotate(0)}50%{transform:rotate(-11deg)}}
+  .ember{animation:burn 1.1s ease-in-out infinite}
+  @keyframes burn{0%,100%{opacity:.68}50%{opacity:1}}
+  .smoke{animation:smokerise 3s ease-out infinite}
+  @keyframes smokerise{0%{transform:translate(0,0) scale(.5);opacity:.5}100%{transform:translate(-4px,-15px) scale(1.6);opacity:0}}
+  .core{animation:corebeat 1.9s ease-in-out infinite}
+  @keyframes corebeat{0%,100%{transform:scale(.8)}50%{transform:scale(1.15)}}
+  .sweep{animation:scan 3.4s ease-in-out infinite}
+  @keyframes scan{0%,100%{transform:rotate(-14deg)}50%{transform:rotate(16deg)}}
+  @media(prefers-reduced-motion:reduce){.voice,.jaw,.ember,.smoke,.core,.sweep{animation:none}.hum{animation:none;opacity:.7}}
+  /* ---- the rock face: reacts to the swing, shatters when it goes ---- */
+  .rockJolt{animation:rockjolt .16s ease-out}
+  @keyframes rockjolt{0%{transform:translate(0,0) scale(1)}35%{transform:translate(2.5px,1.5px) scale(.962)}100%{transform:translate(0,0) scale(1)}}
+  .rockRise{animation:rockrise .5s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes rockrise{0%{transform:translateY(-26px) scale(.55);opacity:0}55%{opacity:1}72%{transform:translateY(2px) scale(1.07)}100%{transform:translateY(0) scale(1)}}
+  .oreTwinkle{animation:twinkle 2.8s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{opacity:.55}50%{opacity:1}}
+  .shard{position:absolute;pointer-events:none;border-radius:1px;animation:shardfly .7s cubic-bezier(.15,.6,.5,1) forwards}
+  @keyframes shardfly{0%{transform:translate(0,0) rotate(0);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot));opacity:0}}
+  .dust{position:absolute;pointer-events:none;border-radius:50%;animation:dustpuff .85s ease-out forwards}
+  @keyframes dustpuff{0%{transform:translate(0,0) scale(.4);opacity:.5}100%{transform:translate(var(--dx),var(--dy)) scale(2.6);opacity:0}}
+  @media(prefers-reduced-motion:reduce){.rockJolt,.rockRise,.oreTwinkle,.shard,.dust{animation:none}.shard,.dust{display:none}}
+  /* ---- the shift log: what the crew got up to while you were gone ---- */
+  .shiftlog{list-style:none;margin:0 0 14px;padding:12px 14px;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:10px}
+  .shiftlog li{display:flex;gap:10px;align-items:baseline;font-size:13.5px;line-height:1.55;color:var(--ink);padding:5px 0}
+  .shiftlog li+li{border-top:1px solid rgba(255,255,255,.05)}
+  .shiftlog li i{font-style:normal;flex:none;width:15px;text-align:center;opacity:.8}
+  .shiftlog li.q{font-family:var(--font-voice,inherit);color:var(--lamp2)}
 </style>
 </head>
 <body>
@@ -991,12 +1048,13 @@
     <div class="card" style="padding:14px 18px;margin-bottom:12px"><b>Choose a story</b><p class="note">One story at a time. Ordinary mining and collected contracts uncover its clues, wherever you dig, even while you're away. Nothing expires.</p></div>
     <div id="sList"></div>
     <div class="card sdetail" id="sDetail" style="display:none"></div>
-    <p class="note" style="margin-top:12px">Keepsakes are cosmetic: they show in the Bunkhouse and beside your name on the leaderboard.</p>
+    <p class="note" style="margin-top:12px">Keepsakes go on your shelf in the Bunkhouse. Displayed ones work for you, and both halves of a story work harder together. Your bunk decides how many you can put out.</p>
   </div>
   <div class="sub" id="q-contracts">
     <div class="card" style="padding:18px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:16px">Contracts</b><small class="note" id="cRefresh"></small></div>
       <div id="cList"></div>
+      <p class="note" id="cDock" style="margin:10px 0 0;color:var(--red);font-size:13px"></p>
       <p class="note" style="margin:12px 0">Mining and worker income count while you're away. Completed rewards wait for you.</p>
       <button class="big" id="cAll">Collect all rewards →</button>
       <p class="note" style="margin-top:10px">New contracts every 6 hours at 00:00, 06:00, 12:00 and 18:00 UTC. Paying the debt keeps your contracts.</p>
@@ -1142,7 +1200,7 @@
   <div class="dlg" role="dialog" aria-label="The Bunkhouse">
     <header><h3>The Bunkhouse</h3><button class="x" id="mClose" aria-label="Close">×</button></header>
     <div class="promo"><svg viewBox="0 0 34 34" id="mPreview"></svg><div><b id="mWho">Your miner</b><p id="mSub">Your corner of the mine. Your look, your record, your trophies.</p></div></div>
-    <div class="seg seg3"><button class="on" data-sub="look">Miner</button><button data-sub="record">Record</button><button data-sub="trophies">Trophies <span id="trophyCount"></span></button></div>
+    <div class="seg seg4"><button class="on" data-sub="look">Miner</button><button data-sub="shelf">Shelf <span id="shelfCount"></span></button><button data-sub="record">Record</button><button data-sub="trophies">Trophies <span id="trophyCount"></span></button></div>
     <div class="sub on" id="sub-look">
       <div class="fld"><label>Shirt</label><div class="swatches" id="shirts"></div></div>
       <div class="fld"><label>Helmet</label><div class="swatches" id="hats"></div></div>
@@ -1150,6 +1208,12 @@
       <div class="fld"><label>Display name <span id="nameCount">0/24</span></label><input id="mName" maxlength="24" placeholder="Choose your miner's name"><div class="help">Shown on the leaderboard. 2–24 letters, numbers, spaces, periods, underscores or hyphens. Leave blank to use your Discord name.</div><div class="err" id="nameErr"></div></div>
       <div class="fld"><label>Earned title</label><select id="mTitle"></select></div>
       <div class="btns"><button class="btn" id="mCancel">Cancel</button><button class="btn p" id="mSave">Save changes ✓</button></div>
+    </div>
+    <div class="sub" id="sub-shelf">
+      <p class="note" id="shelfLede"></p>
+      <div id="shelfFx"></div>
+      <h4 class="shsurf">Bunkhouse shelf</h4><div id="shelfShelf"></div>
+      <h4 class="shsurf">Bedside</h4><div id="shelfBed"></div>
     </div>
     <div class="sub" id="sub-record"><div class="rec" id="record"></div><h4 style="margin:14px 0 6px">Keepsakes</h4><div class="note" id="keepList"></div></div>
     <div class="sub" id="sub-trophies"><div class="trophies" id="trophies"></div></div>
@@ -1236,6 +1300,7 @@
   <p class="note" style="font-size:14px;color:var(--ink);margin-bottom:14px">Good to have you back. Here's what happened while you were away.</p>
   <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:14px"><div><small class="note">Time away</small><b id="awTime" style="display:block;font-size:16px"></b></div><div style="text-align:right"><small class="note">Time credited</small><b id="awCred" style="display:block;font-size:16px"></b></div></div>
   <div class="rec" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px"><div style="text-align:center"><small>⚒ Worker income</small><b id="awCash"></b></div><div style="text-align:center"><small>✎ Contracts</small><b id="awCon"></b></div><div style="text-align:center"><small>📖 Story</small><b id="awStory"></b></div></div>
+  <ul class="shiftlog" id="awLog"></ul>
   <p class="note" id="awNote" style="font-size:13px">Your earnings are already in your mine.</p>
   <div class="btns"><button class="btn p" id="awayBack" style="width:100%;height:46px">Back to the mine →</button></div>
 </div></div>
@@ -1266,6 +1331,7 @@ const PICKS=[
   {name:"Gravebound pick",power:52000,cost:4.5e12,rank:2},
   {name:"The Deep Crown",power:150000,cost:4e13,rank:3},
   {name:"Lightbreaker",power:440000,cost:3.5e14,rank:4},
+  {name:"The First Tool",power:1300000,cost:3e15,rank:5},
 ];
 const CREW=[
   {name:"Digger",desc:"A miner with a shovel and no complaints.",base:30,rate:0.028},
@@ -1282,6 +1348,7 @@ const CREW=[
   {name:"Tunnel choir",desc:"Three shifts that never pass each other in the dark.",base:1.3e12,rate:4.4e6,rank:3},
   {name:"Ashcombe's surveyors",desc:"They map seams the lord already sold twice.",base:1.1e13,rate:2.8e7,rank:4},
   {name:"The Deep Engine",desc:"Older than the mine. It was here first.",base:9e13,rate:1.8e8,rank:5},
+  {name:"The Paymaster",desc:"It settles up at the end of every shift. Nobody hired it.",base:7.5e14,rate:1.1e9,rank:6},
 ];
 const LAYERS=[
   {name:"The Cutting",desc:"Loose earth and broken carts. Every debtor Lord Ashcombe throws down here starts in the Cutting.",hp:10,cost:800,gem:.006},
@@ -1291,7 +1358,8 @@ const LAYERS=[
   {name:"Silvergrave",desc:"Old workings, thin bright seams, and names scratched into the walls by miners who never came up.",hp:2500,cost:1e7,gem:.03},
   {name:"The Glimmer",desc:"Crystal that hums in the dark. Nobody who reaches it wants to leave.",hp:10000,cost:8e7,gem:.05},
   {name:"The Hollow Throne",desc:"Where the lord's debt ends and something older begins.",hp:50000,cost:5e8,gem:.08,rank:2},
-  {name:"The Undercroft",desc:"Beneath the throne. The walls are warm. Whatever Ashcombe was paying, it lives here.",hp:250000,cost:Infinity,gem:.12},
+  {name:"The Undercroft",desc:"Beneath the throne. The walls are warm. Whatever Ashcombe was paying, it lives here.",hp:250000,cost:6e9,gem:.12},
+  {name:"The Warm Dark",desc:"No lord. No ledger. No debt. Something down here settles up in full and on time, and has done since before the mine was cut.",hp:1400000,cost:Infinity,gem:.2,needsThrone:true},
 ];
 const GEMS=[
   {name:"Amethyst",mult:10,w:60},{name:"Emerald",mult:30,w:25},{name:"Sapphire",mult:80,w:10},{name:"Star ruby",mult:250,w:5},
@@ -1304,8 +1372,46 @@ const TERMS=[
   {id:"quiet",name:"The quiet shift",desc:"No Wyrm, no warden's wheel. Just the work. Worker income +50%.",fx:["worker +50%","no Wyrm","table closed"]},
   {id:"blood",name:"Blood money",desc:"Ashcombe wants gems, not rubble. Gems pay ×10, but your pick hits half as hard.",fx:["gems ×10","pick ×0.5"]},
 ];
+// ---- the shelf ----
+// Keepsakes stop being ornaments. Display one and it does something small; display both
+// from the same story and the pair does something worth the slot. Slots come from the bunk.
+const KEEPFX={
+  "Brannock's pipe":{k:"swing",v:.04},        "A mason's chisel":{k:"swing",v:.04},
+  "A torn ledger page":{k:"quest",v:.06},     "Sable's ink pot":{k:"quest",v:.06},
+  "First-shift coal":{k:"crew",v:.05},        "Hollis's glove":{k:"crew",v:.05},
+  "The Warden's key":{k:"off",v:1},           "A guard's whistle":{k:"off",v:1},
+  "A silver nameplate":{k:"gem",v:.06},       "Grave dust":{k:"gem",v:.06},
+  "Quill's compass":{k:"desc",v:.04},         "The survey, folded":{k:"desc",v:.04},
+  "Ashcombe's button":{k:"oil",v:.08},        "A chip from the throne":{k:"oil",v:.08},
+  "The Lender's coin":{k:"crew",v:.05},       "A blank promissory note":{k:"quest",v:.06},
+  "A Wyrm scale":{k:"boss",v:.12},            "A Wyrm tooth":{k:"boss",v:.12},
+};
+const SETFX={
+  cutting:{name:"Swing from the hips",fx:[["swing",.10]]},
+  rust:{name:"What the ledger says",fx:[["quest",.15]]},
+  coal:{name:"The missing shift",fx:[["crew",.12]]},
+  iron:{name:"Why the guards stop here",fx:[["off",3]]},
+  silver:{name:"Names in the stone",fx:[["gem",.15]]},
+  glimmer:{name:"The folded survey",fx:[["desc",.10]]},
+  throne:{name:"What the throne was worth",fx:[["oil",.20]]},
+  lender:{name:"Someone lent him the money",fx:[["swing",.08],["crew",.08]]},
+  wyrm:{name:"What lives below",fx:[["boss",.35]]},
+};
+const FXNAME={swing:"swing power",crew:"worker income",quest:"contract and trophy rewards",off:"offline hours",gem:"gem chance",desc:"descend cost",oil:"oil on payment",boss:"Wyrm damage"};
+const fxText=(k,v)=>k==="off"?`+${v}h offline cap`:k==="desc"?`−${Math.round(v*100)}% descend cost`:`+${Math.round(v*100)}% ${FXNAME[k]}`;
+const SHELF_SLOTS=[2,3,4,6];
+const shelfCap=()=>SHELF_SLOTS[Math.min(SHELF_SLOTS.length-1,S.bunk||0)];
+let FX={};
+function recalcFx(){
+  const on=(S.shelf||[]).filter(n=>KEEPFX[n]),f={};
+  for(const n of on){const e=KEEPFX[n];f[e.k]=(f[e.k]||0)+e.v}
+  for(const st of STORIES){const s=SETFX[st.id];if(!s)continue;
+    if(st.keeps.every(k=>on.includes(k.n)))for(const [k,v] of s.fx)f[k]=(f[k]||0)+v}
+  FX=f;
+}
+const activeSets=()=>{const on=S.shelf||[];return STORIES.filter(st=>SETFX[st.id]&&st.keeps.every(k=>on.includes(k.n)))};
 const termNow=()=>TERMS.find(t=>t.id===(S.terms||"none"))||TERMS[0];
-const descendCost=()=>Math.floor((LAYERS[S.depth].cost||0)*(1-perkLv("shortcut")*.10));
+const descendCost=()=>Math.floor((LAYERS[S.depth].cost||0)*(1-perkLv("shortcut")*.10-(FX.desc||0)));
 const debtCost=()=>REBIRTH_BASE*Math.pow(1.5,S.debts||0)*(termNow().id==="double"?3:1);
 const RANK_UNLOCKS=[
   {rank:1,title:"Ashcombe's terms",desc:"Choose the terms of your next run before you go back down."},
@@ -1313,10 +1419,11 @@ const RANK_UNLOCKS=[
   {rank:2,title:"The Undercroft",desc:"A layer beneath the Hollow Throne opens to those who've paid twice."},
   {rank:3,title:"The Lender",desc:"A new story. Someone lent Ashcombe the money for this mine."},
   {rank:5,title:"Gold-trim shirt",desc:"A cosmetic only five-time debtors can wear."},
+  {rank:6,title:"The Paymaster",desc:"Whatever is under the throne offers to put someone on your payroll."},
 ];
 const BET_MAX_PCT=.10,BET_MIN=10,BET_COOLDOWN=4000;
 
-const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,oilFound:0,last:Date.now()});
+const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,oilFound:0,dockUntil:0,shelf:[],last:Date.now()});
 let S={...fresh(),oil:0,lifetime:0,profile:{name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a"}};
 const SHIRTS=[{c:"#f1e6d2"},{c:"#3aa0c8"},{c:"#c0553c"},{c:"#4f9e7a"},{c:"#b07acb"},{c:"#d1a34a"},{c:"#e0567a"},{c:"#2b2b2b",need:"gems25",label:"Gem hunter"},{c:"#ffd27a",need:"debt",label:"Paid the debt"},{c:"#5ec9b6",need:"glimmer",label:"Reached The Glimmer"},{c:"#e6b422",need:"debt5",label:"Paid the debt 5 times"}];
 const HATS=[{c:"#f3b24a"},{c:"#e8e8e8"},{c:"#c0553c"},{c:"#3aa0c8"},{c:"#4f9e7a"},{c:"#1a1614",need:"wyrm",label:"Slew the Wyrm"},{c:"#c48cff",need:"throne",label:"Reached the Hollow Throne"},{c:"#8fdc6a",need:"days7",label:"Played 7 days"}];
@@ -1352,12 +1459,13 @@ const ACH=[
   {id:"debt",name:"Debt-free",desc:"Pay Lord Ashcombe in full.",ok:()=>(S.debts||0)>=1,r:1},
   {id:"debt5",name:"Repeat customer",desc:"Pay the debt five times.",ok:()=>(S.debts||0)>=5,r:3},
   {id:"undercroft",name:"Warm walls",desc:"Reach the Undercroft.",ok:()=>(S.deepest||0)>=7,r:3},
+  {id:"warmdark",name:"Paid in full",desc:"Reach The Warm Dark.",ok:()=>(S.deepest||0)>=8,r:5},
   {id:"days7",name:"Regular",desc:"Play on 7 different days.",ok:()=>(S.days||0)>=7,r:.8},
 ];
-const RANKSN=["Debtor","Pit hand","Marked man","Gang boss","Deep hand","Warden's bane","Free miner","Collateral"];
+const RANKSN=["Debtor","Pit hand","Marked man","Gang boss","Deep hand","Warden's bane","Free miner","Collateral","Paid in full"];
 const has=id=>!!(S.ach&&S.ach[id]);
-function checkAch(){if(!S.ach)S.ach={};for(const a of ACH){if(!S.ach[a.id]&&a.ok()){S.ach[a.id]=Date.now();const v=nice(Math.max(50,(clickPower()*120+cps()*300)*a.r*(1+perkLv("favor")*.25)));earn(v);toast(`Trophy: ${a.name} — +${fmt(v)}`);confetti(24)}}}
-const TITLES=[{id:"",name:"No title",ok:()=>true},{id:"coalhand",name:"Coalhand",ok:()=>S.depth>=2},{id:"ironjaw",name:"Ironjaw",ok:()=>S.depth>=3},{id:"silverback",name:"Gravewalker",ok:()=>S.depth>=4},{id:"abyssal",name:"Throne-touched",ok:()=>S.depth>=6},{id:"gemhunter",name:"Gem hunter",ok:()=>S.gems>=25},{id:"sealed",name:"Debt-free",ok:()=>S.oil>=1},{id:"lamplighter",name:"Lamplighter",ok:()=>S.oil>=10},{id:"wyrmslayer",name:"Wyrmslayer",ok:()=>(S.bosses||0)>=1},{id:"cardsharp",name:"High roller",ok:()=>(S.bigSpins||0)>=1},{id:"regular",name:"Regular",ok:()=>(S.days||0)>=7},{id:"champion",name:"Weekly champion",ok:()=>has("weekly")},{id:"beneath",name:"Throne-keeper",ok:()=>!!S.throne}];
+function checkAch(){if(!S.ach)S.ach={};for(const a of ACH){if(!S.ach[a.id]&&a.ok()){S.ach[a.id]=Date.now();const v=nice(Math.max(50,(clickPower()*120+cps()*300)*a.r*(1+perkLv("favor")*.25+(FX.quest||0))));earn(v);toast(`Trophy: ${a.name} — +${fmt(v)}`);confetti(24)}}}
+const TITLES=[{id:"",name:"No title",ok:()=>true},{id:"coalhand",name:"Coalhand",ok:()=>S.depth>=2},{id:"ironjaw",name:"Ironjaw",ok:()=>S.depth>=3},{id:"silverback",name:"Gravewalker",ok:()=>S.depth>=4},{id:"abyssal",name:"Throne-touched",ok:()=>S.depth>=6},{id:"gemhunter",name:"Gem hunter",ok:()=>S.gems>=25},{id:"sealed",name:"Debt-free",ok:()=>S.oil>=1},{id:"lamplighter",name:"Lamplighter",ok:()=>S.oil>=10},{id:"wyrmslayer",name:"Wyrmslayer",ok:()=>(S.bosses||0)>=1},{id:"cardsharp",name:"High roller",ok:()=>(S.bigSpins||0)>=1},{id:"regular",name:"Regular",ok:()=>(S.days||0)>=7},{id:"champion",name:"Weekly champion",ok:()=>has("weekly")},{id:"beneath",name:"Throne-keeper",ok:()=>!!S.throne},{id:"warmdark",name:"Paid in full",ok:()=>(S.deepest||0)>=8}];
 const displayName=()=>S.profile.name||(USER?USER.name:"Miner");
 
 const $=id=>document.getElementById(id);
@@ -1369,10 +1477,13 @@ const fmt=n=>{
   return "$"+n.toFixed(n<10?2:n<100?1:0)+u[i];
 };
 const oilMult=()=>1+S.oil*0.1;
+const DEMAND_CHANCE=.45,DOCK_MS=30*60*1000,DOCK_MULT=.8;
+const docked=()=>Date.now()<(S.dockUntil||0);
+const dockMult=()=>docked()?DOCK_MULT:1;
 const termEarn=()=>termNow().id==="double"?2:1;
-const depthMult=()=>(1+S.depth*0.3)*oilMult()*throneMult()*termEarn();
+const depthMult=()=>(1+S.depth*0.3)*oilMult()*throneMult()*termEarn()*dockMult();
 const BUNKS=[{name:"Straw pallet",cap:8,cost:0},{name:"Wooden bunk",cap:12,cost:200000},{name:"Private cell",cap:24,cost:5e6},{name:"Foreman's quarters",cap:48,cost:1e8}];
-const bunkCap=()=>(BUNKS[S.bunk||0].cap+perkLv("shift")*4)*3600;
+const bunkCap=()=>(BUNKS[S.bunk||0].cap+perkLv("shift")*4+(FX.off||0))*3600;
 const PERKS=[
   {id:"steel",name:"Sharper steel",desc:"Every swing hits harder.",max:5,cost:l=>1+l,fx:l=>`+${l*10}% swing power`},
   {id:"labor",name:"Cheap labor",desc:"Workers and machines cost less to hire.",max:5,cost:l=>1+l,fx:l=>`−${l*6}% hire cost`},
@@ -1407,10 +1518,10 @@ const buffOn=()=>Date.now()<(S.buffUntil||0);
 const buffMult=()=>buffOn()?2:1;
 const partyPickMult=()=>1+((PARTY&&PARTY.pick)||0)*.1;
 const partyShiftMult=()=>1+((PARTY&&PARTY.shift)||0)*.25;
-const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1)*(termNow().id==="blood"?.5:1)*partyPickMult();
-const cps=()=>CREW.reduce((a,c,i)=>a+c.rate*(S.crew[i]||0)*crewMult(S.crew[i]||0),0)*depthMult()*buffMult()*(1+perkLv("veins")*.08)*(termNow().id==="quiet"?1.5:1);
+const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1+(FX.swing||0))*(termNow().id==="blood"?.5:1)*partyPickMult();
+const cps=()=>CREW.reduce((a,c,i)=>a+c.rate*(S.crew[i]||0)*crewMult(S.crew[i]||0),0)*depthMult()*buffMult()*(1+perkLv("veins")*.08+(FX.crew||0))*(termNow().id==="quiet"?1.5:1);
 const crewCost=i=>Math.floor(CREW[i].base*Math.pow(1.2,S.crew[i])*(1-perkLv("labor")*.06));
-const oilOnSeal=()=>Math.floor(Math.sqrt(S.cash/debtCost()*10)*(1+perkLv("press")*.35))+(termNow().id==="double"?2:0);
+const oilOnSeal=()=>Math.floor(Math.sqrt(S.cash/debtCost()*10)*(1+perkLv("press")*.35+(FX.oil||0)))+(termNow().id==="double"?2:0);
 let earn=function(n){S.cash+=n;S.lifetime+=n};
 
 let USER=null;
@@ -1430,6 +1541,51 @@ async function save(){
     toast(`Cloud save failed (${saveErr}). Your progress is still saved in this browser.`)}
   renderAccount();
 }
+// ---- the shift log ----
+// Lines are drawn from whatever is actually running in your mine. `need` gates a line;
+// `q` marks it as something somebody said. Written so no line contradicts another.
+const SHIFTLOG=[
+  {need:h=>h>=8,i:"🕯",t:()=>"The lamps were refilled twice. Nobody could say who did it the second time."},
+  {need:h=>h<2,i:"⛏",t:()=>"Short shift. The face is barely cooler than you left it."},
+  {need:()=>S.crew[0]>=1,i:"⛏",t:()=>`The diggers worked the seam flat and started on the next one without being told.`},
+  {need:()=>S.crew[0]>=25,i:"⛏",t:()=>"Somebody organised the diggers into rotations. Output went up. No one is admitting it was their idea."},
+  {need:()=>S.crew[1]>=1,i:"🛒",t:()=>`${S.crew[1]===1?"The ore cart":"The ore carts"} ran the line all shift. One wheel is starting to sing.`},
+  {need:()=>S.crew[2]>=1,i:"🛠",t:()=>"A drill rig threw a bit and kept going on the spare. The spare is now the only one."},
+  {need:()=>S.crew[3]>=1,i:"💥",t:()=>"Two charges went off in the night. Only one was scheduled."},
+  {need:()=>S.crew[4]>=1,i:"⚙",t:()=>"The deep bore went further than the chart allows. The chart has been amended."},
+  {need:()=>S.crew[5]>=1,i:"◆",t:()=>"The harvesters cut clean all shift. The lamplight off the seam kept the night crew awake."},
+  {need:()=>S.crew[6]>=1,i:"🐍",t:()=>"The wyrmling was fed on schedule. It ate the schedule too."},
+  {need:()=>S.crew[7]>=1,i:"♪",t:()=>"The echo choir sang the west wall down. They stopped when you came back.",q:true},
+  {need:()=>S.crew[8]>=1,i:"⚙",t:()=>"The gravewurm rig chewed a fresh shaft and left the tailings stacked in a neat square. Nobody stacked them."},
+  {need:()=>S.crew[9]>=1,i:"🔥",t:()=>"The furnace ran all night. Nothing went back up unsold."},
+  {need:()=>S.crew[10]>=1,i:"●",t:()=>"The Lender's engine did not stop. It has never stopped. You checked."},
+  {need:()=>S.crew[11]>=1,i:"🕯",t:()=>"Three shifts came and went in the tunnel and none of them passed each other."},
+  {need:()=>S.crew[12]>=1,i:"✎",t:()=>"The surveyors mapped a seam that is already sold. Twice, according to their notes."},
+  {need:()=>S.crew[13]>=1,i:"◉",t:()=>"The Deep Engine turned over once while you were gone. That was enough."},
+  {need:()=>S.crew[14]>=1,i:"◈",t:()=>"The paymaster counted out the shift's wages before the shift ended. The figure was already correct.",q:true},
+  {need:(h,g)=>g>0&&S.gems>=5,i:"◆",t:()=>"Something bright came up in the rubble. It is on your bunk."},
+  {need:h=>h>=4&&(S.depth||0)>=4,i:"✦",t:()=>"Someone scratched a new name into the Silvergrave wall. The hand is not one you know.",q:true},
+  {need:h=>h>=6&&(S.depth||0)>=6,i:"✦",t:()=>"The humming under the throne changed pitch about four hours in, then went back."},
+  {need:h=>h>=3&&(S.depth||0)>=8,i:"✦",t:()=>"Your wages were waiting at the face when the crew arrived. Counted out. Correct.",q:true},
+  {need:()=>autoOn(),i:"⛏",t:()=>"The hired hand kept the pick moving. It hasn't asked about a break."},
+  {need:h=>h>=10,i:"🕯",t:()=>"Long enough away that the night crew started calling it your mine, not the lord's."},
+];
+function shiftLog(hours,gain){
+  const pool=SHIFTLOG.filter(l=>{try{return l.need(hours,gain)}catch(e){return false}});
+  const pick=[];
+  while(pick.length<Math.min(4,pool.length)){
+    const l=pool[Math.floor(Math.random()*pool.length)];
+    if(!pick.includes(l))pick.push(l);
+  }
+  return pick;
+}
+function renderShiftLog(hours,gain){
+  const el=$("awLog");if(!el)return;
+  const lines=shiftLog(hours,gain);
+  el.innerHTML=lines.length
+    ?lines.map(l=>`<li class="${l.q?"q":""}"><i>${l.i}</i><span>${esc(l.t())}</span></li>`).join("")
+    :`<li><i>⛏</i><span>The mine was quiet. Hire someone and it won't be.</span></li>`;
+}
 async function load(){
   try{const u=await fetch("/api/me").then(r=>r.json());USER=u&&u.id?u:null}catch(e){USER=null}
   let d=null;
@@ -1439,6 +1595,8 @@ async function load(){
   if(d){
     S={...S,...d};S.profile={name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a",...(d.profile||{})};
     if(S.crew.length<CREW.length)S.crew=[...S.crew,...CREW.map(()=>0)].slice(0,CREW.length);
+    S.story=S.story||{active:null,prog:{},done:{},pick:{},keeps:[]};S.story.keeps=S.story.keeps||[];
+    S.shelf=(S.shelf||[]).filter(n=>S.story.keeps.includes(n)).slice(0,shelfCap());recalcFx();   // before offline pay is worked out
     const away=Math.min((Date.now()-S.last)/1000,bunkCap());let got=away*cps()*OFFLINE_EFF;
     const autoSecs=Math.max(0,Math.min(Date.now(),S.autoUntil||0)-S.last)/1000,autoSw=Math.floor(autoSecs*AUTO_RATE()),autoV=autoSw*clickPower()*1.5;
     if(autoSw>0){earn(autoV);S.swings+=autoSw;got+=autoV}
@@ -1449,10 +1607,12 @@ async function load(){
       $("awCash").textContent=fmt(got)+(autoSw?` (${autoSw.toLocaleString()} auto-swings)`:"");$("awCon").textContent=conAfter>conBefore?`${conAfter-conBefore} ready`:conAfter?`${conAfter} ready`:"—";
       $("awStory").textContent=S.story&&S.story.active?"clues added":"—";
       $("awNote").textContent=real>away+60?`Your earnings are already in your mine. Your workers stopped after ${bunkCap()/3600}h — upgrade your bunk to stretch that.`:"Your earnings are already in your mine.";
+      renderShiftLog(real/3600,got);
       $("away").classList.add("on")}
   }
   const today=new Date().toISOString().slice(0,10);if(S.lastDay!==today){S.lastDay=today;S.days=(S.days||0)+1}
-  S.ach=S.ach||{};S.story=S.story||{active:null,prog:{},done:{},pick:{},keeps:[]};S.story.keeps=S.story.keeps||[];S.profile.shirt=S.profile.shirt||"#f1e6d2";S.profile.hat=S.profile.hat||"#f3b24a";
+  S.ach=S.ach||{};S.story=S.story||{active:null,prog:{},done:{},pick:{},keeps:[]};S.story.keeps=S.story.keeps||[];
+  S.shelf=(S.shelf||[]).filter(n=>S.story.keeps.includes(n)).slice(0,shelfCap());recalcFx();S.profile.shirt=S.profile.shirt||"#f1e6d2";S.profile.hat=S.profile.hat||"#f3b24a";
   renderAccount();buildUI();drawScene();render();loadBoard();loadParty();
   if(USER)save();
   if(!S.seen&&!USER&&S.lifetime===0){$("splashScene").innerHTML=$("scene").innerHTML;$("splash").style.display="";$("splashGo").onclick=()=>{$("splash").style.display="none";tourStart()}}
@@ -1483,14 +1643,47 @@ function renderRecord(){
   const rows=[["Total mined",fmt(S.lifetime)],["Deepest layer",LAYERS[S.deepest||0].name],["Swings",S.swings.toLocaleString()],["Best streak",(S.bestStreak||0)+" swings"],["Gems found",S.gems],["Rock faces cleared",S.clears||0],["Contracts completed",S.questsDone||0],["Stories finished",Object.keys((S.story&&S.story.done)||{}).length],["Keepsakes",(S.story&&S.story.keeps||[]).length],["Wyrms slain",S.bosses||0],["Debts paid",S.debts||0],["Lantern oil",S.oil],["Wheel spins won",S.wheelWins||0],["Big spins (4×+)",S.bigSpins||0],["Slot pulls",S.slotPulls||0],["Slot wins",S.slotWins||0],["Blackjack hands",S.bjHands||0],["Blackjack wins",S.bjWins||0],["Days played",S.days||0],["Shifts taken",S.shiftsUsed||0],["Crew on payroll",CREW.reduce((a,c,i)=>a+S.crew[i],0)]];
   $("record").innerHTML=rows.map(([k,v])=>`<div><small>${k}</small><b>${v}</b></div>`).join("");
   const ks=S.story.keeps||[];$("keepList").innerHTML=ks.length?ks.map(k=>{const st=STORIES.find(x=>x.keeps.some(y=>y.n===k)),kk=st.keeps.find(y=>y.n===k);return `<span style="display:inline-flex;align-items:center;gap:6px;margin:0 10px 6px 0"><i style="width:12px;height:12px;border-radius:3px;background:${kk.c};display:inline-block"></i>${k}</span>`}).join(""):"None yet. Finish a story in the Quests tab.";
+  $("shelfCount").textContent=(S.shelf||[]).length?`${(S.shelf||[]).length}/${shelfCap()}`:"";
 }
 function renderTrophies(){
   const n=ACH.filter(a=>has(a.id)).length;$("trophyCount").textContent=`${n}/${ACH.length}`;
   $("trophies").innerHTML=ACH.map(a=>`<div class="tr ${has(a.id)?'on':''}"><div class="ic">${has(a.id)?'★':'☆'}</div><div><b>${a.name}</b><small>${a.desc}</small></div></div>`).join("");
 }
+function renderShelf(){
+  const owned=(S.story&&S.story.keeps)||[],on=S.shelf||[],cap=shelfCap();
+  $("shelfCount").textContent=owned.length?`${on.length}/${cap}`:"";
+  $("shelfLede").textContent=owned.length
+    ?`Displayed keepsakes work for you. ${on.length} of ${cap} slots used — a better bunk holds more.`
+    :"Nothing to put out yet. Finish a story in the Quests tab and the keepsake is yours to display.";
+  const sets=activeSets();
+  const sum=Object.entries(FX).filter(([,v])=>v).map(([k,v])=>`<span>${fxText(k,k==="off"?v:Math.round(v*1000)/1000)}</span>`).join("");
+  $("shelfFx").innerHTML=(sets.length?sets.map(st=>{const s=SETFX[st.id];
+      return `<div class="setrow"><b>${s.name}</b><span>${s.fx.map(([k,v])=>fxText(k,v)).join(" · ")}</span></div>`}).join(""):"")
+    +(sum?`<div class="fxsum">${sum}</div>`:"");
+  const draw=(where,el)=>{
+    const list=[];
+    for(const st of STORIES)for(const k of st.keeps)
+      if(k.d===where&&owned.includes(k.n))list.push({k,st});
+    if(!list.length){$(el).innerHTML=`<p class="note" style="font-size:13px">Nothing here yet.</p>`;return}
+    $(el).innerHTML=list.map(({k,st})=>{const up=on.includes(k.n),e=KEEPFX[k.n],pair=st.keeps.find(x=>x.n!==k.n);
+      const setHint=owned.includes(pair.n)&&!on.includes(pair.n)?` <em>· pairs with ${esc(pair.n)}</em>`:"";
+      return `<div class="kp ${up?"up":""}"><i style="background:${k.c}"></i>
+        <div><b>${esc(k.n)}</b><small>${e?fxText(e.k,e.v):"Ornament"}${setHint}</small></div>
+        <button data-keep="${esc(k.n)}" ${!up&&on.length>=cap?"disabled":""}>${up?"Put away":on.length>=cap?"No slot":"Display"}</button></div>`}).join("");
+  };
+  draw("Bunkhouse shelf","shelfShelf");draw("Bedside","shelfBed");
+  document.querySelectorAll("[data-keep]").forEach(b=>b.onclick=()=>{
+    const n=b.dataset.keep;S.shelf=S.shelf||[];
+    const i=S.shelf.indexOf(n);
+    if(i>=0)S.shelf.splice(i,1);
+    else{if(S.shelf.length>=shelfCap())return;S.shelf.push(n);
+      const st=STORIES.find(x=>x.keeps.some(k=>k.n===n));
+      if(st&&SETFX[st.id]&&st.keeps.every(k=>S.shelf.includes(k.n))){toast(`${SETFX[st.id].name} — the pair is working.`);confetti(20)}}
+    recalcFx();renderShelf();render();save()});
+}
 function openModal(){
-  draft={...S.profile};renderSwatches();previewSvg();renderRecord();renderTrophies();
-  $("mWho").textContent=displayName();const tt=TITLES.find(t=>t.id===S.profile.title);$("mSub").textContent=(tt&&tt.id?tt.name+" · ":"")+RANKSN[Math.min(7,S.depth)]+(S.oil?` · ${S.oil} lantern oil`:"");
+  draft={...S.profile};renderSwatches();previewSvg();renderRecord();renderTrophies();renderShelf();
+  $("mWho").textContent=displayName();const tt=TITLES.find(t=>t.id===S.profile.title);$("mSub").textContent=(tt&&tt.id?tt.name+" · ":"")+RANKSN[Math.min(RANKSN.length-1,S.depth)]+(S.oil?` · ${S.oil} lantern oil`:"");
   $("mName").value=draft.name;$("nameCount").textContent=draft.name.length+"/24";$("nameErr").style.display="none";
   $("mTitle").innerHTML=TITLES.map(t=>`<option value="${t.id}" ${t.ok()?"":"disabled"} ${draft.title===t.id?"selected":""}>${t.name}${t.ok()?"":" (locked)"}</option>`).join("");
   $("mAcct").textContent=USER?`Signed in with Discord as ${USER.name}. Your saved mine stays with your account.`:"You're not signed in. Progress only lives in this browser until you sign in with Discord.";
@@ -1605,9 +1798,16 @@ const CTYPES=[
 const cWindow=()=>Math.floor(Date.now()/(6*3600*1000));
 const cNext=()=>(cWindow()+1)*6*3600*1000;
 function newContracts(){const pool=CTYPES.filter(c=>!c.needs||c.needs());const list=[];const used=new Set();
+  // A demand left unmet when the window rolls costs you: the warden docks the pay.
+  if(S.contracts&&Array.isArray(S.contracts.list)){const old=S.contracts.list.find(c=>c.demand);
+    if(old&&!old.claimed){S.dockUntil=Date.now()+DOCK_MS;S.demandFailed=true}}
   while(list.length<3&&used.size<pool.length){const T=pool[Math.floor(Math.random()*pool.length)];if(used.has(T.t))continue;used.add(T.t);
-    const n=T.n(),hard=list.length===2;const econ=clickPower()*90+cps()*240;const reward=nice(Math.max(80,econ*(hard?4:1.3)*(1+perkLv("favor")*.25)));
+    const n=T.n(),hard=list.length===2;const econ=clickPower()*90+cps()*240;const reward=nice(Math.max(80,econ*(hard?4:1.3)*(1+perkLv("favor")*.25+(FX.quest||0))));
     list.push({t:T.t,n,base:T.base(),reward,hard,claimed:false})}
+  const dpool=pool.filter(c=>!used.has(c.t));
+  if(dpool.length&&Math.random()<DEMAND_CHANCE){const T=dpool[Math.floor(Math.random()*dpool.length)];
+    const econ=clickPower()*90+cps()*240;
+    list.push({t:T.t,n:Math.ceil(T.n()*1.6),base:T.base(),reward:nice(Math.max(200,econ*7*(1+perkLv("favor")*.25+(FX.quest||0)))),demand:true,claimed:false})}
   S.contracts={key:cWindow(),list}}
 const cType=c=>CTYPES.find(x=>x.t===c.t);
 const cProg=c=>Math.min(c.n,Math.max(0,cType(c).prog(c)));
@@ -1616,10 +1816,11 @@ function claimContract(i){const c=S.contracts.list[i];if(!c||c.claimed||cProg(c)
 function claimAll(){let got=0;S.contracts.list.forEach((c,i)=>{if(!c.claimed&&cProg(c)>=c.n){got+=c.reward;claimContract(i)}});if(got)toast(`Rewards collected: ${fmt(got)}.`);render();save()}
 function renderContracts(){ensureContracts();const L=S.contracts.list,ready=L.filter(c=>!c.claimed&&cProg(c)>=c.n).length;
   $("cRefresh").textContent="Refresh in "+eta2(cNext()-Date.now());
-  $("cList").innerHTML=L.map((c,i)=>{const T=cType(c),p=cProg(c),full=p>=c.n;return `<div class="ct ${c.claimed?'done':''} ${c.hard?'hard':''}">
-    <div class="cthead"><span class="ck">${c.claimed?'✓':c.hard?'⚡':'○'}</span><div><b>${T.name}${c.hard?' <em>hard</em>':''}</b><small>${T.text(c.n)}</small></div></div>
+  $("cList").innerHTML=L.map((c,i)=>{const T=cType(c),p=cProg(c),full=p>=c.n;return `<div class="ct ${c.claimed?'done':''} ${c.hard?'hard':''} ${c.demand?'demand':''}">
+    <div class="cthead"><span class="ck">${c.claimed?'✓':c.demand?'!':c.hard?'⚡':'○'}</span><div><b>${c.demand?"The warden's demand":T.name}${c.demand?' <em class="dem">due</em>':c.hard?' <em>hard</em>':''}</b><small>${T.text(c.n)}${c.demand&&!c.claimed?" — or he docks your pay":""}</small></div></div>
     <div class="prog"><i style="width:${p/c.n*100}%"></i></div>
-    <div class="ctfoot"><span>${c.claimed?'Rewards collected':'+'+fmt(c.reward)}</span><span>${c.claimed?'✓':T.show?T.show(p,c.n):p+' / '+c.n}</span></div></div>`}).join("");
+    <div class="ctfoot"><span>${c.claimed?'Rewards collected':'+'+fmt(c.reward)}</span><span class="${c.demand&&!c.claimed?'due':''}">${c.claimed?'✓':(c.demand?eta2(cNext()-Date.now())+' left · ':'')+(T.show?T.show(p,c.n):p+' / '+c.n)}</span></div></div>`}).join("");
+  $("cDock").textContent=docked()?`The warden docked your pay — everything earns ×${DOCK_MULT} for another ${eta2(S.dockUntil-Date.now())}.`:"";
   $("cAll").disabled=!ready;$("cAll").textContent=ready?`Collect ${ready} reward${ready>1?"s":""} →`:"Nothing to collect yet";}
 $("cAll").onclick=claimAll;
 
@@ -1659,7 +1860,9 @@ function contractWatch(){
   ensureContracts();
   const L=S.contracts.list,ready=L.filter(c=>!c.claimed&&cProg(c)>=c.n);
   if(S.contracts.key!==cSeenWindow){        // fresh six-hour window
-    if(cSeenWindow!==null)showCPop("new","New contracts posted","Three fresh jobs from the overseer.","Take a look");
+    if(S.demandFailed){S.demandFailed=false;toast(`You missed the warden's demand. Your pay is docked ${Math.round((1-DOCK_MULT)*100)}% for ${DOCK_MS/60000} minutes.`)}
+    if(cSeenWindow!==null){const dm=L.some(c=>c.demand);
+      showCPop("new","New contracts posted",dm?"Three jobs from the overseer — and one demand from the warden.":"Three fresh jobs from the overseer.","Take a look")}
     cSeenWindow=S.contracts.key;cSeenReady=ready.length;return}
   if(ready.length>cSeenReady&&!$("tab-quests").classList.contains("on")){
     const sum=ready.reduce((a,c)=>a+c.reward,0),last=ready[ready.length-1];
@@ -1733,7 +1936,7 @@ const sCost=st=>st.layer<0?5e6*st.cost:Math.max(400,(st.layer?LAYERS[st.layer-1]
 function storyClue(amt){const id=S.story.active;if(!id)return;const st=STORIES.find(x=>x.id===id);if(!st||S.story.done[id]&&S.story.keeps.includes(st.keeps[1].n))return;
   S.story.prog[id]=(S.story.prog[id]||0)+amt;const clues=Math.min(4,Math.floor(S.story.prog[id]/sCost(st)));
   if(clues>=4){S.story.active=null;S.story.prog[id]=0;const kp=S.story.keeps.includes(st.keeps[0].n)?st.keeps[1]:st.keeps[S.story.pick[id]||0];if(!S.story.keeps.includes(kp.n))S.story.keeps.push(kp.n);
-    if(!S.story.done[id]){S.story.done[id]=true;const v=nice((clickPower()*200+cps()*600));earn(v);toast(`Story finished: ${st.title}. You keep ${kp.n} and ${fmt(v)}.`);confetti(30)}else toast(`You uncover ${kp.n}.`);
+    if(!S.story.done[id]){S.story.done[id]=true;const v=nice((clickPower()*200+cps()*600));earn(v);toast(`Story finished: ${st.title}. You keep ${kp.n} and ${fmt(v)}.`);confetti(30)}else toast(`You uncover ${kp.n}. Put it out in the Bunkhouse to make it work for you.`);
     openStory=null;render();save()}}
 let openStory=null;
 function face(f,size=40){if(!f)return `<svg viewBox="0 0 16 16" width="${size}" height="${size}" style="image-rendering:pixelated;border-radius:8px;background:#1a1512"><rect x="3" y="3" width="10" height="10" fill="#4a4a50"/><text x="8" y="11" font-size="7" text-anchor="middle" fill="#d9d9e6" font-family="Inter">✕</text></svg>`;
@@ -1908,6 +2111,7 @@ function render(){
   $("depthNow").textContent="Depth "+(S.depth+1);
   if(!next){$("depthNext").textContent="Bottom";dBtn.disabled=true;dBtn.textContent="Bottom reached";$("progFill").style.width="100%";$("progText").textContent="No map goes further";$("progPct").textContent="";$("etaText").textContent="Keep digging for the board"}
   else if(L.rank&&(S.debts||0)<L.rank){$("depthNext").textContent=next.name;dBtn.disabled=true;dBtn.textContent=`Pay the debt ×${L.rank} to descend`;$("progFill").style.width="0%";$("progText").textContent="Sealed";$("progPct").textContent="";$("etaText").textContent=`Opens at debt rank ${L.rank}`}
+  else if(next.needsThrone&&!S.throne){$("depthNext").textContent=next.name;dBtn.disabled=true;dBtn.textContent="Excavate the throne to descend";$("progFill").style.width="0%";$("progText").textContent="Solid floor";$("progPct").textContent="";$("etaText").textContent="Whatever is under the throne opens the way"}
   else{const dc=descendCost();$("depthNext").textContent=next.name;dBtn.disabled=S.cash<dc;dBtn.textContent=S.cash<dc?"Need "+fmt(dc-S.cash)+" more":"Descend ↑";
     const pct=Math.min(100,S.cash/dc*100);$("progFill").style.width=pct+"%";$("progText").textContent=fmt(S.cash)+" / "+fmt(dc);$("progPct").textContent=Math.floor(pct)+"% of the way";$("etaText").textContent="Est. descend: "+eta(dc)}
   const np=PICKS[S.pick+1];
@@ -1932,7 +2136,7 @@ function render(){
   renderThrone();renderPerks();renderDebt();renderParty();
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
   document.querySelectorAll(".eq button,button.buy[data-pick],button.buy[data-crew]").forEach(b=>b.classList.toggle("can",!b.disabled));
-  $("rankName").textContent="· "+RANKSN[Math.min(7,S.depth)]+(S.oil?` · ${S.oil} oil`:"");
+  $("rankName").textContent="· "+RANKSN[Math.min(RANKSN.length-1,S.depth)]+(S.oil?` · ${S.oil} oil`:"");
   {const rp=$("rationPill"),sm=innerWidth<=560;
    // "Hire ($10.0M)" eats half a phone's top bar, so drop to the bare essentials there
    if(autoOn()){rp.classList.add("wait");rp.textContent=(sm?"⛏ ":"⛏ Swinging · ")+eta2(S.autoUntil-Date.now())}
@@ -2284,18 +2488,22 @@ function mine(e,auto){
   const me=document.querySelector(".me .arm");if(me){me.style.transform="rotate(-55deg)";setTimeout(()=>me.style.transform="",90)}
   const now=Date.now();streak=now-lastSwing<1500?streak+1:1;lastSwing=now;if(!auto&&streak>(S.bestStreak||0))S.bestStreak=streak;
   if(!auto&&autoOn()){combo=now-lastManual<1200?combo+1:1;lastManual=now}
-  if(boss){const dmg=clickPower()*streakMult()*(auto?1:comboMult())*(1+perkLv("slayer")*.4);boss.hp-=dmg;S.swings++;partyGainXp();if(!auto)pop("-"+fmt(dmg).slice(1),e,"hit");const w=document.querySelector(".wyrm");if(w){w.classList.remove("hit");void w.offsetWidth;w.classList.add("hit")}bossRender();if(boss.hp<=0)bossEnd(true);render();return}
-  const p=clickPower()*streakMult()*(auto?1:comboMult());earn(p);S.swings++;if(!auto)lastTap=Date.now();partyGainXp();S.rockHp-=p;if(!auto){pop("+"+fmt(p),e,comboMult()>1.4?"hot":"");chips()}
+  if(boss){const dmg=clickPower()*streakMult()*(auto?1:comboMult())*(1+perkLv("slayer")*.4+(FX.boss||0));boss.hp-=dmg;S.swings++;partyGainXp();if(!auto)pop("-"+fmt(dmg).slice(1),e,"hit");const w=document.querySelector(".wyrm");if(w){w.classList.remove("hit");void w.offsetWidth;w.classList.add("hit")}bossRender();if(boss.hp<=0)bossEnd(true);render();return}
+  const p=clickPower()*streakMult()*(auto?1:comboMult());earn(p);S.swings++;if(!auto)lastTap=Date.now();partyGainXp();S.rockHp-=p;rockJolt();if(!auto){pop("+"+fmt(p),e,comboMult()>1.4?"hot":"");chips()}
   const st=$("streak");st.classList.toggle("on",streak>=5||comboMult()>1);
   {const c=comboMult();
     $("streakN").innerHTML=c>1?`×${(streakMult()*c).toFixed(2)}<em>overtime ×${c.toFixed(1)}</em>`:"×"+streakMult().toFixed(2)+(streakMult()>=1.5?" MAX":"")+(autoOn()?" auto":"");
     st.classList.toggle("hot",c>1.4);}
   $("streakBar").style.width=(autoOn()?(combo%5*20):(streak%10*10))+"%";
-  if(Math.random()<LAYERS[S.depth].gem*(1+perkLv("lucky")*.25)){
+  if(Math.random()<LAYERS[S.depth].gem*(1+perkLv("lucky")*.25+(FX.gem||0))){
     let r=Math.random()*100,g=GEMS[0];for(const x of GEMS){if(r<x.w){g=x;break}r-=x.w}
     const v=(p*g.mult+cps()*g.mult/10)*(termNow().id==="blood"?10:1);earn(v);S.gems++;pop(`${g.name}! +${fmt(v)}`,e,"gem");
   }
-  if(S.rockHp<=0){const bonus=clickPower()*3+cps()*2;earn(bonus);S.rockHp=LAYERS[S.depth].hp;S.clears=(S.clears||0)+1;flash();const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake");toast(`Rock cleared! Bonus ${fmt(bonus)}.`)}
+  if(S.rockHp<=0){const bonus=clickPower()*3+cps()*2;earn(bonus);shatter();S.rockHp=LAYERS[S.depth].hp;S.clears=(S.clears||0)+1;flash();
+    const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake");
+    drawFace(true);const rf=$("scene").querySelector("#rockface");
+    if(rf){rf.classList.remove("rockJolt","rockRise");void rf.getBoundingClientRect();rf.classList.add("rockRise")}
+    toast(`Rock cleared! Bonus ${fmt(bonus)}.`)}
   render();
 }
 function buyPick(i){const pr=PICKS[i];if(pr.rank&&(S.debts||0)<pr.rank){toast(`Only miners who have paid the debt ${pr.rank} time${pr.rank>1?"s":""} may lift the ${pr.name}.`);return}
@@ -2383,7 +2591,9 @@ function fitRails(){
 addEventListener("resize",()=>{fitPage();fitRails()});
 addEventListener("load",()=>{fitPage();fitRails()});
 function buyCrew(i){const c=crewCost(i);if(S.cash>=c){S.cash-=c;S.crew[i]++;if(MILES.includes(S.crew[i])){toast(`${CREW[i].name}s hit ${S.crew[i]}: they now work at ×${crewMult(S.crew[i])} power.`);confetti(30)}drawScene();render();save()}}
-function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}const dc=descendCost();if(S.cash>=dc&&LAYERS[S.depth+1]){S.cash-=dc;S.depth++;const rec=S.depth>(S.deepest||0);S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);if(rec)feedPost("depth",S.depth+1);confetti(40);drawScene();render();save()}}
+function descend(){const L=LAYERS[S.depth],nx=LAYERS[S.depth+1];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}
+  if(nx&&nx.needsThrone&&!S.throne){toast("The floor here is solid. Excavate the Hollow Throne first — whatever is under it opens the way.");return}
+  const dc=descendCost();if(S.cash>=dc&&LAYERS[S.depth+1]){S.cash-=dc;S.depth++;const rec=S.depth>(S.deepest||0);S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);if(rec)feedPost("depth",S.depth+1);confetti(40);drawScene();render();save()}}
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
@@ -2407,6 +2617,7 @@ async function loadBoard(){
   }catch(e){boardErr="couldn't reach the server"}
   if(!boardData||!Array.isArray(boardData.all))boardData={all:[],week:[],champs:[],weekEnds:0};
   renderBoard();
+  if(S.depth===4)drawScene();   // the wall carvings are real names — refresh them
 }
 function renderBoard(){
   const rows=$("boardRows"),list=boardMode==="week"?boardData.week:boardData.all;
@@ -2470,7 +2681,7 @@ $("drop").onclick=e=>{e.stopPropagation();dropClaim()};
 $("eqPickBtn").onclick=()=>buyPick(S.pick+1);
 if($("sealBtn"))$("sealBtn").onclick=rebirth;
 $("dPay").onclick=rebirth;
-$("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. Your workers now work ${nb.cap}h while you're away.`);render();save()};
+$("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. Your workers now work ${nb.cap}h while you're away, and you have ${shelfCap()} keepsake slots.`);render();save()};
 document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>switchTab(b.dataset.goto));
 document.body.classList.toggle("minetab",$("tab-mine").classList.contains("on"));
 document.documentElement.classList.toggle("minetab",$("tab-mine").classList.contains("on"));
@@ -2488,7 +2699,8 @@ const PICK_LOOK=[null,{h:"#8a5a2b",e:"#b0834f",s:"#5a3818"},{h:"#8f8f98",e:"#b6b
   {h:"#1f3a2b",e:"#5ee08f",s:"#0f2018",g:"#4ce08a"},
   {h:"#8e9bb0",e:"#e8f3ff",s:"#4d5a6e",g:"#bfe9ff"},
   {h:"#5c1f52",e:"#ff9ae8",s:"#2c0d27",g:"#ff6fd8"},
-  {h:"#f4efdf",e:"#ffffff",s:"#c9bb90",g:"#fff3b0"}];
+  {h:"#f4efdf",e:"#ffffff",s:"#c9bb90",g:"#fff3b0"},
+  {h:"#8a5a1e",e:"#ffd98a",s:"#40230a",g:"#ffb340"}];
 function shade(hex,amt){const n=parseInt(hex.slice(1),16);let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
   r=Math.max(0,Math.min(255,r+amt));g=Math.max(0,Math.min(255,g+amt));b=Math.max(0,Math.min(255,b+amt));
   return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
@@ -2608,29 +2820,32 @@ function blast(x,y){return `<g transform="translate(${x},${y})">
 function echoChoir(x,y){return `<g transform="translate(${x},${y})">
  <g class="pkGlow" fill="#7ff0d8"><ellipse cx="15" cy="12" rx="20" ry="12" opacity=".10"/><ellipse cx="15" cy="12" rx="12" ry="8" opacity=".14"/></g>
  ${[0,11,22].map((o,i)=>`<g transform="translate(${o},0)"><path d="M2 6 q3 -5 6 0 v12 h-6z" fill="#1d2b30"/><path d="M2 6 q3 -5 6 0 v2 h-6z" fill="#2c4149"/>
-  <ellipse cx="5" cy="9.5" rx="2" ry="2.4" fill="#7ff0d8" opacity=".${5+i}"/></g>`).join("")}
+  <ellipse class="voice" style="transform-origin:5px 9.5px;animation-delay:${-i*.6}s" cx="5" cy="9.5" rx="2" ry="2.4" fill="#7ff0d8" opacity=".${5+i}"/>
+  <circle class="hum" style="animation-delay:${-i*.85}s" cx="5" cy="4" r="1.2" fill="#c9fff5"/></g>`).join("")}
  <path d="M0 18 h34 v2 h-34z" fill="#23232a"/></g>`}
 function gravewurmRig(x,y){return `<g transform="translate(${x},${y})">
  <g class="pkGlow" fill="#5ee08f"><ellipse cx="17" cy="12" rx="19" ry="11" opacity=".10"/></g>
  <path d="M0 6 h26 v14 h-26z" fill="#33403a"/><path d="M0 6 h26 v2.4 h-26z" fill="#4c5f55"/>
  <path d="M0 6 h3.6 v14 h-3.6z" fill="#425249"/><path d="M20 6 h6 v14 h-6z" fill="#232c28"/>
- <path d="M4 10 h9 v6 h-9z" fill="#0f1a15"/><path d="M5.4 11.4 h2.4 v3.2 h-2.4z" fill="#5ee08f" opacity=".75"/>
- <path d="M24 9 q7 -1 9 4 q-4 4 -9 1z" fill="#2b3d3d"/><rect x="30" y="11" width="1.6" height="2" fill="#eafff4"/>
+ <path d="M4 10 h9 v6 h-9z" fill="#0f1a15"/><path class="ember" d="M5.4 11.4 h2.4 v3.2 h-2.4z" fill="#5ee08f"/>
+ <g class="jaw" style="transform-origin:24px 12px"><path d="M24 9 q7 -1 9 4 q-4 4 -9 1z" fill="#2b3d3d"/><rect x="30" y="11" width="1.6" height="2" fill="#eafff4"/><rect x="27" y="12.4" width="1.2" height="1.6" fill="#eafff4"/></g>
  <path d="M-2 20 h30 v3 h-30z" fill="#1b211e"/></g>`}
 function furnace(x,y){return `<g transform="translate(${x},${y})">
  <g class="pkGlow" fill="#ff9a3c"><ellipse cx="14" cy="14" rx="18" ry="11" opacity=".12"/></g>
  <path d="M2 6 h22 v14 h-22z" fill="#4a3a30"/><path d="M2 6 h22 v2.4 h-22z" fill="#6b5648"/>
  <path d="M2 6 h3.4 v14 h-3.4z" fill="#5c483c"/><path d="M19 6 h5 v14 h-5z" fill="#332721"/>
- <path d="M7 11 h10 v7 h-10z" fill="#1a0e07"/><path d="M8 12.4 h8 v5 h-8z" fill="#ff8a2b"/><path d="M9.6 13.6 h4.6 v3 h-4.6z" fill="#ffd27a"/>
+ <path d="M7 11 h10 v7 h-10z" fill="#1a0e07"/><path class="ember" d="M8 12.4 h8 v5 h-8z" fill="#ff8a2b"/><path class="ember" style="animation-delay:-.4s" d="M9.6 13.6 h4.6 v3 h-4.6z" fill="#ffd27a"/>
  <path d="M20 0 h5 v6 h-5z" fill="#3b2f27"/><path d="M20 0 h5 v1.4 h-5z" fill="#584639"/>
- <g class="pkGlow" fill="#8a7a6c"><ellipse cx="22.5" cy="-3" rx="4" ry="3" opacity=".5"/><ellipse cx="24" cy="-8" rx="3" ry="2.4" opacity=".3"/></g>
+ ${[0,-1,-2].map((d,i)=>`<ellipse class="smoke" style="transform-origin:22.5px -1px;animation-delay:${d}s" cx="22.5" cy="-1" rx="${3.4-i*.4}" ry="${2.6-i*.3}" fill="#8a7a6c"/>`).join("")}
  <path d="M0 20 h26 v3 h-26z" fill="#1e1815"/></g>`}
 function lenderEngine(x,y){return `<g transform="translate(${x},${y})">
  <g class="pkGlow" fill="#ff4257"><ellipse cx="16" cy="12" rx="20" ry="12" opacity=".11"/></g>
  <path d="M1 5 h30 v16 h-30z" fill="#2b2226"/><path d="M1 5 h30 v2.4 h-30z" fill="#463539"/>
  <path d="M1 5 h4 v16 h-4z" fill="#3a2c30"/><path d="M25 5 h6 v16 h-6z" fill="#1d1619"/>
  <path d="M5.6 5 h1.6 v16 h-1.6z" fill="#5a4348"/><path d="M24 5 h1.6 v16 h-1.6z" fill="#5a4348"/>
- <path d="M10 9 h12 v8 h-12z" fill="#140d10"/><ellipse cx="16" cy="13" rx="3.2" ry="3.2" fill="#ff4257"/><ellipse cx="16" cy="13" rx="1.2" ry="1.2" fill="#ffd8dc"/>
+ <path d="M10 9 h12 v8 h-12z" fill="#140d10"/>
+ <g class="core" style="transform-origin:16px 13px"><ellipse cx="16" cy="13" rx="3.2" ry="3.2" fill="#ff4257"/><ellipse cx="16" cy="13" rx="1.2" ry="1.2" fill="#ffd8dc"/></g>
+ <rect class="ember" x="10" y="9" width="12" height="1" fill="#ff8a9a" opacity=".6"/>
  <path d="M0 21 h32 v3 h-32z" fill="#160f11"/></g>`}
 function tunnelChoir(x,y){return `<g transform="translate(${x},${y})">
  <path d="M0 2 h32 v2.4 h-32z" fill="#5a3f26"/><path d="M0 2 h32 v.8 h-32z" fill="#8a6a4a"/>
@@ -2641,8 +2856,8 @@ function surveyors(x,y){return `<g transform="translate(${x},${y})">
  <g class="pkGlow" fill="#8fc9ff"><ellipse cx="15" cy="12" rx="17" ry="10" opacity=".10"/></g>
  <path d="M8 10 L4 22 h1.8 L9.4 12z" fill="#4c4c55"/><path d="M14 10 L18 22 h1.8 L15.4 12z" fill="#3b3b43"/><path d="M11 10 h1.6 v12 h-1.6z" fill="#44444d"/>
  <path d="M6 5 h12 v5.4 h-12z" fill="#5f5f6a"/><path d="M6 5 h12 v1.4 h-12z" fill="#7d7d88"/>
- <path d="M17 6.4 h5 v2.6 h-5z" fill="#2b2b31"/><ellipse cx="22.4" cy="7.7" rx="1.5" ry="1.5" fill="#8fc9ff" opacity=".8"/>
- <path d="M24 14 h8 v8 h-8z" fill="#5a3f26"/><path d="M24 14 h8 v1.6 h-8z" fill="#8a6a4a"/><path d="M25.4 16.6 h5 v.9 h-5z" fill="#d8cdb8"/><path d="M25.4 18.4 h3.4 v.9 h-3.4z" fill="#d8cdb8"/></g>`}
+ <g class="sweep" style="transform-origin:22px 8px"><path d="M17 6.4 h5 v2.6 h-5z" fill="#2b2b31"/><path d="M22 7.7 L34 3 L34 12z" fill="#8fc9ff" opacity=".18"/><ellipse cx="22.4" cy="7.7" rx="1.5" ry="1.5" fill="#8fc9ff" opacity=".9"/></g>
+ <path d="M24 14 h8 v8 h-8z" fill="#5a3f26"/><path d="M24 14 h8 v1.6 h-8z" fill="#8a6a4a"/><path class="ember" d="M25.4 16.6 h5 v.9 h-5z" fill="#d8cdb8"/><path d="M25.4 18.4 h3.4 v.9 h-3.4z" fill="#d8cdb8"/></g>`}
 function deepEngine(x,y){return `<g transform="translate(${x},${y})">
  <g class="pkGlow" fill="#5ec9b6"><ellipse cx="27" cy="14" rx="30" ry="16" opacity=".10"/><ellipse cx="27" cy="14" rx="18" ry="11" opacity=".12"/></g>
  <path d="M2 4 h50 v22 h-50z" fill="#26332f"/><path d="M2 4 h50 v3 h-50z" fill="#3d514a"/>
@@ -2651,6 +2866,18 @@ function deepEngine(x,y){return `<g transform="translate(${x},${y})">
  <g class="wh" style="transform-origin:33px 15px"><circle cx="33" cy="15" r="6.4" fill="#1f2b27"/><circle cx="33" cy="15" r="2.2" fill="#4a6159"/>
   <path d="M32.2 8.2 h1.6 v13.6 h-1.6z" fill="#3d514a"/><path d="M26.2 14.2 h13.6 v1.6 h-13.6z" fill="#3d514a"/></g>
  <path d="M0 26 h54 v3.4 h-54z" fill="#141a18"/></g>`}
+function paymaster(x,y){return `<g transform="translate(${x},${y})">
+ <g class="pkGlow" fill="#ffb340"><ellipse cx="15" cy="13" rx="19" ry="11" opacity=".11"/></g>
+ <path d="M14 2 h1.6 v4.4 h-1.6z" fill="#5c4534"/><path d="M8.6 2 h12.4 v1.2 h-12.4z" fill="#8a6a4a"/>
+ <path class="ember" style="animation-delay:-.5s" d="M8.6 3.4 h2.8 v1.6 h-2.8z" fill="#ffb340"/>
+ <path class="ember" style="animation-delay:-.9s" d="M18.2 3.4 h2.8 v1.6 h-2.8z" fill="#ffb340"/>
+ <path d="M1 6.4 h28 v13.6 h-28z" fill="#3a2a22"/><path d="M1 6.4 h28 v2.4 h-28z" fill="#5c4534"/>
+ <path d="M1 6.4 h4 v13.6 h-4z" fill="#4a3629"/><path d="M23 6.4 h6 v13.6 h-6z" fill="#241a14"/>
+ <path d="M4 10.4 h9 v7 h-9z" fill="#140d08"/>
+ <path class="ember" d="M5.4 11.8 h6.2 v4.2 h-6.2z" fill="#ffb340"/><path d="M5.4 11.8 h6.2 v1.2 h-6.2z" fill="#ffe1a8"/>
+ <path d="M16 15.4 h9 v1.8 h-9z" fill="#e8b64a"/><path d="M16.8 13.3 h9 v1.8 h-9z" fill="#ffd27a"/><path d="M16 11.2 h9 v1.8 h-9z" fill="#e8b64a"/>
+ <circle class="hum" cx="21" cy="9.6" r="1.4" fill="#ffe9b8"/>
+ <path d="M-1 20 h32 v3 h-32z" fill="#1a120d"/></g>`}
 function bore(x,y){return `<g transform="translate(${x},${y})">
  <ellipse cx="20" cy="23" rx="20" ry="2.6" fill="#000" opacity=".45"/>
  <path d="M0 0 h34 v18 h-34z" fill="#4c4c55"/><path d="M0 0 h34 v2.6 h-34z" fill="#75757f"/>
@@ -2691,6 +2918,7 @@ const PAL=[
  {sky:"#10201e",wall:["#3f5a58","#4f6a68","#2f4a48","#5f7a78"],ore:"#6fd3c4",floor:"#4f6a68",floor2:"#3f5a58"},
  {sky:"#150f1e",wall:["#4a3a5a","#5a4a6a","#3a2a4a","#6a5a7a"],ore:"#c77dff",floor:"#5a4a6a",floor2:"#4a3a5a"},
  {sky:"#1a0f12",wall:["#4a2a30","#5a3a40","#3a1a20","#6a4a50"],ore:"#ff6b6b",floor:"#4a2a30",floor2:"#3a1a20"},
+ {sky:"#1c0d06",wall:["#5e3220","#70402a","#4a2416","#864f34"],ore:"#ffb340",floor:"#5e3220",floor2:"#3f1f11"},
 ];
 function stones(r,x0,y0,w,h,pal,ore,seed,sh){let g="",R=rnd(seed);
   for(let y=y0;y<y0+h;y+=9){for(let x=x0-6;x<x0+w;){
@@ -2707,19 +2935,61 @@ function stones(r,x0,y0,w,h,pal,ore,seed,sh){let g="",R=rnd(seed);
   if(sh)g+=`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="#000" opacity="${sh}"/>`;
   return g}
 function beam(x,y,w,h){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#5a3f26"/><rect x="${x}" y="${y}" width="${w}" height="${Math.min(3,h)}" fill="#8a6a4a"/><rect x="${x}" y="${y}" width="${Math.min(2,w)}" height="${h}" fill="#2c1d10" opacity=".8"/><rect x="${x+w-1.5}" y="${y}" width="1.5" height="${h}" fill="#000" opacity=".35"/>`}
-function drawFace(){const el=$("scene").querySelector("#rockface");if(!el)return;
-  const L=LAYERS[S.depth],pal=PAL[S.depth]||PAL[0],floor=158,hp=Math.max(0,S.rockHp/L.hp);
-  const sz=13+hp*10,x=184;
-  let g=`<g class="face"><ellipse cx="${x+sz*.9}" cy="${floor+1}" rx="${sz*1.1}" ry="3.4" fill="#000" opacity=".5"/>
-  <path d="M${x} ${floor} l${sz*.28} -${sz*.95} l${sz*.38} ${sz*.28} l${sz*.24} -${sz*.8} l${sz*.42} ${sz*.55} l${sz*.34} -${sz*.22} l${sz*.26} ${sz*1.14}z" fill="${pal.wall[2]}"/>
-  <path d="M${x+sz*.28} ${floor-sz*.95} l${sz*.38} ${sz*.28} l${sz*.24} -${sz*.8} l${sz*.42} ${sz*.55} l-${sz*.22} ${sz*.32} l-${sz*.62} -${sz*.12}z" fill="${pal.wall[3]}"/>
-  <path d="M${x+sz*.9} ${floor-sz*.5} l${sz*.5} ${sz*.5} l-${sz*.1} ${sz*.5} l-${sz*.5} 0z" fill="#000" opacity=".3"/>
-  <path d="M${x+3} ${floor-3} q${sz*.4} -${sz*.9} ${sz*1.2} -${sz*.6}" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="1.6"/>`;
-  for(let i=0;i<4;i++){const gx=x+6+i*sz*.4,gy=floor-sz*.35-(i%2)*sz*.34;
-    g+=`<path d="M${gx} ${gy+2} l1.8 -2.2 l2.4 .7 l.5 2.4 l-2.2 1.5 l-2 -.9z" fill="${pal.ore}"/><path d="M${gx+.8} ${gy+1.5} l1.4 -1.2 l.9 .4 l-1.6 1.5z" fill="#fff" opacity=".5"/>`}
-  const cracks=Math.floor((1-hp)*5);
-  for(let i=0;i<cracks;i++)g+=`<path d="M${x+8+i*sz*.3} ${floor-sz*.2} l${3-i%3*2} -${sz*.25} l${i%2?4:-3} -${sz*.2}" fill="none" stroke="#0f0c0a" stroke-width="1.5"/>`;
+// The rock is only rebuilt when it actually changes (new layer, new rock, or another
+// notch of damage). Rebuilding on every swing killed every child animation instantly.
+let faceKey="";
+function rockPts(cx,cy,r,seed,n){const R=rnd(seed),a=[];
+  for(let i=0;i<n;i++){const th=i/n*Math.PI*2-Math.PI/2,rr=r*(.70+R()*.38);
+    a.push([Math.round((cx+Math.cos(th)*rr)*10)/10,Math.round((cy+Math.sin(th)*rr*.86)*10)/10])}
+  return a}
+const ptsD=P=>P.map((p,i)=>(i?"L":"M")+p[0]+" "+p[1]).join(" ")+"z";
+function drawFace(force){const el=$("scene").querySelector("#rockface");if(!el)return;
+  const L=LAYERS[S.depth],pal=PAL[S.depth]||PAL[0],floor=158;
+  const hp=Math.max(0,Math.min(1,S.rockHp/L.hp));
+  const key=S.depth+"|"+(S.clears||0)+"|"+Math.round(hp*24);
+  if(!force&&key===faceKey&&el.firstChild)return;faceKey=key;
+  const seed=S.depth*37+((S.clears||0)%23)*11+5;
+  const r=13+hp*10,cx=184+r*.95,cy=floor-r*.6;
+  const P=rockPts(cx,cy,r,seed,9);
+  for(const p of P)if(p[1]>floor)p[1]=floor;
+  const mid=[Math.round(cx*10)/10,Math.round((cy+r*.1)*10)/10];
+  const lit=[P[7],P[8],P[0],P[1],P[2],mid],shd=[P[3],P[4],P[5],P[6],mid];
+  const R=rnd(seed+4);
+  let g=`<g><ellipse cx="${cx.toFixed(1)}" cy="${floor+1}" rx="${(r*1.15).toFixed(1)}" ry="3.4" fill="#000" opacity=".5"/>`;
+  g+=`<path d="${ptsD(P)}" fill="${pal.wall[2]}"/>`;
+  g+=`<path d="${ptsD(lit)}" fill="${pal.wall[3]}" opacity=".9"/>`;
+  g+=`<path d="${ptsD(shd)}" fill="#000" opacity=".28"/>`;
+  g+=`<path d="M${(cx-r*.55).toFixed(1)} ${(cy-r*.2).toFixed(1)} q${(r*.4).toFixed(1)} -${(r*.55).toFixed(1)} ${r.toFixed(1)} -${(r*.3).toFixed(1)}" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="1.6"/>`;
+  const ores=3+Math.round(R()*2);
+  for(let i=0;i<ores;i++){const ox=(cx-r*.6+R()*r*1.15).toFixed(1),oy=(cy-r*.5+R()*r*.9).toFixed(1);
+    g+=`<g class="oreTwinkle" style="animation-delay:${(-i*.7).toFixed(2)}s"><path d="M${ox} ${+oy+2} l1.8 -2.2 l2.4 .7 l.5 2.4 l-2.2 1.5 l-2 -.9z" fill="${pal.ore}"/><path d="M${+ox+.8} ${+oy+1.5} l1.4 -1.2 l.9 .4 l-1.6 1.5z" fill="#fff" opacity=".5"/></g>`}
+  const cracks=Math.round((1-hp)*6);
+  for(let i=0;i<cracks;i++){const th=R()*Math.PI*2,len=r*(.4+R()*.5);
+    const x1=cx+Math.cos(th)*r*.12,y1=cy+Math.sin(th)*r*.12;
+    const x2=x1+Math.cos(th)*len*.55,y2=y1+Math.sin(th)*len*.5;
+    const x3=x2+Math.cos(th+(R()-.5))*len*.5,y3=y2+Math.sin(th+(R()-.5))*len*.45;
+    const dd=`M${x1.toFixed(1)} ${y1.toFixed(1)} L${x2.toFixed(1)} ${y2.toFixed(1)} L${x3.toFixed(1)} ${y3.toFixed(1)}`;
+    if(hp<.4)g+=`<path d="${dd}" fill="none" stroke="${pal.ore}" stroke-width="3" opacity=".35"/>`;
+    g+=`<path d="${dd}" fill="none" stroke="#0f0c0a" stroke-width="1.5"/>`}
   el.innerHTML=g+"</g>"}
+function rockJolt(){const el=$("scene").querySelector("#rockface");if(!el)return;
+  el.classList.remove("rockJolt");void el.getBoundingClientRect();el.classList.add("rockJolt")}
+function shatter(){const rk=$("rock");if(!rk)return;
+  const b=rk.getBoundingClientRect(),sx=b.width/340,pal=PAL[S.depth]||PAL[0];
+  const cols=pal.wall.concat([pal.ore,pal.ore]),x=205*sx,y=142*sx;
+  for(let i=0;i<16;i++){const c=document.createElement("i");c.className="shard";
+    const s=Math.max(3,Math.round((3+Math.random()*5)*sx)),ang=Math.random()*Math.PI*2;
+    c.style.cssText=`left:${x}px;top:${y}px;width:${s}px;height:${Math.round(s*.8)}px;background:${cols[i%cols.length]}`;
+    c.style.setProperty("--dx",(Math.cos(ang)*(30+Math.random()*70)*sx).toFixed(1)+"px");
+    c.style.setProperty("--dy",((Math.sin(ang)*40-28+Math.random()*70)*sx).toFixed(1)+"px");
+    c.style.setProperty("--rot",Math.round(Math.random()*720-360)+"deg");
+    rk.appendChild(c);setTimeout(()=>c.remove(),760)}
+  for(let i=0;i<7;i++){const p=document.createElement("i");p.className="dust";
+    const s=Math.max(6,Math.round((10+Math.random()*14)*sx));
+    p.style.cssText=`left:${x}px;top:${y}px;width:${s}px;height:${s}px;background:${pal.floor2}`;
+    p.style.setProperty("--dx",((Math.random()*80-40)*sx).toFixed(1)+"px");
+    p.style.setProperty("--dy",((-10-Math.random()*30)*sx).toFixed(1)+"px");
+    rk.appendChild(p);setTimeout(()=>p.remove(),880)}}
 function sceneOverlay(pal,floor){
   let g=`<rect x="168" y="52" width="3" height="20" fill="#3a3a40"/>
   <g class="lamp"><rect x="163" y="72" width="12" height="13" fill="#f3b24a"/><rect x="166" y="75" width="6" height="7" fill="#fff4c2"/>
@@ -2730,6 +3000,25 @@ function sceneOverlay(pal,floor){
   for(let i=0;i<12;i++)g+=`<circle class="mote" style="animation-delay:${-i*1.3}s" cx="${26+i*26}" cy="${64+(i*19)%74}" r="1.1" fill="#ffcf7a" opacity=".5"/>`;
   for(let i=0;i<5;i++)g+=`<rect class="grit" style="animation-delay:${-i*.8}s" x="${60+i*54}" y="${52+i*7}" width="1" height="3" fill="#c9c4bb" opacity=".4"/>`;
   g+=`<rect x="0" y="0" width="340" height="190" fill="url(#vig)"/>`;
+  return g}
+// ---- names in the stone ----
+// Silvergrave's walls are covered in the names of miners who never came up. At depth 4
+// those names are real: the leaderboard, the people from the stories, and you.
+const STONE_NAMES=[{n:"Brannock",d:2},{n:"Sable",d:1},{n:"Hollis",d:3},{n:"The Warden",d:11}];
+function wallNames(floor){
+  const rows=[];
+  (boardData&&boardData.all?boardData.all:[]).slice(0,8).forEach(p=>rows.push({n:p.name,d:p.oil||0}));
+  STONE_NAMES.forEach(x=>rows.push(x));
+  if(USER||S.profile.name)rows.push({n:displayName(),d:S.oil||0,me:true});
+  const seen=new Set(),out=[];
+  for(const r of rows){const n=String(r.n||"").slice(0,13);if(!n||seen.has(n))continue;seen.add(n);out.push({...r,n})}
+  const slots=[[8,64],[8,80],[8,96],[8,112],[8,128],[10,144],[236,64],[236,80],[236,96],[236,112],[236,128],[238,144]];
+  let g="";
+  out.slice(0,slots.length).forEach((r,i)=>{
+    const [x,y]=slots[i],col=r.me?"#e8dcc2":"#c9c4bb",op=r.me?".62":(.18+((i*37)%18)/100).toFixed(2);
+    g+=`<text x="${x}" y="${y}" font-family="var(--pixel),system-ui,sans-serif" font-size="7" fill="${col}" opacity="${op}" letter-spacing=".4">${esc(r.n)}${r.d?" "+r.d:""}</text>`;
+    g+=`<rect x="${x}" y="${y+1.4}" width="${Math.min(84,r.n.length*4.1)}" height=".5" fill="#000" opacity=".35"/>`;
+  });
   return g}
 function drawScene(){
   const pal=PAL[S.depth]||PAL[0],floor=158,gemc=LAYERS[S.depth].gem*6+.05;
@@ -2765,7 +3054,8 @@ function drawScene(){
     for(let i=0;i<90;i++)g+=`<rect x="${Math.floor(R()*340)}" y="${floor+3+Math.floor(R()*32)}" width="${1+Math.floor(R()*3)}" height="1" fill="${pal.floor2}" opacity=".8"/>`;
     for(let i=0;i<9;i++){const bx=Math.floor(R()*330),by=floor+4+Math.floor(R()*24),s=Math.round((2+R()*3)*10)/10;
       g+=`<path d="M${bx} ${by+s} l${s*.5} -${s} l${s} .3 l${s*.4} ${s*.8}z" fill="${pal.wall[2]}"/>`}
-    g+=`<g id="rockface"></g>`;
+    g+=`<g id="rockface" style="transform-origin:205px 146px"></g>`;
+    if(S.depth===4)g+=wallNames(floor);
     g+=`<rect x="196" y="${floor+25}" width="144" height="2" fill="#3a3a40"/><rect x="196" y="${floor+31}" width="144" height="2" fill="#3a3a40"/><rect x="196" y="${floor+25}" width="144" height="1" fill="#8d8d94" opacity=".5"/>`;
     for(let x=200;x<340;x+=12)g+=`<rect x="${x}" y="${floor+23}" width="4" height="12" fill="#5a3f26"/>`;
     g+=`<rect x="262" y="${floor-16}" width="18" height="16" fill="#5a3f26"/><rect x="262" y="${floor-16}" width="18" height="3" fill="#8a6a4a"/><rect x="262" y="${floor-16}" width="2" height="16" fill="#fff" opacity=".1"/><rect x="265" y="${floor-13}" width="12" height="1" fill="#3a2716"/><rect x="282" y="${floor-10}" width="12" height="10" fill="#5a3f26"/><rect x="282" y="${floor-10}" width="12" height="2" fill="#8a6a4a"/>`;
@@ -2794,6 +3084,7 @@ function drawScene(){
   if(S.crew[9])g+=furnace(256,24);
   if(S.crew[10])g+=lenderEngine(298,20);
   if(S.crew[13])g+=deepEngine(240,66);
+  if(S.crew[14])g+=paymaster(54,100);
   // rails, bottom right
   if(S.crew[1]){g+=`<g class="cartroll">${cart(206,floor+12)}</g>`+label(196,floor+22,"×"+S.crew[1])}
   g+=sceneOverlay(pal,floor);$("scene").innerHTML=g;drawFace();
