@@ -1624,11 +1624,16 @@ const PICKS=[
 // work toward on the way down. Power climbs x3 a tier while price climbs x4.5, so a new
 // tier is a step up you have to earn rather than a solved game. Generated from the curve
 // instead of typed out, because these numbers and the descend costs were solved together.
-const DEEPPICKS=["The Paymaster's own","Cinderwake head","Long payroll pick","Gravelight",
-  "Drowned ledger pick","Saltbone","The Sleeping Wheel","Slagheart","Wyrmfall","Nightglass",
-  "The Ninth Lamp","Marrowglass","The Undug"];
+// Twenty tiers rather than thirteen, one every two floors instead of every three. The
+// ratios came down to match (x2.05 power, x2.71 price) so the curve from the Paymaster's
+// own to the Undug is the same climb as before, just taken in more, smaller steps -
+// there is a new head to earn roughly twice as often, and the pacing is untouched.
+const DEEPPICKS=["The Paymaster's own","Cinderwake head","Long payroll pick","Ashglass edge",
+  "The Turning Shaft","Gravelight","Drowned ledger pick","Saltbone","Emberfall",
+  "The Sleeping Wheel","Slagheart","The Owed Hour","Wyrmfall","Nightglass","The Ninth Lamp",
+  "Marrowglass","Deadlight","Starless","The Older Cut","The Undug"];
 DEEPPICKS.forEach((name,k)=>PICKS.push({
-  name,power:3.8e6*Math.pow(3,k),cost:2.8e16*Math.pow(4.5,k),deep:12+3*k}));
+  name,power:3.8e6*Math.pow(2.05,k),cost:2.8e16*Math.pow(2.71,k),deep:11+2*k}));
 const CREW=[
   {name:"Digger",desc:"A miner with a shovel and no complaints.",base:30,rate:0.028},
   {name:"Ore cart",desc:"Hauls rubble so diggers dig, not carry.",base:400,rate:0.14},
@@ -1646,23 +1651,62 @@ const CREW=[
   {name:"The Deep Engine",desc:"Older than the mine. It was here first.",base:9e13,rate:1.8e8,rank:5},
   {name:"The Paymaster",desc:"It settles up at the end of every shift. Nobody hired it.",base:7.5e14,rate:1.1e9,rank:6},
 ];
+// Forty-three machines instead of thirteen: one for every floor from the Undercroft to
+// the bottom, so every single descent puts something new on the board. The Undercroft is
+// where they start because it is already the layer whose walls are warm - the strange
+// machinery turning up three floors before the Warm Dark is the point, not a mistake.
+//
+// The ratios came down to match (x1.3716 rate, x1.5479 price). Those are 3 and 4.5 taken
+// to the 12/42, so the whole climb from the first of these to the last is exactly the
+// climb the descend costs were solved against - more steps, same mountain. Change the
+// count and these two numbers have to be re-derived or the pacing drifts.
 const DEEPCREW=[
+  ["Undercroft hands","They were already working when you found the stair."],
+  ["The warm dark gang","Nobody assigned them. The work gets done."],
   ["The long payroll","Every name ever written down the shaft, still on shift."],
+  ["Hollowmarrow drill","It rings hollow going in and comes out full."],
   ["Cinderwake furnace","Banked for a century. It only needed asking."],
   ["The sunken shift","A gang that never clocked off. They do not want paying."],
   ["The tallying floor","It does the accounts. The accounts come out in your favour."],
   ["Ashglass cutters","They work the black sheets by their own reflections."],
   ["The sleeping wheel","Three storeys of winding gear, woken up."],
+  ["Ninefold gang","One crew that crosses itself nine times and never meets."],
   ["Drowned ledger crew","They work waist-deep and never look down."],
   ["Saltbone gang","Preserved mid-shift. Still knows the seam."],
-  ["The counting dark","It counts. Whatever it counts, it hands over."],
+  ["The quiet wage","No sound, no complaint, no invoice."],
+  ["Emberfall stack","It catches what drifts up and sells it back."],
+  ["The turning shaft","It digs the passage you did not walk down."],
+  ["Gravelight rig","Works by a light with no source and no lamp oil."],
+  ["The unmarked gang","Boots under the bench, tools still warm."],
+  ["Half-door crew","They come through the frame. They do not come back."],
   ["Slagheart engine","Fed on everything the mine ever threw away."],
+  ["The counting dark","It counts. Whatever it counts, it hands over."],
   ["Wyrmfall rig","Built inside the ribs. It uses them for leverage."],
+  ["The bitten vein","It chews where something bigger already chewed."],
+  ["Nightglass field crew","They harvest by the lamps in the shards, not yours."],
+  ["The owed hour","It works the hour your watch loses. You keep the wage."],
+  ["Cold furnace","Banked since before the lord. Still hot to the touch."],
   ["The second throne","Empty, like the first. It still signs off on the work."],
+  ["Marrowglass kiln","Bone in, glass out. Nobody asks whose."],
+  ["The debt below","It settles a figure six times what Ashcombe asked."],
+  ["Stillwater crew","They dive the shaft with no bottom and surface paid."],
+  ["The ninth lamp","Eight burn. The ninth pays."],
+  ["Ironsilence gang","They hammer all shift and you hear only breathing."],
+  ["The rendering floor","Everything here was built to run downhill."],
+  ["Gloamvein harvesters","They cut the hour after sunset out of the rock."],
+  ["The last overseer","The book is open. The pen is wet. The wage is correct."],
+  ["Emberless crew","They work by feel in cold that eats the lamp."],
+  ["The shut ledger","A book too large to open, and it pays anyway."],
+  ["Deadlight rig","Light with nothing behind it, and it still shows the seam."],
+  ["The older cut","Tool marks that predate hands. It still makes them."],
+  ["Starless gang","They mine the holes in the pattern."],
+  ["The first shaft","The oldest hole in the world, and still going down."],
+  ["Where the mine began","It digs upward. It has been for a long time."],
   ["The undug","It does not break the rock. The rock stops being there."],
+  ["The bottom of the book","The last line, and room for one more figure."],
 ];
 DEEPCREW.forEach(([name,desc],k)=>CREW.push({
-  name,desc,base:6e15*Math.pow(4.5,k),rate:7e9*Math.pow(3,k),deep:11+3*k}));
+  name,desc,base:6e15*Math.pow(1.5479,k),rate:7e9*Math.pow(1.3716,k),deep:8+k}));
 const LAYERS=[
   {name:"The Cutting",desc:"Loose earth and broken carts. Every debtor Lord Ashcombe throws down here starts in the Cutting.",hp:10,cost:800,gem:.006},
   {name:"Rustveins",desc:"Copper threads in red clay. The overseers start writing your name in the ledger.",hp:40,cost:12000,gem:.01},
@@ -1728,7 +1772,7 @@ const DEEP=[
 // and four to five days at the bottom. The curve is steep early (x17 a floor) and
 // eases to about x3.3, because income accelerates faster than any flat ratio can track.
 // Re-solve rather than hand-edit these: changing crew rates changes what they should be.
-const DEEPCOST=[6.81e11,1.14e13,1.88e14,3.01e15,4.64e16,6.8e17,9.38e18,1.21e20,1.43e21,1.56e22,1.54e23,1.38e24,1.11e25,8e25,3.91e26,1.86e27,8.62e27,3.91e28,1.73e29,7.52e29,3.19e30,1.33e31,5.4e31,2.15e32,8.41e32,3.23e33,1.22e34,4.5e34,1.64e35,5.89e35,2.09e36,7.29e36,2.52e37,8.61e37,2.92e38,9.8e38,3.27e39,1.09e40,3.6e40,1.19e41];
+const DEEPCOST=[6.94e11,1.22e13,2.17e14,3.83e15,6.62e16,1.1e18,1.74e19,2.57e20,3.49e21,4.32e22,4.83e23,4.84e24,4.32e25,3.42e26,1.64e27,7.59e27,3.42e28,1.5e29,6.41e29,2.67e30,1.09e31,4.34e31,1.69e32,6.45e32,2.41e33,8.86e33,3.19e34,1.13e35,3.97e35,1.37e36,4.69e36,1.59e37,5.34e37,1.79e38,5.94e38,1.97e39,6.51e39,2.15e40,7.08e40,2.33e41];
 DEEP.forEach(([name,desc],i)=>{
   LAYERS.push({name,desc,deep:true,
     hp:Math.round(1.4e6*Math.pow(3,i+1)),
@@ -2963,7 +3007,9 @@ function paged(key,items,per,mountId,rowHtml,redraw){
 }
 // Rows differ a lot in height, so each list gets its own page size to keep the
 // two Upgrades columns roughly level.
-const PER_PAGE={picks:12,crew:6,perks:6,trophies:8};
+// Both columns run twelve to a page now that the rows are the same height, so the
+// pickaxes and the machines end level instead of one trailing far below the other.
+const PER_PAGE={picks:12,crew:12,perks:6,trophies:8};
 
 function buildUI(){
     if(S.crew.length<CREW.length)S.crew=[...S.crew,...CREW.map(()=>0)].slice(0,CREW.length);
@@ -2971,10 +3017,16 @@ function buildUI(){
   paged("picks",PICKS.slice(1),PER_PAGE.picks,"picks",(p,i)=>`<div class="row" id="pick${i+1}">
       <div><div class="name">${p.name}<em>${fmt(p.power)}/swing</em></div><div class="desc">Swing harder, break more rock.</div></div>
       <button class="buy" data-pick="${i+1}"></button></div>`,redraw);
-  // Crew locked behind a debt rank are hidden entirely, so page over what's actually shown.
-  const shownCrew=CREW.map((c,i)=>({c,i})).filter(x=>!locked(x.c));
+  // Locked machines stay on the list, greyed, showing what lifts them - same as the
+  // pickaxe column opposite. Hiding them meant the deep machines simply did not exist
+  // as far as the player could tell, and the page count jumped around as they unlocked.
+  const shownCrew=CREW.map((c,i)=>({c,i}));
+  // Same two-line shape as a pickaxe row. The milestone bar and its caption used to make
+  // these rows twice the height of the ones opposite, so the two columns never lined up
+  // and only six machines fit a page against twelve picks. The counts and the milestone
+  // both survive as chips on the title line - nothing was dropped, only folded in.
   paged("crew",shownCrew,PER_PAGE.crew,"crew",x=>`<div class="row" id="crew${x.i}">
-      <div><div class="name">${x.c.name}<em id="crewN${x.i}"></em><em id="crewM${x.i}" class="mile"></em></div><div class="desc">${x.c.desc} <span id="crewR${x.i}"></span></div><div class="mprog" id="crewP${x.i}"><i></i></div><div class="desc" id="crewT${x.i}"></div></div>
+      <div><div class="name">${x.c.name}<em id="crewN${x.i}"></em><em id="crewM${x.i}" class="mile"></em></div><div class="desc">${x.c.desc} <span id="crewR${x.i}"></span></div></div>
       <button class="buy" data-crew="${x.i}"></button></div>`,redraw);
   document.querySelectorAll("#picks [data-pick]").forEach(b=>b.onclick=()=>buyPick(+b.dataset.pick));
   document.querySelectorAll("#crew [data-crew]").forEach(b=>b.onclick=()=>buyCrew(+b.dataset.crew));
@@ -3056,16 +3108,18 @@ function render(){
   PICKS.forEach((p,i)=>{if(!i)return;const row=$("pick"+i);if(!row)return;const b=row.querySelector("button");
     const lk=locked(p);
     if(i<=S.pick){row.classList.add("locked");b.disabled=true;b.textContent="Owned"}
-    else if(lk){row.classList.add("locked");b.disabled=true;b.textContent="Debt ×"+p.rank}
+    else if(lk){row.classList.add("locked");b.disabled=true;b.textContent=lockText(p)}
     else if(i>S.pick+1){row.classList.add("locked");b.disabled=true;b.textContent=fmt(p.cost)}
     else{row.classList.remove("locked");b.disabled=S.cash<p.cost;b.textContent=fmt(p.cost)}});
-  CREW.forEach((c,i)=>{const row=$("crew"+i);if(!row)return;row.style.display=locked(c)?"none":"";const b=row.querySelector("button"),q=bulkQuote(i);
-    b.disabled=S.cash<q.total;b.innerHTML=(q.n>1?`<em>×${q.n}</em>`:"")+fmt(q.total);
-    const n=S.crew[i]||0,m=crewMult(n),nm=nextMile(n);
-    $("crewN"+i).textContent=n?"×"+n:"";$("crewM"+i).textContent=m>1?`×${m} power`:"";
-    $("crewR"+i).innerHTML="+"+fmt(c.rate*m*depthMult())+"/sec each"+(n?`<b style="display:block;color:var(--green);font-weight:500">Earning ${fmt(crewTotal(i))}/sec</b>`:"");
-    const prevM=MILES.filter(x=>x<=n).slice(-1)[0]||0;$("crewP"+i).firstChild.style.width=nm?((n-prevM)/(nm-prevM)*100)+"%":"100%";
-    $("crewT"+i).textContent=nm?`${nm-n} more → ×${m*2} power at ${nm}`:"Maxed out at ×32 power";});
+  CREW.forEach((c,i)=>{const row=$("crew"+i);if(!row)return;const b=row.querySelector("button");
+    const lk=locked(c),n=S.crew[i]||0,m=crewMult(n),nm=nextMile(n);
+    row.classList.toggle("locked",lk);
+    if(lk){b.disabled=true;b.textContent=lockText(c)}
+    else{const q=bulkQuote(i);b.disabled=S.cash<q.total;b.innerHTML=(q.n>1?`<em>×${q.n}</em>`:"")+fmt(q.total)}
+    $("crewN"+i).textContent=n?"×"+n+(m>1?` · ×${m} power`:""):"";
+    // the milestone chip is progress, so it only means anything once you own one
+    $("crewM"+i).textContent=!n?"":nm?`${nm-n} to ×${m*2}`:"×32 max";
+    $("crewR"+i).innerHTML="+"+fmt(c.rate*m*depthMult())+"/sec each"+(n?` · <b style="color:var(--green);font-weight:500">earning ${fmt(crewTotal(i))}/sec</b>`:"");});
   const o=oilOnSeal(),rb=$("rebirth");
   rb.disabled=S.cash<debtCost();
   $("rebirthDesc").textContent=S.cash<debtCost()
