@@ -342,6 +342,22 @@
     .coffee small{display:none}
   }
 
+  /* Mobile stacking order. Desktop (>=1100px) is untouched — that layout is a grid and
+     ignores these. display:contents dissolves the two rails and the stage so every card
+     becomes a direct flex item of .pit and can be ordered individually. */
+  @media(max-width:1099px){
+    .pit .side,.pit .stage{display:contents}
+    .pit .titlebar{order:1}
+    .pit .hero{order:2}
+    .pit .eqcard{order:3}
+    .pit>.rail:first-child>.card:first-child{order:4}
+    .pit #mgCard{order:5}
+    .pit .links{order:6}
+    .pit #storyCard{order:7}
+    .pit .log{order:8}
+    .pit #throneCard{order:9}
+  }
+
   /* upgrades tab */
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
   @media(max-width:760px){.cols{grid-template-columns:1fr}}
