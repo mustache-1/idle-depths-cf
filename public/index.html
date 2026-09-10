@@ -299,7 +299,7 @@
     #tab-mine.on ~ footer{padding:8px 0 6px;font-size:11.5px;gap:12px;align-items:center}
     #tab-mine.on ~ footer .fcoffee{display:none}
     #tab-mine.on ~ footer #lifeStats,#tab-mine.on ~ footer #awayNote{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
-    body.minetab{overflow:hidden}
+    html.minetab,body.minetab{overflow:hidden}
     .pit{display:grid;grid-template-columns:236px minmax(0,1fr) 286px;gap:13px;align-items:stretch;
       height:calc(100vh - 166px);min-height:0}
     .pit .stage{height:100%;min-height:0}
@@ -309,7 +309,7 @@
     .pit .rock{flex:none;aspect-ratio:340/190;min-height:0}
     .pit .links{flex:none}
     .pit .eqcard{flex:1;min-height:0}
-    .pit .log{flex:1;min-height:110px;max-height:215px}
+    .pit .log{flex:1;min-height:110px}
     .pit .titlebar h2{font-size:20px}
     .pit .titlebar span{font-size:13px}
     .pit .rank b{font-size:20px}
@@ -1790,7 +1790,7 @@ document.querySelectorAll("[data-hs]").forEach(b=>b.onclick=()=>openHelp(b.datas
 document.querySelectorAll("[data-help]").forEach(a=>a.onclick=e=>{e.preventDefault();openHelp(a.dataset.help)});
 $("helpTour").onclick=tourStart;$("helpTour2").onclick=tourStart;
 document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-q]").forEach(x=>x.classList.toggle("on",x===b));$("q-stories").classList.toggle("on",b.dataset.q==="stories");$("q-contracts").classList.toggle("on",b.dataset.q==="contracts")});
-function switchTab(t){document.body.classList.toggle("minetab",t==="mine");if(t==="leaderboard")loadBoard();document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests")renderStories()}
+function switchTab(t){document.body.classList.toggle("minetab",t==="mine");document.documentElement.classList.toggle("minetab",t==="mine");if(t==="leaderboard")loadBoard();document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests")renderStories()}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 function eta2(ms){const s=Math.ceil(ms/1000);return s<3600?Math.floor(s/60)+"m":Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m"}
 function eta(cost){const need=cost-S.cash;if(need<=0)return "Ready now";const r=cps();if(r<=0)return "Keep swinging";const s=need/r;if(s<60)return Math.ceil(s)+"s";if(s<3600)return Math.floor(s/60)+"m "+Math.ceil(s%60)+"s";if(s<86400)return Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m";return Math.floor(s/86400)+"d "+Math.floor(s%86400/3600)+"h"}
@@ -2161,6 +2161,18 @@ function mine(e,auto){
   render();
 }
 function buyPick(i){if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cost;S.pick=i;drawScene();render();save();toast(`You picked up the ${PICKS[i].name}.`)}}
+// The grid height was a hardcoded guess (100vh minus a magic number), which left a gap
+// above the footer on some screens and overflowed on others. Measure instead: the grid
+// gets exactly what's left after the header, tabs and the footer's real height.
+function fitPage(){
+  const pit=document.querySelector("#tab-mine .pit"),f=document.querySelector("footer");
+  if(!pit||!f)return;
+  if(innerWidth<1100){pit.style.height="";return}
+  pit.style.height="";                                   // measure the top edge unbiased
+  const top=pit.getBoundingClientRect().top;
+  const h=Math.max(420,Math.round(innerHeight-top-f.offsetHeight-16));
+  pit.style.height=h+"px";
+}
 let eqSig="",railH=-1,eqPg=0;
 const EQ_PER=6;
 function eqCrewRender(){
@@ -2291,6 +2303,7 @@ $("dPay").onclick=rebirth;
 $("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. Your workers now work ${nb.cap}h while you're away.`);render();save()};
 document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>switchTab(b.dataset.goto));
 document.body.classList.toggle("minetab",$("tab-mine").classList.contains("on"));
+document.documentElement.classList.toggle("minetab",$("tab-mine").classList.contains("on"));
 $("rebirth").onclick=rebirth;
 $("reset").onclick=async()=>{if(await ask("Start over?","Everything — cash, workers, lantern oil, perks, trophies and stories — will be lost. This can't be undone.","Reset everything"))
   {S={...fresh(),oil:0,lifetime:0,profile:S.profile};local.del();closeModal();drawScene();render();save()}};
