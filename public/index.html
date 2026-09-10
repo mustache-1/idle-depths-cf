@@ -660,7 +660,7 @@
     <div class="stat rate"><small>Per second</small><b id="cps">$0</b></div>
     <div class="stat"><small>Lantern oil</small><b id="oil">×1.0</b></div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center"><button id="rationPill" class="pill">⛏ Free shift ready</button><button class="helpbtn" id="help" aria-label="How to play">?</button><div id="account"></div></div>
+  <div style="display:flex;gap:8px;align-items:center"><button id="rationPill" class="pill">⛏ Hire auto-swinger</button><button class="helpbtn" id="help" aria-label="How to play">?</button><div id="account"></div></div>
 </div></div>
 
 <div class="tabs"><div class="wrap">
@@ -750,7 +750,7 @@
     <section><h3>Pickaxes</h3><div id="picks"></div></section>
     <section><h3>Crew &amp; machines</h3><div id="crew"></div>
       <h3 style="margin-top:18px">Overseer's extras</h3>
-      <div class="row"><div><div class="name">Auto-swinger<em id="autoState"></em></div><div class="desc">Free, once a day. Pick a shift — 3, 6, 9 or 12 hours — and a hired hand swings for you, awake or asleep. Shorter shifts swing faster.</div><div class="desc" id="autoDesc"></div></div><button class="buy" id="autoBtn">Start shift</button></div>
+      <div class="row"><div><div class="name">Auto-swinger<em id="autoState"></em></div><div class="desc">$15M, any time. Pick a shift — 3, 6, 9 or 12 hours — and a hired hand swings for you, awake or asleep. Shorter shifts swing faster.</div><div class="desc" id="autoDesc"></div></div><button class="buy" id="autoBtn">Start shift</button></div>
       <h3 style="margin-top:18px">Bunkhouse</h3>
       <div class="row"><div><div class="name" id="bunkName">Straw pallet<em id="bunkCap">8h offline</em></div><div class="desc" id="bunkDesc">A better bed means the crew keeps working longer while you're gone.</div></div><button class="buy" id="bunkBtn">$50.0K</button></div>
     </section>
@@ -832,7 +832,7 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free daily shift</b> — once a day an auto-swinger works for you. Start with a 3h shift (3 swings/sec); each shift you take unlocks the next: 6h (2/sec), 9h (1.5/sec), 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
+    <ul><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Auto-swinger</b> — for $15M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
@@ -987,7 +987,7 @@
 </div></div>
 <div class="modal" id="shiftModal" style="z-index:66"><div class="dlg" style="max-width:440px">
   <header><h3>Start a shift</h3><button class="x" id="shiftClose" aria-label="Close">×</button></header>
-  <p class="note" style="margin-bottom:12px">Your free daily pass. Each shift you take unlocks the next, longer one. Shorter shifts swing faster, longer ones last through the night. Every shift keeps your streak at max (+50%). Tap along while it runs to stack an overtime bonus up to +100% on top. It keeps going even if you close the game.</p>
+  <p class="note" style="margin-bottom:12px">Costs $15M, any time — no waiting, no daily limit. Shorter shifts swing faster, longer ones last through the night. Every shift keeps your streak at max (+50%). Tap along while it runs to stack an overtime bonus up to +100% on top. It keeps going even if you close the game.</p>
   <div class="shifts" id="shiftList"></div>
 </div></div>
 <div class="modal" id="loginModal" style="z-index:64"><div class="dlg" style="max-width:420px;text-align:center">
@@ -1118,7 +1118,7 @@ const perkLv=id=>(S.perks&&S.perks[id])||0;
 const throneMult=()=>S.throne?1.25:1;
 const EXC_GOAL=1e8,EXC_TITHE=.15;
 const EXC_TEXT=[[0,"Something is buried under the throne. Every coin the crew earns down here, 15% goes into the dig."],[.25,"The crew has cleared the rubble. The seat isn't stone. It's older than the mine."],[.5,"There are names carved beneath the seat. One of them is Ashcombe."],[.75,"The floor beneath the throne is hollow. Something answers when the picks strike."],[1,"The throne is empty, and it always was. The lord was never the one you owed. What's beneath pays better than he ever did."]];
-const AUTO_CD=24*3600*1000;const SHIFTS=[{h:3,rate:3},{h:6,rate:2},{h:9,rate:1.5},{h:12,rate:1}];  // free once a day; longer shifts swing slower
+const SHIFTS=[{h:3,rate:3},{h:6,rate:2},{h:9,rate:1.5},{h:12,rate:1}];  // paid, available any time; longer shifts swing slower
 const AUTO_RATE=()=>(S.autoRate||3);
 const autoOn=()=>Date.now()<(S.autoUntil||0);
 const MILES=[20,40,60,80,100];
@@ -1423,13 +1423,14 @@ function renderStories(){
 // story clues also uncover from plain mining
 const _earn=earn;earn=function(n){_earn(n);if(S.story&&S.story.active&&n>0)storyClueRaw(n)};
 function storyClueRaw(n){storyClue(n)}
-// ---- daily auto-swinger (free pass, pick a shift) ----
-const autoReady=()=>!autoOn()&&Date.now()>=(S.autoBought||0)+AUTO_CD;
+// ---- auto-swinger (paid, pick a shift, available any time) ----
+const AUTO_COST=15e6;
+const autoReady=()=>!autoOn()&&S.cash>=AUTO_COST;
 function openShift(){if(autoOn()){toast(`The auto-swinger is on shift — ${eta2(S.autoUntil-Date.now())} left.`);return}
-  if(!autoReady()){toast("Next free shift in "+eta2((S.autoBought||0)+AUTO_CD-Date.now())+".");return}
-  const tier=Math.min(SHIFTS.length-1,S.shiftsUsed||0);
-  $("shiftList").innerHTML=SHIFTS.map((x,i)=>{const locked=i>tier;return `<button class="shift ${locked?'lock':''}" data-shift="${x.h}" ${locked?'disabled':''}><b>${x.h}h</b><small>${x.rate}/sec · ~${fmt(clickPower()*x.rate*x.h*3600)}</small>${locked?`<em>🔒 ${i-tier===1?"Unlocks after your next shift":"Unlocks in "+(i-tier)+" shifts"}</em>`:i===tier&&i>0?`<em class="new">New</em>`:""}</button>`}).join("");
-  document.querySelectorAll("[data-shift]:not([disabled])").forEach(b=>b.onclick=()=>{const x=SHIFTS.find(z=>z.h==b.dataset.shift);S.autoRate=x.rate;S.autoBought=Date.now();S.autoUntil=Date.now()+x.h*3600*1000;S.shiftsUsed=(S.shiftsUsed||0)+1;$("shiftModal").classList.remove("on");toast(`Auto-swinger on a ${x.h}-hour shift. It keeps swinging even if you close the game.`);confetti(20);render();save()});
+  if(!autoReady()){toast(`Hiring an auto-swinger costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`);return}
+  const tier=SHIFTS.length-1;
+  $("shiftList").innerHTML=SHIFTS.map((x,i)=>{const locked=i>tier;return `<button class="shift ${locked?'lock':''}" data-shift="${x.h}" ${locked?'disabled':''}><b>${x.h}h</b><small>${x.rate}/sec · ~${fmt(clickPower()*x.rate*x.h*3600)}</small></button>`}).join("");
+  document.querySelectorAll("[data-shift]:not([disabled])").forEach(b=>b.onclick=()=>{if(S.cash<AUTO_COST){toast("Not enough cash.");return}const x=SHIFTS.find(z=>z.h==b.dataset.shift);S.cash-=AUTO_COST;S.autoRate=x.rate;S.autoBought=Date.now();S.autoUntil=Date.now()+x.h*3600*1000;S.shiftsUsed=(S.shiftsUsed||0)+1;$("shiftModal").classList.remove("on");toast(`Hired an auto-swinger for a ${x.h}-hour shift (${fmt(AUTO_COST)}). It keeps swinging even if you close the game.`);confetti(20);render();save()});
   $("shiftModal").classList.add("on")}
 $("rationPill").onclick=openShift;$("autoBtn").onclick=openShift;$("shiftClose").onclick=()=>$("shiftModal").classList.remove("on");
 // ---- tutorial ----
@@ -1440,7 +1441,7 @@ const TOUR=[
   {tab:"mine",el:".side .card:nth-child(2)",ic:"⚒",t:"Equipment",p:"Better pickaxes hit harder. Crew and machines earn every second, even while you're away — at half pace, for up to 8 hours (longer with a better bunk)."},
   {tab:"mine",el:".side .card:first-child",ic:"↓",t:"Descend",p:"Save up to break into the next layer. Each layer pays more, changes the ore, and unlocks a story. Seven layers down is the Hollow Throne; what's beneath it needs a paid debt to reach."},
   {tab:"mine",el:".quest",ic:"📖",t:"Your story",p:"Your active story sits here. Pick one in Quests and ordinary mining uncovers its four clues while you dig — offline progress counts too. Contracts still run in the background; they'll pop up on their own when one is finished."},
-  {tab:"mine",el:"#rationPill",ic:"⛏",t:"Free daily shift",p:"Once a day, for free, an auto-swinger works the pick for you. Start with 3 hours; each shift you take unlocks a longer one, up to 12. It keeps swinging even when the game is closed. When this glows gold, tap it."},
+  {tab:"mine",el:"#rationPill",ic:"⛏",t:"Auto-swinger",p:"For $15M, a hired hand works the pick for you — any time, no daily limit. Choose a 3, 6, 9 or 12 hour shift. It keeps swinging even when the game is closed. When this glows gold, tap it."},
   {tab:"upgrades",el:"#tab-upgrades .cols",ic:"⚒",t:"Upgrades",p:"The full shop: every pickaxe, every crew type, and your bunk. Crew get 20% pricier with each hire. The bunk stretches offline earnings from 8 hours up to 48. Every 20 of the same crew doubles their power — 20, 40, 60, 80, 100 — so stacking one type pays off."},
   {tab:"quests",el:"#sList",ic:"📖",t:"Stories",p:"Every layer has a story with a character and four clues. Pick one as your active story and ordinary mining uncovers it. Finishing earns a keepsake that shows beside your name on the leaderboard."},
   {tab:"quests",el:"#q-contracts",ic:"✎",t:"Collecting contracts",p:"This is where contract rewards are collected. One button grabs everything that's finished. New contracts land at 00:00, 06:00, 12:00 and 18:00 UTC.",pre:()=>document.querySelector("[data-q=contracts]").click(),post:()=>document.querySelector("[data-q=stories]").click()},
@@ -1519,16 +1520,16 @@ function render(){
   const nb=BUNKS[(S.bunk||0)+1];$("bunkName").innerHTML=BUNKS[S.bunk||0].name+`<em>${BUNKS[S.bunk||0].cap}h offline</em>`;
   if(nb){$("bunkDesc").textContent=`Upgrade to the ${nb.name}: crew keeps working for ${nb.cap} hours while you're away.`;$("bunkBtn").textContent=fmt(nb.cost);$("bunkBtn").disabled=S.cash<nb.cost}
   else{$("bunkDesc").textContent="The best quarters in the mine. Crew works up to 48 hours while you're gone.";$("bunkBtn").textContent="Maxed";$("bunkBtn").disabled=true}
-  {const on=autoOn(),cd=Math.max(0,(S.autoBought||0)+AUTO_CD-Date.now());$("autoBadge").style.display=on?"":"none";$("autoBadge").textContent="auto · "+eta2(S.autoUntil-Date.now());
+  {const on=autoOn();$("autoBadge").style.display=on?"":"none";$("autoBadge").textContent="auto · "+eta2(S.autoUntil-Date.now());
    $("autoState").textContent=on?"working":"";
    if(on){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${AUTO_RATE()} swings/sec.`;$("autoBtn").textContent="On shift";$("autoBtn").disabled=true}
-   else if(cd>0){$("autoDesc").textContent=`Next free shift in ${eta2(cd)}.`;$("autoBtn").textContent=eta2(cd);$("autoBtn").disabled=true}
-   else{$("autoDesc").textContent=`Ready. A 3-hour shift earns about ${fmt(clickPower()*3*3*3600)} at your current swing.`;$("autoBtn").textContent="Start shift";$("autoBtn").disabled=false}}
+   else if(S.cash<AUTO_COST){$("autoDesc").textContent=`Costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`;$("autoBtn").textContent=fmt(AUTO_COST);$("autoBtn").disabled=true}
+   else{$("autoDesc").textContent=`Ready. A 3-hour shift earns about ${fmt(clickPower()*3*3*3600)} at your current swing.`;$("autoBtn").textContent="Hire — "+fmt(AUTO_COST);$("autoBtn").disabled=false}}
   renderThrone();renderPerks();renderDebt();
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
   document.querySelectorAll(".eq button,button.buy[data-pick],button.buy[data-crew]").forEach(b=>b.classList.toggle("can",!b.disabled));
   $("rankName").textContent="· "+RANKSN[Math.min(7,S.depth)]+(S.oil?` · ${S.oil} oil`:"");
-  {const rp=$("rationPill");if(autoOn()){rp.classList.add("wait");rp.textContent="⛏ Swinging · "+eta2(S.autoUntil-Date.now())}else if(autoReady()){rp.classList.remove("wait");rp.textContent="⛏ Free shift ready"}else{rp.classList.add("wait");rp.textContent="⛏ Shift in "+eta2((S.autoBought||0)+AUTO_CD-Date.now())}}
+  {const rp=$("rationPill");if(autoOn()){rp.classList.add("wait");rp.textContent="⛏ Swinging · "+eta2(S.autoUntil-Date.now())}else if(autoReady()){rp.classList.remove("wait");rp.textContent="⛏ Hire for "+fmt(AUTO_COST)}else{rp.classList.add("wait");rp.textContent="⛏ Hire ("+fmt(AUTO_COST)+")"}}
   {const np=PICKS[S.pick+1];let n=0;if(np&&S.cash>=np.cost)n++;CREW.forEach((c,i)=>{if(i>2&&!(c.rank&&(S.debts||0)<c.rank)&&S.cash>=crewCost(i))n++});const nb=BUNKS[(S.bunk||0)+1];if(nb&&S.cash>=nb.cost)n++;
    const badge=$("upBadge");badge.textContent=n;badge.classList.toggle("on",n>0&&!$("tab-upgrades").classList.contains("on"));
    if(n>0&&!$("tab-upgrades").classList.contains("on")&&Date.now()-lastNudge>180000&&S.lifetime>500){lastNudge=Date.now();toast(`You can afford ${n} more upgrade${n>1?"s":""} — don't sit on your cash. Check Upgrades.`)}}
