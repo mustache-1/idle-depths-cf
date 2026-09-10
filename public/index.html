@@ -647,6 +647,21 @@
   .stile.active .st8{color:var(--lamp)}
   .stile .sp{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
   .stile .sp i{display:block;height:100%;background:var(--lamp)}
+  .tinput{width:100%;height:46px;padding:0 13px;border-radius:10px;
+    border:1px solid var(--line2);background:var(--panel);color:var(--ink);
+    font:inherit;font-size:15px;outline:none}
+  .tinput:focus{border-color:var(--lamp);box-shadow:0 0 0 3px rgba(255,176,31,.14)}
+  .tinput.bad{border-color:var(--red);box-shadow:0 0 0 3px rgba(255,82,82,.13)}
+  .terr{min-height:18px;margin-top:6px;font-size:12.5px;color:var(--red)}
+  /* the top three sit above a line; everyone below is "the rest of the shift" */
+  .board tr.lastpod td{border-bottom:0}
+  .board tr.cut td{padding:0;border:0;position:relative;height:26px}
+  .board tr.cut td::before{content:"";position:absolute;left:0;right:0;top:13px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--line2) 18%,var(--line2) 82%,transparent)}
+  .board tr.cut span{position:relative;display:inline-block;left:50%;transform:translateX(-50%);
+    top:5px;background:var(--panel);padding:0 12px;font-size:11px;color:var(--mute);letter-spacing:.04em}
+  .board tr.p1 td,.board tr.p2 td,.board tr.p3 td{background:rgba(255,176,31,.045)}
+  .board tr.p1 td{background:rgba(255,176,31,.085)}
   /* top three carry their own light */
   .board tr.p1 td:nth-child(2){color:#ffd76a;text-shadow:0 0 14px rgba(255,215,106,.55),0 0 30px rgba(255,176,31,.28)}
   .board tr.p2 td:nth-child(2){color:#dfe4ea;text-shadow:0 0 12px rgba(223,228,234,.42)}
@@ -690,16 +705,38 @@
   .spager button:not(:disabled):hover{border-color:var(--lamp);color:var(--lamp)}
   @media(max-width:700px){.sgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:380px){.sgrid{grid-template-columns:1fr}}
-  .newbuild{position:fixed;left:50%;bottom:-90px;transform:translateX(-50%);z-index:200;
-    display:flex;align-items:center;gap:12px;max-width:calc(100vw - 24px);
-    background:var(--panel2);border:1px solid var(--lamp);border-radius:12px;
-    padding:11px 13px;box-shadow:0 10px 30px rgba(0,0,0,.55);
-    transition:bottom .35s ease;font-size:14px}
-  .newbuild.on{bottom:18px}
-  .newbuild span{color:var(--ink);min-width:0}
-  .newbuild button{flex:none;height:36px;padding:0 14px;border:0;border-radius:8px;
-    background:var(--lamp);color:#20180a;font:inherit;font-weight:500;cursor:pointer}
-  @media(max-width:480px){.newbuild{font-size:13px;padding:10px 11px;gap:9px}}
+  /* ---- new build: the mine goes dark, one lantern stays lit ---- */
+  .nbwrap{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;
+    padding:24px;background:rgba(4,3,2,.86);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+  .nbwrap.on{display:flex;animation:nbin .3s ease}
+  @keyframes nbin{from{opacity:0}to{opacity:1}}
+  .nbcard{position:relative;width:100%;max-width:380px;text-align:center;
+    background:linear-gradient(180deg,#1d1710,#141009);border:1px solid #4a3a24;border-radius:16px;
+    padding:10px 24px 22px;box-shadow:0 24px 60px rgba(0,0,0,.7),0 0 60px rgba(255,176,31,.10)}
+  .nblamp{position:relative;height:118px;display:flex;align-items:center;justify-content:center}
+  .nblamp svg{position:relative;z-index:2;image-rendering:pixelated}
+  .nbglow{position:absolute;top:50%;left:50%;width:280px;height:280px;transform:translate(-50%,-50%);
+    border-radius:50%;pointer-events:none;
+    background:radial-gradient(circle,rgba(255,190,80,.42) 0%,rgba(255,176,31,.16) 38%,transparent 68%)}
+  .nbcard b{display:block;font-size:19px;font-weight:600;color:var(--lamp2);letter-spacing:-.01em}
+  .nbcard p{margin:9px auto 18px;max-width:32ch;font-size:14px;line-height:1.55;color:var(--dim)}
+  .nbgo{width:100%;height:48px;border:0;border-radius:11px;background:var(--lamp);color:#20180a;
+    font:inherit;font-size:15px;font-weight:600;cursor:pointer}
+  .nbgo:hover{background:var(--lamp2)}
+  .nblater{width:100%;height:40px;margin-top:8px;border:0;background:transparent;
+    color:var(--mute);font:inherit;font-size:13px;cursor:pointer}
+  .nblater:hover{color:var(--dim)}
+  .nbgo:focus-visible,.nblater:focus-visible{outline:2px solid var(--lamp2);outline-offset:2px}
+  @media(prefers-reduced-motion:no-preference){
+    .nbglow{animation:nbpulse 3.4s ease-in-out infinite}
+    .nbflame{animation:nbflicker 1.7s steps(2,end) infinite}
+    .nblamp svg{animation:nbsway 5s ease-in-out infinite;transform-origin:50% 4%}
+  }
+  @keyframes nbpulse{0%,100%{opacity:.8;transform:translate(-50%,-50%) scale(1)}
+    50%{opacity:1;transform:translate(-50%,-50%) scale(1.09)}}
+  @keyframes nbflicker{0%,100%{opacity:1}50%{opacity:.82}}
+  @keyframes nbsway{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
+  @media(max-width:420px){.nbcard{padding:6px 18px 18px}.nblamp{height:100px}.nbglow{width:230px;height:230px}}
   .ct .asks{font-style:normal;font-size:11px;color:var(--lamp);opacity:.85;margin-left:6px}
   .ct{padding:14px 0;border-top:1px solid var(--line)}
   .ct:first-child{border-top:0;padding-top:0}
@@ -1037,9 +1074,30 @@
 
 <div id="strata" aria-hidden="true"></div>
 
-<div class="newbuild" id="newBuild" role="status">
-  <span>A new shift has been posted. Your progress is saved.</span>
-  <button id="newBuildGo">Reload</button>
+<div class="nbwrap" id="newBuild" role="dialog" aria-modal="true" aria-labelledby="nbTitle">
+  <div class="nbcard">
+    <div class="nblamp">
+      <div class="nbglow"></div>
+      <svg viewBox="0 0 24 32" width="76" height="101" aria-hidden="true">
+        <rect x="11" y="0" width="2" height="3" fill="#7a6a4a"/>
+        <rect x="8" y="3" width="8" height="2" fill="#9a8a5a"/>
+        <rect x="6" y="5" width="12" height="2" fill="#c9a24a"/>
+        <rect x="5" y="7" width="14" height="16" fill="#3a2f1c"/>
+        <rect x="7" y="9" width="10" height="12" fill="#1a1610"/>
+        <rect x="9" y="12" width="6" height="8" fill="#e8a336" class="nbflame"/>
+        <rect x="10" y="14" width="4" height="5" fill="#ffd27a" class="nbflame"/>
+        <rect x="11" y="15" width="2" height="3" fill="#fff2d0" class="nbflame"/>
+        <rect x="5" y="23" width="14" height="2" fill="#c9a24a"/>
+        <rect x="7" y="25" width="10" height="2" fill="#7a6a4a"/>
+        <rect x="4" y="7" width="1" height="18" fill="#5a4a2c"/>
+        <rect x="19" y="7" width="1" height="18" fill="#5a4a2c"/>
+      </svg>
+    </div>
+    <b id="nbTitle">The lamps have been re-lit</b>
+    <p>A new version of the mine is ready. Your progress is already saved &mdash; reload to pick up where you left off.</p>
+    <button class="nbgo" id="newBuildGo">Reload the mine</button>
+    <button class="nblater" id="newBuildLater">Not yet</button>
+  </div>
 </div>
 
 <div class="splash" id="splash" style="display:none"><div class="in">
@@ -1056,7 +1114,7 @@
     <div class="stat rate"><small>Per second</small><b id="cps">$0</b></div>
     <div class="stat"><small>Lantern oil</small><b id="oil">×1.0</b></div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center"><button id="rationPill" class="pill">⛏ Hire auto-swinger</button><button class="helpbtn" id="help" aria-label="How to play">?</button><div id="account"></div></div>
+  <div style="display:flex;gap:8px;align-items:center"><button id="dailyPill" class="pill">🏮 Free shift</button><button class="helpbtn" id="help" aria-label="How to play">?</button><div id="account"></div></div>
 </div></div>
 
 <div class="tabs"><div class="wrap">
@@ -1303,7 +1361,7 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
+    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free shift</b> — every 24 hours you can put a hand on the pick for 6 hours at 2 swings/sec, at no cost. The clock starts when you claim, so claiming late never wastes a day.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
@@ -1455,6 +1513,13 @@
 </div>
 <div class="tour" id="tour"><div class="hole" id="hole"></div><div class="tip" id="tip"><div class="tiphead"><span class="tipic" id="tipIc">✦</span><div><small id="tipStep"></small><b id="tipTitle"></b></div></div><p id="tipText"></p><div class="tipdots" id="tipDots"></div><div class="btns"><button class="btn" id="tipSkip" style="margin-right:auto">Skip tour</button><button class="btn" id="tipBack">← Back</button><button class="btn p" id="tipNext">Next →</button></div></div></div>
 <div class="modal" id="ask" style="z-index:70"><div class="dlg" style="max-width:420px"><h3 id="askTitle" style="font-size:18px;font-weight:600;margin-bottom:8px"></h3><p class="note" id="askText" style="font-size:14px;color:var(--ink)"></p><div class="btns"><button class="btn" id="askNo">Cancel</button><button class="btn p" id="askYes">Confirm</button></div></div></div>
+<div class="modal" id="askt" style="z-index:71"><div class="dlg" style="max-width:420px">
+  <h3 id="asktTitle" style="font-size:18px;font-weight:600;margin-bottom:8px"></h3>
+  <p class="note" id="asktText" style="font-size:14px;color:var(--ink);margin-bottom:12px"></p>
+  <input id="asktInput" class="tinput" type="text" autocomplete="off" spellcheck="false" maxlength="24">
+  <div class="terr" id="asktErr"></div>
+  <div class="btns"><button class="btn" id="asktNo">Cancel</button><button class="btn p" id="asktYes">Save</button></div>
+</div></div>
 <div class="modal" id="away" style="z-index:65"><div class="dlg" style="max-width:480px">
   <header><h3>Your workers kept digging.</h3><button class="x" id="awayClose" aria-label="Close">×</button></header>
   <p class="note" style="font-size:14px;color:var(--ink);margin-bottom:14px">Good to have you back. Here's what happened while you were away.</p>
@@ -1669,6 +1734,28 @@ const EXC_TEXT=[[0,"Something is buried under the throne. Every coin the crew ea
 const SHIFTS=[{h:3,rate:3},{h:6,rate:2},{h:9,rate:1.5},{h:12,rate:1}];  // paid, available any time; longer shifts swing slower
 const AUTO_RATE=()=>(S.autoRate||3)*(1+perkLv("foreman")*.35);
 const autoOn=()=>Date.now()<(S.autoUntil||0);
+
+// ---- the free daily shift ----
+// Six hours of auto-swinging, free. The first one is a gift to everyone; after that
+// the clock runs 24h from the moment you claim, not from midnight, so there is no
+// "best" time to log in and nobody loses a day to a timezone.
+const DAILY_H=6,DAILY_RATE=2,DAILY_MS=24*3600*1000;
+const dailyReady=()=>Date.now()>=(S.dailyNext||0);
+const dailyLeft=()=>Math.max(0,(S.dailyNext||0)-Date.now());
+function claimDaily(){
+  if(autoOn()){toast(`A hand is already on the pick — ${eta2(S.autoUntil-Date.now())} left on this shift.`);return}
+  if(!dailyReady()){toast(`The next free shift is ${eta2(dailyLeft())} away. You can still hire a hand from the mine.`);return}
+  S.autoUntil=Date.now()+DAILY_H*3600*1000;
+  S.autoRate=DAILY_RATE;
+  S.autoBought=true;
+  S.shiftsUsed=(S.shiftsUsed||0)+1;
+  S.dailyNext=Date.now()+DAILY_MS;
+  S.dailyTaken=(S.dailyTaken||0)+1;
+  toast(S.dailyTaken===1
+    ?`The overseer waves a hand through. Six hours on the pick, on the house.`
+    :`Free shift claimed — ${DAILY_H} hours at ${DAILY_RATE} swings a second.`);
+  confetti(30);drawScene();render();save();
+}
 const MILES=[20,40,60,80,100];
 const mileAt=m=>Math.max(5,Math.round(m*(1-perkLv("union")*.15)));  // Union card pulls every milestone in
 const crewMult=n=>Math.pow(2,MILES.filter(m=>n>=mileAt(m)).length);   // ×2 at each → up to ×32
@@ -1790,6 +1877,34 @@ function renderAccount(){
 // ---- in-page confirm (browser confirm() can be blocked) ----
 function ask(title,text,yes="Confirm"){return new Promise(res=>{$("askTitle").textContent=title;$("askText").textContent=text;$("askYes").textContent=yes;$("ask").classList.add("on");
   const done=v=>{$("ask").classList.remove("on");$("askYes").onclick=null;$("askNo").onclick=null;res(v)};$("askYes").onclick=()=>done(true);$("askNo").onclick=()=>done(false)})}
+// A text prompt in the page's own language. Resolves to the trimmed string, or null
+// if cancelled. `check` returns an error string for invalid input, or "" when it's fine.
+function askText({title,text,value="",placeholder="",ok="Save",max=24,check}){
+  return new Promise(res=>{
+    const box=$("askt"),inp=$("asktInput"),err=$("asktErr"),yes=$("asktYes"),no=$("asktNo");
+    $("asktTitle").textContent=title;$("asktText").textContent=text||"";
+    yes.textContent=ok;inp.maxLength=max;inp.placeholder=placeholder;inp.value=value;
+    err.textContent="";inp.classList.remove("bad");
+    const validate=()=>{
+      const msg=check?check(inp.value.trim()):"";
+      err.textContent=msg;inp.classList.toggle("bad",!!msg&&inp.value.trim()!=="");
+      yes.disabled=!!msg;return !msg;
+    };
+    const done=v=>{
+      box.classList.remove("on");
+      inp.oninput=null;inp.onkeydown=null;yes.onclick=null;no.onclick=null;
+      yes.disabled=false;res(v);
+    };
+    inp.oninput=validate;
+    inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();if(validate())done(inp.value.trim())}
+      else if(e.key==="Escape"){e.preventDefault();done(null)}};
+    yes.onclick=()=>{if(validate())done(inp.value.trim())};
+    no.onclick=()=>done(null);
+    box.classList.add("on");validate();
+    setTimeout(()=>{inp.focus();inp.select()},50);
+  });
+}
+
 // ---- your miner modal ----
 let draft={};
 function previewSvg(){$("mPreview").innerHTML=`<rect width="34" height="34" fill="#1a1512" rx="4"/>`+miner(2,1,"",draft.shirt,draft.hat)}
@@ -2300,7 +2415,7 @@ function openShift(){if(autoOn()){toast(`The auto-swinger is on shift — ${eta2
   $("shiftList").innerHTML=SHIFTS.map((x,i)=>{const locked=i>tier;return `<button class="shift ${locked?'lock':''}" data-shift="${x.h}" ${locked?'disabled':''}><b>${x.h}h</b><small>${x.rate}/sec · ~${fmt(clickPower()*x.rate*x.h*3600)}</small></button>`}).join("");
   document.querySelectorAll("[data-shift]:not([disabled])").forEach(b=>b.onclick=()=>{if(S.cash<AUTO_COST){toast("Not enough cash.");return}const x=SHIFTS.find(z=>z.h==b.dataset.shift);S.cash-=AUTO_COST;S.autoRate=x.rate;S.autoBought=Date.now();S.autoUntil=Date.now()+x.h*3600*1000*partyShiftMult();S.shiftsUsed=(S.shiftsUsed||0)+1;$("shiftModal").classList.remove("on");toast(`Hired an auto-swinger for a ${x.h}-hour shift (${fmt(AUTO_COST)}). It keeps swinging even if you close the game.`);confetti(20);render();save()});
   $("shiftModal").classList.add("on")}
-$("rationPill").onclick=openShift;$("autoBtn").onclick=openShift;$("shiftClose").onclick=()=>$("shiftModal").classList.remove("on");
+$("dailyPill").onclick=claimDaily;$("autoBtn").onclick=openShift;$("shiftClose").onclick=()=>$("shiftModal").classList.remove("on");
 
 // ---- crew (real multiplayer: create/join by code, xp synced to the server) ----
 let PARTY=null,partyXpBuf=0,partyBusy=false;
@@ -2315,8 +2430,17 @@ async function partyCreate(){if(!USER||partyBusy)return;partyBusy=true;
   }catch(e){toast("Couldn't create a crew right now.")}
   partyBusy=false;render()}
 async function partyJoin(){if(!USER||partyBusy)return;
-  const code=(prompt("Enter a 5-letter crew code:")||"").trim();if(!code)return;partyBusy=true;
-  try{const r=await fetch("/api/crew/join",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({code})});
+  const code=await askText({
+    title:"Join a crew",
+    text:"Ask a friend for their five-letter code. You'll find yours at the top of the crew tab.",
+    placeholder:"K7QMD",ok:"Join crew",max:5,
+    // The server's alphabet drops I, O, 0 and 1 so codes can be read aloud.
+    check:v=>!v?"Enter the code they gave you."
+      :v.length<5?"Codes are five characters."
+      :!/^[A-HJ-NP-Za-hj-np-z2-9]{5}$/.test(v)?"That isn't a valid code — no I, O, 0 or 1.":"",
+  });
+  if(code===null)return;partyBusy=true;
+  try{const r=await fetch("/api/crew/join",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({code:code.toUpperCase()})});
     const d=await r.json();if(d.error)toast(d.error);else{PARTY=d;toast("Joined the crew.");confetti(16)}
   }catch(e){toast("Couldn't join that crew.")}
   partyBusy=false;render()}
@@ -2343,9 +2467,18 @@ async function crewPost(path,body,okMsg){
 }
 async function partyRename(){
   const cur=(PARTY&&PARTY.name)||"";
-  const name=prompt("Name the crew (2-24 characters)",cur);
+  const name=await askText({
+    title:"Name the crew",
+    text:"Everyone in the crew sees this, and it's the name that shows on the crew board.",
+    value:cur,placeholder:"The East Gallery",ok:"Rename crew",max:24,
+    // Mirrors the server's rule, so a rejection never comes as a surprise.
+    check:v=>!v?"Give the crew a name."
+      :v.length<2?"A little longer than that."
+      :!/^[A-Za-z0-9 '._-]+$/.test(v)?"Letters, numbers, spaces, and ' . _ - only."
+      :v===cur?"That's already the name.":"",
+  });
   if(name===null)return;
-  await crewPost("/api/crew/rename",{name:name.trim()},"Crew renamed.");
+  await crewPost("/api/crew/rename",{name},"Crew renamed.");
 }
 async function partyPromote(id){
   const m=(PARTY.members||[]).find(x=>x.id===id);if(!m)return;
@@ -2465,7 +2598,7 @@ const TIPS=[
   {id:"contract",when:()=>S.contracts&&S.contracts.list.some(c=>!c.claimed&&cProg(c)>=c.n),tab:"quests",el:"#q-contracts",ic:"✎",t:"A contract is finished",p:"Contracts run in the background and refresh every six hours. Collect everything that's done with one button — progress counts while you're away, too."},
   {id:"demand",when:()=>S.contracts&&S.contracts.list.some(c=>c.demand&&!c.claimed),tab:"quests",el:"#q-contracts",ic:"!",t:"The warden wants something",p:"A demand is a contract with a deadline. Meet it and the pay is far better than a normal job. Miss it and he docks everything you earn by 20% for half an hour."},
   {id:"keepsake",when:()=>((S.story&&S.story.keeps)||[]).length>=1,tab:"mine",el:"#account",ic:"🛏",t:"You earned a keepsake",p:"Take it to the Shelf in your Bunkhouse and put it out. Displayed keepsakes work for you, and both halves of the same story work far harder together. Your bunk decides how many you can display at once."},
-  {id:"auto",when:()=>S.cash>=AUTO_COST&&!autoOn(),tab:"mine",el:"#rationPill",ic:"⛏",t:"Hire a hand for the pick",p:"An auto-swinger works the rock for you for 3 to 12 hours, even with the game closed. Shorter shifts swing faster. Your streak stays maxed the whole time."},
+  {id:"auto",when:()=>dailyReady()&&!autoOn(),tab:"mine",el:"#dailyPill",ic:"🏮",t:"Your free shift is ready",p:"Every 24 hours the overseer lets a hand work your pick for six hours, free — even with the game closed. The clock starts when you claim it, not at midnight, so there is no bad time to come back. You can still pay for a longer shift from the Upgrades tab any time."},
   {id:"wyrm",when:()=>(S.bosses||0)>=1,tab:"mine",el:"#rock",ic:"🐍",t:"You killed the Wyrm",p:"It surfaces at random. Cut it down inside 30 seconds and you get the Sunforged pick — everything doubles for five minutes. The Wyrm bait perk makes it show up more often."},
   {id:"candebt",when:()=>S.cash>=debtCost(),tab:"debt",el:"#tab-debt .card",ic:"⚖",t:"You can pay Ashcombe",p:"Paying resets the mine but hands you lantern oil: a permanent bonus to everything and the currency for perks. Each payment also unlocks things the first run can't reach."},
   {id:"perks",when:()=>(S.oil||0)>=1,tab:"perks",el:"#perkList",ic:"✦",t:"You have lantern oil",p:"Unspent oil gives +10% to everything each. Spent oil buys permanent perks instead. Neither is wrong — decide whether you want a fatter multiplier or a different way to play."},
@@ -2517,6 +2650,7 @@ $("helpTour").onclick=tourStart;$("helpTour2").onclick=tourStart;
 document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-q]").forEach(x=>x.classList.toggle("on",x===b));["ledger","stories","contracts"].forEach(k=>$("q-"+k).classList.toggle("on",b.dataset.q===k));if(b.dataset.q==="ledger")renderLedger()});
 $("lgClaim").onclick=ledgerSign;
 $("newBuildGo").onclick=async()=>{await save();location.reload()};
+$("newBuildLater").onclick=()=>{$("newBuild").classList.remove("on")};
 function switchTab(t){document.body.classList.toggle("minetab",t==="mine");document.documentElement.classList.toggle("minetab",t==="mine");if(t==="leaderboard")loadBoard();document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests"){renderLedger();renderStories()}}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 function eta2(ms){const s=Math.ceil(ms/1000);return s<3600?Math.floor(s/60)+"m":Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m"}
@@ -2602,11 +2736,11 @@ function render(){
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
   document.querySelectorAll(".eq button,button.buy[data-pick],button.buy[data-crew]").forEach(b=>b.classList.toggle("can",!b.disabled));
   $("rankName").textContent="· "+RANKSN[Math.min(RANKSN.length-1,S.depth)]+(S.oil?` · ${S.oil} oil`:"");
-  {const rp=$("rationPill"),sm=innerWidth<=560;
-   // "Hire ($10.0M)" eats half a phone's top bar, so drop to the bare essentials there
+  {const rp=$("dailyPill"),sm=innerWidth<=560;
+   // The phone top bar is tight, so short labels there.
    if(autoOn()){rp.classList.add("wait");rp.textContent=(sm?"⛏ ":"⛏ Swinging · ")+eta2(S.autoUntil-Date.now())}
-   else if(autoReady()){rp.classList.remove("wait");rp.textContent=sm?"⛏ Hire":"⛏ Hire for "+fmt(AUTO_COST)}
-   else{rp.classList.add("wait");rp.textContent=sm?"⛏ "+fmt(AUTO_COST):"⛏ Hire ("+fmt(AUTO_COST)+")"}}
+   else if(dailyReady()){rp.classList.remove("wait");rp.textContent=sm?"🏮 Free":"🏮 Free shift ready"}
+   else{rp.classList.add("wait");rp.textContent=sm?"🏮 "+eta2(dailyLeft()):"🏮 Free shift in "+eta2(dailyLeft())}}
   {const np=PICKS[S.pick+1];let n=0;if(np&&S.cash>=np.cost)n++;CREW.forEach((c,i)=>{if(i>2&&!(c.rank&&(S.debts||0)<c.rank)&&S.cash>=crewCost(i))n++});const nb=BUNKS[(S.bunk||0)+1];if(nb&&S.cash>=nb.cost)n++;
    const badge=$("upBadge");badge.textContent=n;badge.classList.toggle("on",n>0&&!$("tab-upgrades").classList.contains("on"));
    if(n>0&&!$("tab-upgrades").classList.contains("on")&&Date.now()-lastNudge>180000&&S.lifetime>500){lastNudge=Date.now();toast(`You can afford ${n} more upgrade${n>1?"s":""} — don't sit on your cash. Check Upgrades.`)}}
@@ -3062,7 +3196,7 @@ function descend(){const L=LAYERS[S.depth],nx=LAYERS[S.depth+1];if(L.rank&&(S.de
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
-  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
+  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,dailyNext:S.dailyNext,dailyTaken:S.dailyTaken,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
   toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);feedPost("debt",S.debts);drawScene();render();save();
 }
@@ -3085,6 +3219,7 @@ async function checkBuild(){
     buildPrompted=true;
     const bar=$("newBuild");
     if(bar)bar.classList.add("on");
+    const go=$("newBuildGo");if(go)go.focus();
   }catch(e){}
 }
 setInterval(checkBuild,4*60*1000);
@@ -3142,7 +3277,7 @@ function renderBoard(){
     const rb=$("boardRetry");if(rb)rb.onclick=loadBoard;
     return}
   if(!list.length){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">${boardMode==="week"?"Nobody has mined this week yet. Sign in and be first.":"No one has mined yet. Sign in and be the first."}</td></tr>`;$("nudge").textContent="";return}
-  rows.innerHTML=list.map((p,i)=>`<tr data-p="${i}" class="${i<3?'p'+(i+1)+' ':''}${USER&&p.id===USER.id?'me':''}"><td>${i+1}</td><td><svg viewBox="0 0 34 34" width="26" height="26" style="vertical-align:middle;margin-right:8px;image-rendering:pixelated"><rect width="34" height="34" rx="6" fill="#1a1512"/>${miner(2,1,"",p.shirt||"#f1e6d2",p.hat||"#f3b24a",null)}</svg>${esc(p.name)}${p.title?` <span style="color:var(--lamp);font-size:12px">${esc(p.title)}</span>`:""}${p.keeps?` <span title="${p.keeps} keepsakes" style="color:var(--gem);font-size:12px">◆${p.keeps}</span>`:""}<em>depth ${p.depth} · ${p.oil} oil</em></td><td>${fmt(p.score)}</td></tr>`).join("");
+  rows.innerHTML=list.map((p,i)=>`${i===3?`<tr class="cut"><td colspan="3"><span>the rest of the shift</span></td></tr>`:""}<tr data-p="${i}" class="${i<3?'p'+(i+1)+' ':''}${i===2?'lastpod ':''}${USER&&p.id===USER.id?'me':''}"><td>${i+1}</td><td><svg viewBox="0 0 34 34" width="26" height="26" style="vertical-align:middle;margin-right:8px;image-rendering:pixelated"><rect width="34" height="34" rx="6" fill="#1a1512"/>${miner(2,1,"",p.shirt||"#f1e6d2",p.hat||"#f3b24a",null)}</svg>${esc(p.name)}${p.title?` <span style="color:var(--lamp);font-size:12px">${esc(p.title)}</span>`:""}${p.keeps?` <span title="${p.keeps} keepsakes" style="color:var(--gem);font-size:12px">◆${p.keeps}</span>`:""}<em>depth ${p.depth} · ${p.oil} oil</em></td><td>${fmt(p.score)}</td></tr>`).join("");
   rows.querySelectorAll("[data-p]").forEach(tr=>tr.onclick=()=>openRival(list[+tr.dataset.p]));
   const me=USER?list.findIndex(p=>p.id===USER.id):-1;
   $("nudge").textContent=me>0?`You're ${fmt(list[me-1].score-list[me].score)} behind ${list[me-1].name}. Keep swinging.`:me===0?"You're on top. Everyone below is coming for you.":USER?"You're not on the board yet. Mine a little and check back.":"";
