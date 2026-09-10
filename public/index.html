@@ -1029,7 +1029,7 @@
   <div class="titlebar"><h2>Perks</h2><span>Spend lantern oil on permanent advantages</span></div>
   <div class="card" style="padding:16px 18px;margin-bottom:16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
     <div><small class="note">Lantern oil to spend</small><div style="font-size:26px;font-weight:600;color:var(--lamp2)" id="perkOil">0</div></div>
-    <p class="note" style="max-width:520px">You earn oil by paying Lord Ashcombe's $50M debt. Each flask you hold gives +10% to everything; spending it here trades that for a targeted, permanent perk. Choose what fits how you play.</p>
+    <p class="note" style="max-width:520px">You earn oil by paying Lord Ashcombe's $50M debt — and the mine gives up the odd flask to anyone still swinging. Each flask you hold gives +10% to everything; spending it here trades that for a targeted, permanent perk. Choose what fits how you play.</p>
   </div>
   <div class="cols" id="perkList"></div>
 </div>
@@ -1316,7 +1316,7 @@ const RANK_UNLOCKS=[
 ];
 const BET_MAX_PCT=.10,BET_MIN=10,BET_COOLDOWN=4000;
 
-const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,last:Date.now()});
+const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,oilFound:0,last:Date.now()});
 let S={...fresh(),oil:0,lifetime:0,profile:{name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a"}};
 const SHIRTS=[{c:"#f1e6d2"},{c:"#3aa0c8"},{c:"#c0553c"},{c:"#4f9e7a"},{c:"#b07acb"},{c:"#d1a34a"},{c:"#e0567a"},{c:"#2b2b2b",need:"gems25",label:"Gem hunter"},{c:"#ffd27a",need:"debt",label:"Paid the debt"},{c:"#5ec9b6",need:"glimmer",label:"Reached The Glimmer"},{c:"#e6b422",need:"debt5",label:"Paid the debt 5 times"}];
 const HATS=[{c:"#f3b24a"},{c:"#e8e8e8"},{c:"#c0553c"},{c:"#3aa0c8"},{c:"#4f9e7a"},{c:"#1a1614",need:"wyrm",label:"Slew the Wyrm"},{c:"#c48cff",need:"throne",label:"Reached the Hollow Throne"},{c:"#8fdc6a",need:"days7",label:"Played 7 days"}];
@@ -2232,7 +2232,7 @@ function chips(){const rk=$("rock"),r=rk.getBoundingClientRect(),sx=r.width/340,
 // ---- random drops ----
 // A purse falls somewhere on the rock face now and then. Grab it before it fades.
 let dropNext=Date.now()+45000+Math.random()*45000,dropGone=0;
-const DROP_MIN=70000,DROP_VAR=90000,DROP_LIFE=13000;
+const DROP_MIN=70000,DROP_VAR=90000,DROP_LIFE=13000,OIL_PER_RUN=2;
 function dropReady(){
   return !boss && !document.hidden
     && $("tab-mine").classList.contains("on")
@@ -2260,8 +2260,11 @@ function dropClaim(){
   dropHide();
   const worth=Math.max(clickPower()*40,cps()*60,50);
   const r=Math.random();
-  if(r<.12&&(S.debts||0)>0){S.oil=(S.oil||0)+1;toast("A flask of lantern oil, still corked. +1 oil.");confetti(60)}
-  else if(r<.23){S.buffUntil=Math.max(S.buffUntil||0,Date.now())+90000;
+  const canOil=(S.debts||0)>0&&(S.oilFound||0)<OIL_PER_RUN;
+  if(r<.12&&canOil){S.oilFound=(S.oilFound||0)+1;S.oil=(S.oil||0)+1;
+    const left=OIL_PER_RUN-S.oilFound;
+    toast(`A flask of lantern oil, still corked. +1 oil.`+(left?"":" The mine has no more to give this run."));confetti(60)}
+  else if(r<.23||(r<.12&&!canOil)){S.buffUntil=Math.max(S.buffUntil||0,Date.now())+90000;
     toast("The purse held a shard of sunmetal — everything ×2 for 90 seconds.");confetti(50);drawScene()}
   else if(r<.37){const v=nice(worth*5);earn(v);S.gems=(S.gems||0)+3;
     toast(`A knotted pouch: ${fmt(v)} and three loose gems.`);confetti(50)}
