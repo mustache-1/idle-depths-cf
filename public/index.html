@@ -253,10 +253,10 @@
   .coffee small{display:block;color:var(--dim);font-size:11.5px;line-height:1.35}
   .coffee:hover{background:rgba(255,176,31,.2);box-shadow:0 0 16px rgba(255,176,31,.18)}
   .fcoffee{max-width:340px;margin:14px 0}
-  .log{padding:14px 16px;display:flex;flex-direction:column;min-height:0}
-  .log h3{font-size:15px;font-weight:600;display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+  .log{padding:11px 15px;display:flex;flex-direction:column;min-height:0}
+  .log h3{font-size:14px;font-weight:600;display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
   .log h3 em{font-style:normal;font-size:12px;color:var(--mute);font-weight:400;margin-left:auto}
-  .logstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-bottom:11px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+  .logstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-bottom:8px;margin-bottom:2px;border-bottom:1px solid var(--line)}
   .logstats small{display:block;font-size:11px;color:var(--dim)}
   .logstats b{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
   .logstats div:nth-child(1) b{color:var(--green)}
@@ -264,7 +264,7 @@
   .logstats div:nth-child(3) b{color:var(--lamp2)}
   .logstats div:nth-child(4) b{color:var(--gem)}
   #logList{list-style:none;min-height:0;overflow-y:auto;scrollbar-width:thin}
-  #logList li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+  #logList li{display:flex;gap:10px;align-items:baseline;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
   #logList li:last-child{border-bottom:0}
   #logList li i{font-style:normal;flex:none;width:16px;text-align:center;opacity:.85}
   #logList li span{flex:1;min-width:0;color:var(--ink)}
@@ -287,17 +287,20 @@
     .stat b{font-size:15px}
     .stat small{font-size:11px}
     #tab-mine{width:min(1440px,calc(100% + 400px),calc(100vw - 40px));margin-left:calc((100% - min(1440px,calc(100% + 400px),calc(100vw - 40px))) / 2);padding:12px 0}
-    #tab-mine.on ~ footer{display:none}
+    #tab-mine.on ~ footer{padding:8px 0 6px;font-size:11.5px;gap:12px;align-items:center}
+    #tab-mine.on ~ footer .fcoffee{display:none}
+    #tab-mine.on ~ footer #lifeStats,#tab-mine.on ~ footer #awayNote{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
+    body.minetab{overflow:hidden}
     .pit{display:grid;grid-template-columns:236px minmax(0,1fr) 286px;gap:13px;align-items:stretch;
-      height:calc(100vh - 108px);min-height:0}
+      height:calc(100vh - 166px);min-height:0}
     .pit .stage{height:100%;min-height:0}
     .pit .side{align-self:start;max-height:100%;min-height:0;overflow-y:auto;scrollbar-width:thin}
     .pit .side .card{padding:11px 13px}
-    .pit .hero{flex:none;width:min(100%,calc((100vh - 320px) * 1.79));margin:0 auto;display:flex;flex-direction:column}
+    .pit .hero{flex:none;width:min(100%,calc((100vh - 500px) * 1.79));margin:0 auto;display:flex;flex-direction:column}
     .pit .rock{flex:none;aspect-ratio:340/190;min-height:0}
     .pit .links{flex:none}
     .pit .eqcard{flex:1;min-height:0}
-    .pit .log{flex:1;min-height:0}
+    .pit .log{flex:1;min-height:110px;max-height:215px}
     .pit .titlebar h2{font-size:20px}
     .pit .titlebar span{font-size:13px}
     .pit .rank b{font-size:20px}
@@ -1773,7 +1776,7 @@ document.querySelectorAll("[data-hs]").forEach(b=>b.onclick=()=>openHelp(b.datas
 document.querySelectorAll("[data-help]").forEach(a=>a.onclick=e=>{e.preventDefault();openHelp(a.dataset.help)});
 $("helpTour").onclick=tourStart;$("helpTour2").onclick=tourStart;
 document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-q]").forEach(x=>x.classList.toggle("on",x===b));$("q-stories").classList.toggle("on",b.dataset.q==="stories");$("q-contracts").classList.toggle("on",b.dataset.q==="contracts")});
-function switchTab(t){if(t==="leaderboard")loadBoard();document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests")renderStories()}
+function switchTab(t){document.body.classList.toggle("minetab",t==="mine");if(t==="leaderboard")loadBoard();document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests")renderStories()}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 function eta2(ms){const s=Math.ceil(ms/1000);return s<3600?Math.floor(s/60)+"m":Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m"}
 function eta(cost){const need=cost-S.cash;if(need<=0)return "Ready now";const r=cps();if(r<=0)return "Keep swinging";const s=need/r;if(s<60)return Math.ceil(s)+"s";if(s<3600)return Math.floor(s/60)+"m "+Math.ceil(s%60)+"s";if(s<86400)return Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m";return Math.floor(s/86400)+"d "+Math.floor(s%86400/3600)+"h"}
@@ -2262,6 +2265,7 @@ if($("sealBtn"))$("sealBtn").onclick=rebirth;
 $("dPay").onclick=rebirth;
 $("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. Your workers now work ${nb.cap}h while you're away.`);render();save()};
 document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>switchTab(b.dataset.goto));
+document.body.classList.toggle("minetab",$("tab-mine").classList.contains("on"));
 $("rebirth").onclick=rebirth;
 $("reset").onclick=async()=>{if(await ask("Start over?","Everything — cash, workers, lantern oil, perks, trophies and stories — will be lost. This can't be undone.","Reset everything"))
   {S={...fresh(),oil:0,lifetime:0,profile:S.profile};local.del();closeModal();drawScene();render();save()}};
