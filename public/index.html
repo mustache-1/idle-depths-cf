@@ -1143,7 +1143,7 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
+    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
@@ -1423,7 +1423,7 @@ const RANK_UNLOCKS=[
 ];
 const BET_MAX_PCT=.10,BET_MIN=10,BET_COOLDOWN=4000;
 
-const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,oilFound:0,dockUntil:0,shelf:[],last:Date.now()});
+const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,oilFound:0,dockUntil:0,shelf:[],tips:{},last:Date.now()});
 let S={...fresh(),oil:0,lifetime:0,profile:{name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a"}};
 const SHIRTS=[{c:"#f1e6d2"},{c:"#3aa0c8"},{c:"#c0553c"},{c:"#4f9e7a"},{c:"#b07acb"},{c:"#d1a34a"},{c:"#e0567a"},{c:"#2b2b2b",need:"gems25",label:"Gem hunter"},{c:"#ffd27a",need:"debt",label:"Paid the debt"},{c:"#5ec9b6",need:"glimmer",label:"Reached The Glimmer"},{c:"#e6b422",need:"debt5",label:"Paid the debt 5 times"}];
 const HATS=[{c:"#f3b24a"},{c:"#e8e8e8"},{c:"#c0553c"},{c:"#3aa0c8"},{c:"#4f9e7a"},{c:"#1a1614",need:"wyrm",label:"Slew the Wyrm"},{c:"#c48cff",need:"throne",label:"Reached the Hollow Throne"},{c:"#8fdc6a",need:"days7",label:"Played 7 days"}];
@@ -1610,8 +1610,9 @@ async function load(){
       renderShiftLog(real/3600,got);
       $("away").classList.add("on")}
   }
+  if(d&&S.seen&&!d.tips&&(S.lifetime||0)>1e5){S.tips={};for(const t of TIPS){let ok=false;try{ok=t.when()}catch(e){}if(ok)S.tips[t.id]=1}}
   const today=new Date().toISOString().slice(0,10);if(S.lastDay!==today){S.lastDay=today;S.days=(S.days||0)+1}
-  S.ach=S.ach||{};S.story=S.story||{active:null,prog:{},done:{},pick:{},keeps:[]};S.story.keeps=S.story.keeps||[];
+  S.ach=S.ach||{};S.tips=S.tips||{};S.story=S.story||{active:null,prog:{},done:{},pick:{},keeps:[]};S.story.keeps=S.story.keeps||[];
   S.shelf=(S.shelf||[]).filter(n=>S.story.keeps.includes(n)).slice(0,shelfCap());recalcFx();S.profile.shirt=S.profile.shirt||"#f1e6d2";S.profile.hat=S.profile.hat||"#f3b24a";
   renderAccount();buildUI();drawScene();render();loadBoard();loadParty();
   if(USER)save();
@@ -2036,29 +2037,44 @@ function renderParty(){
   $("mgFill").style.width=pct+"%";$("mgProg").textContent=Math.floor(PARTY.xp||0)+" / "+cap;$("mgPct").textContent=Math.floor(pct)+"%"}
 // ---- tutorial ----
 const TOUR=[
-  {tab:"mine",el:null,ic:"⚖",t:"You owe Lord Ashcombe",p:"You couldn't pay, so the lord's men threw you into his mine to work it off. He wants $50M. Every swing chips at the rock — and the debt. Dig deep enough and you might find something worth more than freedom."},
-  {tab:"mine",el:"#rock",ic:"⛏",t:"This is your pit",p:"Tap the scene to swing. Each swing earns cash and cracks the rock face; break it for a bonus. Tap fast to build a streak worth up to +50%. Now and then the Deep Wyrm surfaces here — kill it in 30 seconds for a golden pick that doubles everything for 5 minutes."},
-  {tab:"mine",el:".stats",ic:"$",t:"Cash, income, oil",p:"Cash is what you spend. Per second is what your crew earns without you. Lantern oil is your permanent bonus from paying the debt — and the currency for perks."},
-  {tab:"mine",el:".side .card:nth-child(3)",ic:"⚒",t:"Equipment",p:"Better pickaxes hit harder. Workers and machines earn every second, even while you're away — at half pace, for up to 8 hours (longer with a better bunk)."},
-  {tab:"mine",el:".side .card:first-child",ic:"↓",t:"Descend",p:"Save up to break into the next layer. Each layer pays more, changes the ore, and unlocks a story. Seven layers down is the Hollow Throne; what's beneath it needs a paid debt to reach."},
-  {tab:"mine",el:".quest",ic:"📖",t:"Your story",p:"Your active story sits here. Pick one in Quests and ordinary mining uncovers its four clues while you dig — offline progress counts too. Contracts still run in the background; they'll pop up on their own when one is finished."},
-  {tab:"mine",el:"#rationPill",ic:"⛏",t:"Auto-swinger",p:"For $10M, a hired hand works the pick for you — any time, no daily limit. Choose a 3, 6, 9 or 12 hour shift. It keeps swinging even when the game is closed. When this glows gold, tap it."},
-  {tab:"upgrades",el:"#tab-upgrades .cols",ic:"⚒",t:"Upgrades",p:"The full shop: every pickaxe, every worker type, and your bunk. Workers get 20% pricier with each hire. The bunk stretches offline earnings from 8 hours up to 48. Every 20 of the same crew doubles their power — 20, 40, 60, 80, 100 — so stacking one type pays off."},
-  {tab:"quests",el:"#sList",ic:"📖",t:"Stories",p:"Every layer has a story with a character and four clues. Pick one as your active story and ordinary mining uncovers it. Finishing earns a keepsake that shows beside your name on the leaderboard."},
-  {tab:"quests",el:"#q-contracts",ic:"✎",t:"Collecting contracts",p:"This is where contract rewards are collected. One button grabs everything that's finished. New contracts land at 00:00, 06:00, 12:00 and 18:00 UTC.",pre:()=>document.querySelector("[data-q=contracts]").click(),post:()=>document.querySelector("[data-q=stories]").click()},
-  {tab:"debt",el:"#tab-debt .card",ic:"⚖",t:"Pay the debt",p:"At $50M you pay Ashcombe, walk out, and go back down with lantern oil. Each payment raises the next price and unlocks new things: a Wyrm handler, the Undercroft, new stories."},
-  {tab:"debt",el:"#termList",ic:"✍",t:"Ashcombe's terms",p:"After your first payment you pick the terms of the next run: double or nothing, the quiet shift, or blood money. Different runs, different strategies."},
-  {tab:"perks",el:"#perkList",ic:"✦",t:"Perks",p:"Spend lantern oil on permanent advantages: sharper steel, cheaper crew, more Wyrms, bigger stakes, a head start after paying. Oil spent here stops giving its +10%, so choose what fits how you play."},
-  {tab:"leaderboard",el:"#tab-leaderboard .board",ic:"♛",t:"Leaderboard",p:"The weekly board resets every Monday — last week's top three are named and earn a title. There's an all-time board too. Avatar colors and keepsakes show, so people can see what you've earned."},
-  {tab:"mine",el:"#account",ic:"🛏",t:"The Bunkhouse",p:"Your corner: change your shirt and helmet, set a display name and title, see your record, and collect 25+ trophies. Trophies pay cash and unlock rare colors."},
-  {tab:"mine",el:".links",ic:"🃏",t:"The camp",p:"Everything outside the rock face lives here: the Bunkhouse, the warden's table for a gamble (wheel, slots and blackjack — 25% max stake, the house always keeps a little), the leaderboard, and these rules. Good luck down there."},
+  {tab:"mine",el:null,ic:"⚖",t:"You owe Lord Ashcombe",p:"Fifty million, and no way to pay it. So his men put you at the bottom of his mine to work it off. Everything down here starts with one swing."},
+  {tab:"mine",el:"#rock",ic:"⛏",t:"Swing the pick",p:"Tap the rock face. Every swing earns cash and cracks the rock — break it through and you get a bonus. Go on. Try it.",
+    need:()=>S.swings>=5,needText:()=>`Swing ${Math.max(0,5-S.swings)} more`},
+  {tab:"mine",el:".stats",ic:"$",t:"That's yours",p:"Cash is what you spend. Per second is what gets earned without you — right now it's nothing, because nobody works for you yet."},
+  {tab:"mine",el:".side .card:nth-child(3)",ic:"⚒",t:"Stop swinging alone",p:"A digger costs $30 and never stops. Workers earn every second, awake or asleep — they're the real game. A better pick only makes your own arm hurt less."},
+  {tab:"mine",el:".links",ic:"✦",t:"The rest will find you",p:"Descending, stories, contracts, the warden's table, the shelf in your bunkhouse — none of it matters yet, and each one will introduce itself when it does. Full rules are in Help whenever you want them."},
 ];
+// ---- contextual tips ----
+// The old tour explained sixteen systems to someone who had never swung a pick. These fire
+// once each, at the moment the thing they explain actually becomes true.
+const TIPS=[
+  {id:"canhire",when:()=>S.cash>=crewCost(0)&&CREW.reduce((a,c,i)=>a+S.crew[i],0)===0,tab:"mine",el:".side .card:nth-child(3)",ic:"⚒",t:"You can afford a digger",p:"Hire him. He earns while you swing, while you sleep, and while you're doing something else entirely. Every hire of the same type costs 20% more than the last."},
+  {id:"firstcrew",when:()=>CREW.reduce((a,c,i)=>a+S.crew[i],0)>=1,tab:"mine",el:".stats",ic:"$",t:"Per second is moving",p:"That number is money you get for doing nothing. Grow it and the mine runs itself. Close the game and your crew keeps working at half pace for up to 8 hours."},
+  {id:"candescend",when:()=>S.depth===0&&S.cash>=descendCost(),tab:"mine",el:".side .card:first-child",ic:"↓",t:"You can go deeper",p:"Descending costs cash but raises everything you earn, changes the ore, and opens a new story. There are nine layers. You're on the first."},
+  {id:"gem",when:()=>S.gems>=1,tab:"mine",el:"#rock",ic:"◆",t:"That was a gem",p:"Gems turn up at random while you swing and pay a big multiple of the hit. Deeper layers drop them more often, and the Lucky strike perk pushes the odds further."},
+  {id:"contract",when:()=>S.contracts&&S.contracts.list.some(c=>!c.claimed&&cProg(c)>=c.n),tab:"quests",el:"#q-contracts",ic:"✎",t:"A contract is finished",p:"Contracts run in the background and refresh every six hours. Collect everything that's done with one button — progress counts while you're away, too."},
+  {id:"demand",when:()=>S.contracts&&S.contracts.list.some(c=>c.demand&&!c.claimed),tab:"quests",el:"#q-contracts",ic:"!",t:"The warden wants something",p:"A demand is a contract with a deadline. Meet it and the pay is far better than a normal job. Miss it and he docks everything you earn by 20% for half an hour."},
+  {id:"keepsake",when:()=>((S.story&&S.story.keeps)||[]).length>=1,tab:"mine",el:"#account",ic:"🛏",t:"You earned a keepsake",p:"Take it to the Shelf in your Bunkhouse and put it out. Displayed keepsakes work for you, and both halves of the same story work far harder together. Your bunk decides how many you can display at once."},
+  {id:"auto",when:()=>S.cash>=AUTO_COST&&!autoOn(),tab:"mine",el:"#rationPill",ic:"⛏",t:"Hire a hand for the pick",p:"An auto-swinger works the rock for you for 3 to 12 hours, even with the game closed. Shorter shifts swing faster. Your streak stays maxed the whole time."},
+  {id:"wyrm",when:()=>(S.bosses||0)>=1,tab:"mine",el:"#rock",ic:"🐍",t:"You killed the Wyrm",p:"It surfaces at random. Cut it down inside 30 seconds and you get the Sunforged pick — everything doubles for five minutes. The Wyrm bait perk makes it show up more often."},
+  {id:"candebt",when:()=>S.cash>=debtCost(),tab:"debt",el:"#tab-debt .card",ic:"⚖",t:"You can pay Ashcombe",p:"Paying resets the mine but hands you lantern oil: a permanent bonus to everything and the currency for perks. Each payment also unlocks things the first run can't reach."},
+  {id:"perks",when:()=>(S.oil||0)>=1,tab:"perks",el:"#perkList",ic:"✦",t:"You have lantern oil",p:"Unspent oil gives +10% to everything each. Spent oil buys permanent perks instead. Neither is wrong — decide whether you want a fatter multiplier or a different way to play."},
+  {id:"silver",when:()=>S.depth===4,tab:"mine",el:"#rock",ic:"✦",t:"Read the walls",p:"Silvergrave is covered in the names of miners who never came back up. They're real: the people from the stories, everyone on the leaderboard, and you. Your own name is the bright one."},
+  {id:"warmdark",when:()=>!!S.throne,tab:"mine",el:".side .card:first-child",ic:"◈",t:"The floor opened",p:"The throne was empty, and now there's a way under it. The Warm Dark is the deepest layer in the mine, and whatever is down there settles up in full and on time. Ashcombe never did."},
+];
+
 let tourI=0;
-function tourShow(){const prev=TOUR[tourI-1];if(prev&&prev.post)prev.post();const st=TOUR[tourI];if(!st){tourEnd();return}
+let TQ=TOUR;
+function tourGate(){const st=TQ[tourI];if(!st)return;const b=$("tipNext");
+  if(!st.need){b.disabled=false;return}
+  const ok=st.need();b.disabled=!ok;
+  b.textContent=ok?(tourI===TQ.length-1?"Start mining ⛏":"Next →"):(st.needText?st.needText():"Try it first")}
+function tourShow(){const prev=TQ[tourI-1];if(prev&&prev.post)prev.post();const st=TQ[tourI];if(!st){tourEnd();return}
   switchTab(st.tab||"mine");if(st.pre)st.pre();
-  const tip=$("tip"),h=$("hole");$("tipStep").textContent=`Step ${tourI+1} of ${TOUR.length}`;$("tipIc").textContent=st.ic||"✦";$("tipTitle").textContent=st.t;$("tipText").textContent=st.p;
-  $("tipDots").innerHTML=TOUR.map((_,i)=>`<i class="${i===tourI?'on':i<tourI?'done':''}"></i>`).join("");
-  $("tipNext").textContent=tourI===TOUR.length-1?"Start mining ⛏":"Next →";$("tipBack").style.visibility=tourI?"":"hidden";
+  const tip=$("tip"),h=$("hole");$("tipStep").textContent=TQ.length>1?`Step ${tourI+1} of ${TQ.length}`:"A note from the mine";$("tipIc").textContent=st.ic||"✦";$("tipTitle").textContent=st.t;$("tipText").textContent=st.p;
+  $("tipDots").innerHTML=TQ.length>1?TQ.map((_,i)=>`<i class="${i===tourI?'on':i<tourI?'done':''}"></i>`).join(""):"";
+  $("tipNext").textContent=TQ.length>1?(tourI===TQ.length-1?"Start mining ⛏":"Next →"):"Got it";$("tipBack").style.visibility=tourI?"":"hidden";
+  $("tipSkip").style.visibility=TQ.length>1?"":"hidden";tourGate();
   if(!st.el){h.style.width="0";h.style.height="0";h.style.left="50%";h.style.top="50%";tip.style.left="50%";tip.style.top="50%";tip.style.transform="translate(-50%,-50%)";return}
   tip.style.transform="";const el=document.querySelector(st.el);if(!el){tourI++;tourShow();return}
   el.scrollIntoView({block:"center",behavior:"smooth"});
@@ -2067,10 +2083,22 @@ function tourShow(){const prev=TOUR[tourI-1];if(prev&&prev.post)prev.post();cons
     let top=below+tipH<vh?below:Math.max(12,r.top-tipH-18);if(r.height>vh*.6)top=Math.max(12,vh/2-tipH/2);
     let left=Math.min(Math.max(12,r.left),vw-tipW-12);if(vw<560)left=12;
     tip.style.top=top+"px";tip.style.left=left+"px"},380)}
-function tourStart(){tourI=0;$("tour").classList.add("on");tourShow()}
-function tourEnd(){$("tour").classList.remove("on");const st=TOUR[tourI];if(st&&st.post)st.post();switchTab("mine");S.seen=true;save()}
-$("tipNext").onclick=()=>{tourI++;tourShow()};$("tipBack").onclick=()=>{if(tourI>0){const p=TOUR[tourI];if(p&&p.post)p.post();tourI--;tourShowNoPost();}};
-function tourShowNoPost(){const keep=TOUR[tourI-1];const save=keep&&keep.post;if(keep)keep.post=null;tourShow();if(keep)keep.post=save}$("tipSkip").onclick=tourEnd;$("openTour").onclick=tourStart;
+function tourStart(list){TQ=Array.isArray(list)&&list.length?list:TOUR;tourI=0;$("tour").classList.add("on");tourShow()}
+function tourEnd(){$("tour").classList.remove("on");const st=TQ[tourI];if(st&&st.post)st.post();if(TQ===TOUR){switchTab("mine");S.seen=true}TQ=TOUR;save()}
+$("tipNext").onclick=()=>{if($("tipNext").disabled)return;tourI++;tourShow()};$("tipBack").onclick=()=>{if(tourI>0){const p=TQ[tourI];if(p&&p.post)p.post();tourI--;tourShowNoPost();}};
+function tourShowNoPost(){const keep=TQ[tourI-1];const save=keep&&keep.post;if(keep)keep.post=null;tourShow();if(keep)keep.post=save}$("tipSkip").onclick=tourEnd;$("openTour").onclick=()=>tourStart();
+function tipCheck(){
+  if(!S.seen||boss||$("tour").classList.contains("on"))return;
+  if(document.querySelector(".modal.on")||$("splash").style.display!=="none")return;
+  if($("cPop")&&$("cPop").classList.contains("on"))return;
+  S.tips=S.tips||{};
+  for(const t of TIPS){
+    if(S.tips[t.id])continue;
+    let ok=false;try{ok=t.when()}catch(e){}
+    if(!ok)continue;
+    S.tips[t.id]=Date.now();save();tourStart([t]);return;
+  }
+}
 function openHelp(sec="help"){switchTab("support");document.querySelectorAll("[data-hs]").forEach(b=>b.classList.toggle("on",b.dataset.hs===sec));document.querySelectorAll(".hsec").forEach(p=>p.classList.toggle("on",p.id==="hs-"+sec));window.scrollTo({top:0,behavior:"smooth"})}
 $("help").onclick=()=>openHelp("help");
 document.querySelectorAll("[data-hs]").forEach(b=>b.onclick=()=>openHelp(b.dataset.hs));
@@ -3108,7 +3136,8 @@ setInterval(()=>{const c=cps()/10;earn(c);S.crewEarned=(S.crewEarned||0)+c;
   if(S.depth>=6&&!S.throne){S.exc=(S.exc||0)+c*EXC_TITHE;if(S.exc>=EXC_GOAL){S.throne=true;S.oil=(S.oil||0)+5;toast("The throne is empty. Its blessing is yours: +25% to everything, forever, and 5 flasks of lantern oil.");drawScene();render();save()}}
   dropTick();
   if(boss){bossRender();if(Date.now()>boss.until)bossEnd(false)}else if(termNow().id!=="quiet"&&Date.now()>bossCooldown&&document.visibilityState==="visible"&&Math.random()<BOSS_CHANCE*(1+perkLv("bait")*.5))spawnBoss();
-  if(wasBuffed&&!buffOn()){wasBuffed=false;toast("The Sunforged pick crumbles to ash. Back to your own tools.");drawScene();render()}if(++tick%10===0)render();if(tick%150===0)save();if(tick%600===0)loadBoard()},100);
+  if($("tour").classList.contains("on"))tourGate();
+  if(wasBuffed&&!buffOn()){wasBuffed=false;toast("The Sunforged pick crumbles to ash. Back to your own tools.");drawScene();render()}if(++tick%10===0){render();tipCheck()}if(tick%150===0)save();if(tick%600===0)loadBoard()},100);
 load();
 </script>
 </body>
