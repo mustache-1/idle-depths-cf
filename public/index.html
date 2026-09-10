@@ -647,6 +647,41 @@
   .stile.active .st8{color:var(--lamp)}
   .stile .sp{height:3px;background:var(--line);border-radius:2px;overflow:hidden}
   .stile .sp i{display:block;height:100%;background:var(--lamp)}
+  /* top three carry their own light */
+  .board tr.p1 td:nth-child(2){color:#ffd76a;text-shadow:0 0 14px rgba(255,215,106,.55),0 0 30px rgba(255,176,31,.28)}
+  .board tr.p2 td:nth-child(2){color:#dfe4ea;text-shadow:0 0 12px rgba(223,228,234,.42)}
+  .board tr.p3 td:nth-child(2){color:#e2a06a;text-shadow:0 0 12px rgba(226,160,106,.42)}
+  .board tr.p1 td:first-child,.board tr.p2 td:first-child,.board tr.p3 td:first-child{font-weight:700}
+  .board tr.p1 td:first-child{color:#ffd76a}
+  .board tr.p2 td:first-child{color:#dfe4ea}
+  .board tr.p3 td:first-child{color:#e2a06a}
+  @media(prefers-reduced-motion:no-preference){
+    .board tr.p1 td:nth-child(2){animation:lamp 3.2s ease-in-out infinite}
+  }
+  @keyframes lamp{0%,100%{text-shadow:0 0 14px rgba(255,215,106,.55),0 0 30px rgba(255,176,31,.28)}
+    50%{text-shadow:0 0 18px rgba(255,215,106,.8),0 0 42px rgba(255,176,31,.45)}}
+  .crewrow{display:flex;align-items:center;gap:12px;padding:12px 8px;border-bottom:1px solid var(--line)}
+  .crewrow:last-child{border-bottom:0}
+  .crewrow .r{width:30px;color:var(--dim);font-variant-numeric:tabular-nums;flex:none}
+  .crewrow .nm{flex:1;min-width:0}
+  .crewrow .nm b{display:block;font-size:15px;font-weight:600}
+  .crewrow .nm small{display:block;font-size:12px;color:var(--dim)}
+  .crewrow .dg{flex:none;text-align:right;font-variant-numeric:tabular-nums}
+  .crewrow .dg b{color:var(--lamp2);font-weight:600}
+  .crewrow .dg small{display:block;font-size:11px;color:var(--dim)}
+  .rmem{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;
+    display:flex;align-items:center;gap:10px;min-width:0}
+  .rmem .av{width:34px;height:34px;border-radius:50%;background:rgba(255,176,31,.15);flex:none;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--lamp2)}
+  .rmem .who{flex:1;min-width:0}
+  .rmem .who div:first-child{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rmem .who div:last-child{font-size:11px;color:var(--dim)}
+  .rmem .acts{display:flex;gap:5px;flex:none}
+  .rmem .acts button{height:28px;padding:0 9px;border-radius:7px;border:1px solid var(--line2);
+    background:transparent;color:var(--dim);font-size:11.5px;cursor:pointer}
+  .rmem .acts button:hover{border-color:var(--lamp);color:var(--lamp)}
+  .rmem .acts button.danger:hover{border-color:var(--red);color:var(--red)}
+  .cols>section{align-self:start}
   .spager{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px}
   .spager span{font-size:12.5px;color:var(--dim);font-variant-numeric:tabular-nums;min-width:96px;text-align:center}
   .spager button{height:38px;min-width:38px;padding:0 14px;border-radius:9px;border:1px solid var(--line2);
@@ -1223,7 +1258,7 @@
     <div>
       <div class="card" style="padding:18px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
-          <div><b style="font-size:16px" id="ptyName">Crew</b><span class="lvl" id="gangLvl" style="margin-left:8px"></span></div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:16px" id="ptyName">Crew</b><span class="lvl" id="gangLvl"></span><button class="btn" id="ptyRename" style="display:none;height:30px;padding:0 11px;font-size:12px">Rename</button></div>
           <div style="display:flex;align-items:center;gap:8px">
             <span class="note" style="margin:0">Code <b id="ptyCode" style="color:var(--lamp2);letter-spacing:.05em"></b></span>
             <button class="btn" id="ptyLeave">Leave</button>
@@ -1250,7 +1285,7 @@
 <div class="panel" id="tab-leaderboard">
   <div class="titlebar"><h2>Leaderboard</h2><span id="boardSub">Every debtor, ranked by lifetime cash mined</span></div>
   <div class="board">
-    <div class="seg" style="max-width:320px;margin:0 0 12px"><button class="on" data-board="week">This week</button><button data-board="all">All time</button></div>
+    <div class="seg three" style="max-width:440px;margin:0 0 12px"><button class="on" data-board="week">This week</button><button data-board="all">All time</button><button data-board="crews">Crews</button></div>
     <p class="note" id="champs" style="margin:0 0 12px"></p>
     <table><tbody id="boardRows"><tr><td colspan="3" style="color:var(--dim)">Loading…</td></tr></tbody></table>
     <p class="note" id="nudge" style="margin-top:12px;color:var(--lamp)"></p>
@@ -1775,7 +1810,7 @@ function renderTrophies(){
   const n=ACH.filter(a=>has(a.id)).length;$("trophyCount").textContent=`${n}/${ACH.length}`;
   // Earned first, so the page you land on shows what you've actually got.
   const ord=[...ACH].sort((x,y)=>(has(y.id)?1:0)-(has(x.id)?1:0));
-  paged("trophies",ord,8,"trophies",a=>`<div class="tr ${has(a.id)?'on':''}"><div class="ic">${has(a.id)?'★':'☆'}</div><div><b>${a.name}</b><small>${a.desc}</small></div></div>`,renderTrophies);
+  paged("trophies",ord,PER_PAGE.trophies,"trophies",a=>`<div class="tr ${has(a.id)?'on':''}"><div class="ic">${has(a.id)?'★':'☆'}</div><div><b>${a.name}</b><small>${a.desc}</small></div></div>`,renderTrophies);
 }
 function renderShelf(){
   const owned=(S.story&&S.story.keeps)||[],on=S.shelf||[],cap=shelfCap();
@@ -1896,7 +1931,7 @@ function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("on");c
 const nice=v=>{const m=Math.pow(10,Math.max(0,Math.floor(Math.log10(v))-1));return Math.round(v/m)*m};
 function renderPerks(){
   $("perkOil").textContent=S.oil||0;
-  paged("perks",PERKS,PER_PAGE,"perkList",pk=>{const l=perkLv(pk.id),max=l>=pk.max,c=max?0:pk.cost(l);
+  paged("perks",PERKS,PER_PAGE.perks,"perkList",pk=>{const l=perkLv(pk.id),max=l>=pk.max,c=max?0:pk.cost(l);
     return `<div class="perk"><div><div class="name">${pk.name}</div><div class="desc">${pk.desc}</div><div class="fx">${l?pk.fx(l):"Not learned"}${!max?` → ${pk.fx(l+1)}`:""}</div><div class="pips">${Array.from({length:pk.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join("")}</div></div><button data-perk="${pk.id}" ${max||(S.oil||0)<c?"disabled":""}>${max?"Maxed":`${c} oil`}</button></div>`},renderPerks);
   document.querySelectorAll("#perkList [data-perk]").forEach(b=>b.onclick=async()=>{const pk=PERKS.find(x=>x.id===b.dataset.perk),l=perkLv(pk.id);if(l>=pk.max||(S.oil||0)<pk.cost(l))return;
     if(!await ask(pk.name,`Spend ${pk.cost(l)} lantern oil? Oil spent no longer gives its +10% bonus. This can't be undone.`,"Spend oil"))return;
@@ -2269,6 +2304,7 @@ $("rationPill").onclick=openShift;$("autoBtn").onclick=openShift;$("shiftClose")
 
 // ---- crew (real multiplayer: create/join by code, xp synced to the server) ----
 let PARTY=null,partyXpBuf=0,partyBusy=false;
+let crewBoard=null,crewBoardErr="";
 async function loadParty(){if(!USER){PARTY=null;renderParty();return}
   try{const r=await fetch("/api/crew");const d=await r.json().catch(()=>null);PARTY=(r.ok&&d&&!d.error)?d:null}
   catch(e){PARTY=null}
@@ -2293,6 +2329,35 @@ async function partyUpgrade(id){if(!PARTY||partyBusy)return;partyBusy=true;
     const d=await r.json();if(d.error)toast(d.error);else{PARTY=d;toast(id===0?"Shared picks upgraded — everyone swings harder.":"Longer shifts upgraded — auto-swinger lasts longer.");confetti(16)}
   }catch(e){toast("Couldn't buy that right now.")}
   partyBusy=false;render()}
+async function crewPost(path,body,okMsg){
+  if(partyBusy)return null;partyBusy=true;
+  try{const r=await fetch(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body||{})});
+    const d=await r.json();
+    if(d.error){toast(d.error);return null}
+    PARTY=d;DIG=d.dig||DIG;crewBoard=null;
+    if(okMsg)toast(okMsg);
+    renderParty();renderDig();render();
+    return d;
+  }catch(e){toast("Couldn't reach the overseer. Try again.");return null}
+  finally{partyBusy=false}
+}
+async function partyRename(){
+  const cur=(PARTY&&PARTY.name)||"";
+  const name=prompt("Name the crew (2-24 characters)",cur);
+  if(name===null)return;
+  await crewPost("/api/crew/rename",{name:name.trim()},"Crew renamed.");
+}
+async function partyPromote(id){
+  const m=(PARTY.members||[]).find(x=>x.id===id);if(!m)return;
+  if(!await ask("Hand over the crew?",`${m.name} becomes the lead. You stay in the crew, but you won't be able to rename it or remove anyone after this.`,"Make lead"))return;
+  await crewPost("/api/crew/promote",{id},`${m.name} leads the crew now.`);
+}
+async function partyKick(id){
+  const m=(PARTY.members||[]).find(x=>x.id===id);if(!m)return;
+  if(!await ask("Remove from the crew?",`${m.name} loses their share of the dig and the crew's upgrades. They can be invited back with the code.`,"Remove"))return;
+  await crewPost("/api/crew/kick",{id},`${m.name} is off the crew.`);
+}
+
 function partyGainXp(){if(PARTY)partyXpBuf+=5}
 
 // ---- crew dig ----
@@ -2361,8 +2426,20 @@ function renderParty(){
   $("ptyName").textContent=PARTY.name||"Crew";$("ptyCode").textContent=PARTY.id||"";
   $("gangLvl").textContent="Lv "+lvl;$("gangFill").style.width=pct+"%";
   $("gangProg").textContent=Math.floor(PARTY.xp||0)+" / "+cap+" xp";$("gangPct").textContent=Math.floor(pct)+"%";
-  $("gangRoster").innerHTML=mem.map(m=>`<div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:50%;background:rgba(255,176,31,.15);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--lamp2)">${esc(m.name.slice(0,2).toUpperCase())}</div><div><div style="font-size:13px;font-weight:500">${esc(m.name)}</div><div style="font-size:11px;color:var(--dim)">${m.id===PARTY.owner?"Leader":"Crew"}</div></div></div>`).join("")
+  const iLead=USER&&PARTY.owner===USER.id;
+  $("gangRoster").innerHTML=mem.map(m=>{
+    const me=USER&&m.id===USER.id,lead=m.id===PARTY.owner;
+    const seen=(PARTY.seen&&PARTY.seen[m.id])||0;
+    return `<div class="rmem"><div class="av">${esc(m.name.slice(0,2).toUpperCase())}</div>
+      <div class="who"><div>${esc(m.name)}${me?" (you)":""}</div>
+      <div>${lead?"Lead":"Crew"}${seen?" · "+agoShort(seen):""}</div></div>
+      ${iLead&&!me?`<div class="acts"><button data-prom="${m.id}" title="Hand the crew over">Make lead</button><button class="danger" data-kick="${m.id}">Remove</button></div>`:""}</div>`}).join("")
     +Array.from({length:4-mem.length}).map(()=>`<div style="border:1px dashed var(--line2);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px;opacity:.7"><div style="width:34px;height:34px;border-radius:50%;border:1px dashed var(--line2);display:flex;align-items:center;justify-content:center;color:var(--mute)">+</div><div style="font-size:12px;color:var(--mute)">Open slot</div></div>`).join("");
+  const rn=$("ptyRename");
+  rn.style.display=iLead?"":"none";
+  rn.onclick=partyRename;
+  $("gangRoster").querySelectorAll("[data-prom]").forEach(b=>b.onclick=()=>partyPromote(b.dataset.prom));
+  $("gangRoster").querySelectorAll("[data-kick]").forEach(b=>b.onclick=()=>partyKick(b.dataset.kick));
   $("gUp0Lvl").textContent=PARTY.pick?"Lv "+PARTY.pick:"";$("gUp1Lvl").textContent=PARTY.shift?"Lv "+PARTY.shift:"";
   $("gUp0Btn").textContent=Math.round(6000*((PARTY.pick||0)+1)).toLocaleString()+" xp";$("gUp1Btn").textContent=Math.round(12000*((PARTY.shift||0)+1)).toLocaleString()+" xp";
   $("gUp0Btn").disabled=(PARTY.xp||0)<6000*((PARTY.pick||0)+1);$("gUp1Btn").disabled=(PARTY.xp||0)<12000*((PARTY.shift||0)+1);
@@ -2461,17 +2538,19 @@ function paged(key,items,per,mountId,rowHtml,redraw){
     if(redraw)redraw();
   });
 }
-const PER_PAGE=6;
+// Rows differ a lot in height, so each list gets its own page size to keep the
+// two Upgrades columns roughly level.
+const PER_PAGE={picks:12,crew:6,perks:6,trophies:8};
 
 function buildUI(){
     if(S.crew.length<CREW.length)S.crew=[...S.crew,...CREW.map(()=>0)].slice(0,CREW.length);
   const redraw=()=>{buildUI();render()};
-  paged("picks",PICKS.slice(1),PER_PAGE,"picks",(p,i)=>`<div class="row" id="pick${i+1}">
+  paged("picks",PICKS.slice(1),PER_PAGE.picks,"picks",(p,i)=>`<div class="row" id="pick${i+1}">
       <div><div class="name">${p.name}<em>${fmt(p.power)}/swing</em></div><div class="desc">Swing harder, break more rock.</div></div>
       <button class="buy" data-pick="${i+1}"></button></div>`,redraw);
   // Crew locked behind a debt rank are hidden entirely, so page over what's actually shown.
   const shownCrew=CREW.map((c,i)=>({c,i})).filter(x=>!(x.c.rank&&(S.debts||0)<x.c.rank));
-  paged("crew",shownCrew,PER_PAGE,"crew",x=>`<div class="row" id="crew${x.i}">
+  paged("crew",shownCrew,PER_PAGE.crew,"crew",x=>`<div class="row" id="crew${x.i}">
       <div><div class="name">${x.c.name}<em id="crewN${x.i}"></em><em id="crewM${x.i}" class="mile"></em></div><div class="desc">${x.c.desc} <span id="crewR${x.i}"></span></div><div class="mprog" id="crewP${x.i}"><i></i></div><div class="desc" id="crewT${x.i}"></div></div>
       <button class="buy" data-crew="${x.i}"></button></div>`,redraw);
   document.querySelectorAll("#picks [data-pick]").forEach(b=>b.onclick=()=>buyPick(+b.dataset.pick));
@@ -3014,7 +3093,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkBuild
 // ---- leaderboard ----
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 let boardMode="week",boardData=null;
-document.querySelectorAll("[data-board]").forEach(b=>b.onclick=()=>{boardMode=b.dataset.board;document.querySelectorAll("[data-board]").forEach(x=>x.classList.toggle("on",x===b));renderBoard()});
+document.querySelectorAll("[data-board]").forEach(b=>b.onclick=()=>{boardMode=b.dataset.board;document.querySelectorAll("[data-board]").forEach(x=>x.classList.toggle("on",x===b));if(boardMode==="crews"&&!crewBoard)loadCrewBoard();else renderBoard()});
 let boardErr=null;
 async function loadBoard(){
   boardErr=null;
@@ -3028,7 +3107,31 @@ async function loadBoard(){
   renderBoard();
   if(S.depth===4)drawScene();   // the wall carvings are real names — refresh them
 }
+async function loadCrewBoard(){
+  try{const r=await fetch("/api/crews");const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    crewBoard=d.crews||[];crewBoardErr="";
+  }catch(e){crewBoardErr=String(e.message||e)}
+  renderBoard();
+}
+function renderCrewBoard(){
+  const rows=$("boardRows");
+  $("boardSub").textContent="Crews ranked by weekly digs cleared together";
+  $("champs").innerHTML="";$("nudge").textContent="";
+  if(crewBoardErr){rows.innerHTML=`<tr><td colspan="3" style="color:var(--red)">The crew board couldn't be loaded &mdash; ${esc(crewBoardErr)}</td></tr>`;return}
+  if(!crewBoard){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">Loading&hellip;</td></tr>`;return}
+  if(!crewBoard.length){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">No crew has cleared a dig yet. Yours could be first.</td></tr>`;return}
+  rows.innerHTML=`<tr><td colspan="3" style="padding:0;border:0">`+crewBoard.map((c,i)=>{
+    const mine=PARTY&&PARTY.id===c.id;
+    return `<div class="crewrow ${i<3?'p'+(i+1):''}" style="${mine?'background:rgba(255,176,31,.06)':''}">
+      <span class="r">${i+1}</span>
+      <span class="nm"><b style="${i===0?'color:#ffd76a;text-shadow:0 0 14px rgba(255,215,106,.5)':i===1?'color:#dfe4ea':i===2?'color:#e2a06a':''}">${esc(c.name)}</b>
+      <small>${c.size}/4 · led by ${esc(c.lead)}${c.full?` · ${c.full} full week${c.full>1?"s":""}`:""}${mine?" · your crew":""}</small></span>
+      <span class="dg"><b>${c.digs}</b><small>dig${c.digs===1?"":"s"}</small></span></div>`}).join("")+`</td></tr>`;
+}
+
 function renderBoard(){
+  if(boardMode==="crews")return renderCrewBoard();
   const rows=$("boardRows"),list=boardMode==="week"?boardData.week:boardData.all;
   $("boardSub").textContent=boardMode==="week"?"Most mined since Monday · resets in "+(boardData.weekEnds?eta2(boardData.weekEnds-Date.now()):"—"):"Every debtor, ranked by lifetime cash mined";
   $("champs").innerHTML=boardData.champs&&boardData.champs.length?"Last week's champions: "+boardData.champs.map((c,i)=>`<b style="color:${["#ffd27a","#c9ccd1","#d08a4a"][i]}">${esc(c.name)}</b>`).join(", "):"";
@@ -3039,7 +3142,7 @@ function renderBoard(){
     const rb=$("boardRetry");if(rb)rb.onclick=loadBoard;
     return}
   if(!list.length){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">${boardMode==="week"?"Nobody has mined this week yet. Sign in and be first.":"No one has mined yet. Sign in and be the first."}</td></tr>`;$("nudge").textContent="";return}
-  rows.innerHTML=list.map((p,i)=>`<tr data-p="${i}" class="${USER&&p.id===USER.id?'me':''}"><td>${i+1}</td><td><svg viewBox="0 0 34 34" width="26" height="26" style="vertical-align:middle;margin-right:8px;image-rendering:pixelated"><rect width="34" height="34" rx="6" fill="#1a1512"/>${miner(2,1,"",p.shirt||"#f1e6d2",p.hat||"#f3b24a",null)}</svg>${esc(p.name)}${p.title?` <span style="color:var(--lamp);font-size:12px">${esc(p.title)}</span>`:""}${p.keeps?` <span title="${p.keeps} keepsakes" style="color:var(--gem);font-size:12px">◆${p.keeps}</span>`:""}<em>depth ${p.depth} · ${p.oil} oil</em></td><td>${fmt(p.score)}</td></tr>`).join("");
+  rows.innerHTML=list.map((p,i)=>`<tr data-p="${i}" class="${i<3?'p'+(i+1)+' ':''}${USER&&p.id===USER.id?'me':''}"><td>${i+1}</td><td><svg viewBox="0 0 34 34" width="26" height="26" style="vertical-align:middle;margin-right:8px;image-rendering:pixelated"><rect width="34" height="34" rx="6" fill="#1a1512"/>${miner(2,1,"",p.shirt||"#f1e6d2",p.hat||"#f3b24a",null)}</svg>${esc(p.name)}${p.title?` <span style="color:var(--lamp);font-size:12px">${esc(p.title)}</span>`:""}${p.keeps?` <span title="${p.keeps} keepsakes" style="color:var(--gem);font-size:12px">◆${p.keeps}</span>`:""}<em>depth ${p.depth} · ${p.oil} oil</em></td><td>${fmt(p.score)}</td></tr>`).join("");
   rows.querySelectorAll("[data-p]").forEach(tr=>tr.onclick=()=>openRival(list[+tr.dataset.p]));
   const me=USER?list.findIndex(p=>p.id===USER.id):-1;
   $("nudge").textContent=me>0?`You're ${fmt(list[me-1].score-list[me].score)} behind ${list[me-1].name}. Keep swinging.`:me===0?"You're on top. Everyone below is coming for you.":USER?"You're not on the board yet. Mine a little and check back.":"";
