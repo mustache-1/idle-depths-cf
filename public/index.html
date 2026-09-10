@@ -2260,12 +2260,12 @@ function dropClaim(){
   dropHide();
   const worth=Math.max(clickPower()*40,cps()*60,50);
   const r=Math.random();
-  if(r<.05&&(S.debts||0)>0){S.oil=(S.oil||0)+1;toast("A flask of lantern oil, still corked. +1 oil.");confetti(60)}
-  else if(r<.16){S.buffUntil=Math.max(S.buffUntil||0,Date.now())+90000;
+  if(r<.12&&(S.debts||0)>0){S.oil=(S.oil||0)+1;toast("A flask of lantern oil, still corked. +1 oil.");confetti(60)}
+  else if(r<.23){S.buffUntil=Math.max(S.buffUntil||0,Date.now())+90000;
     toast("The purse held a shard of sunmetal — everything ×2 for 90 seconds.");confetti(50);drawScene()}
-  else if(r<.30){const v=nice(worth*5);earn(v);S.gems=(S.gems||0)+3;
+  else if(r<.37){const v=nice(worth*5);earn(v);S.gems=(S.gems||0)+3;
     toast(`A knotted pouch: ${fmt(v)} and three loose gems.`);confetti(50)}
-  else if(r<.55){const v=nice(worth*2.2);earn(v);toast(`Someone's lost wages: ${fmt(v)}.`);confetti(34)}
+  else if(r<.62){const v=nice(worth*2.2);earn(v);toast(`Someone's lost wages: ${fmt(v)}.`);confetti(34)}
   else {const v=nice(worth);earn(v);toast(`A dropped purse: ${fmt(v)}.`);confetti(22)}
   render();save();
 }
