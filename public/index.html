@@ -314,7 +314,7 @@
   .links .coffee{margin:6px 4px 2px}
   .pit .titlebar,.pit .strip,.pit .quest{flex:none}
   .eqcard{display:flex;flex-direction:column;min-height:0}
-  .eqlist{min-height:0;overflow:hidden}
+  .eqlist{min-height:0;overflow-y:auto;scrollbar-width:thin}
   /* buy-quantity toggle — sits above any list of hires */
   .qty{display:flex;align-items:center;gap:6px;margin:0 0 8px}
   .qty span{font-size:11.5px;color:var(--dim);margin-right:2px}
@@ -1392,7 +1392,8 @@
 <div class="panel" id="tab-leaderboard">
   <div class="titlebar"><h2>Leaderboard</h2><span id="boardSub">Every debtor, ranked by lifetime cash mined</span></div>
   <div class="board">
-    <div class="seg three" style="max-width:440px;margin:0 0 12px"><button class="on" data-board="week">This week</button><button data-board="all">All time</button><button data-board="crews">Crews</button></div>
+    <div class="seg" style="grid-template-columns:1fr 1fr;max-width:320px;margin:0 0 10px"><button class="on" data-board="all">Seasons</button><button data-board="crews">Crews</button></div>
+    <div class="qty" id="seasonPick" style="margin:0 0 12px"><span>Season</span><button class="on" data-season="all">Current</button><button data-season="legacy">Season 1</button></div>
     <p class="note" id="champs" style="margin:0 0 12px"></p>
     <table><tbody id="boardRows"><tr><td colspan="3" style="color:var(--dim)">Loading…</td></tr></tbody></table>
     <p class="note" id="nudge" style="margin-top:12px;color:var(--lamp)"></p>
@@ -1770,12 +1771,15 @@ const fmt=n=>{
   if(+n.toFixed(d2)>=1000)return "$"+n.toExponential(2).replace("e+","e")+u[i];
   return "$"+n.toFixed(d2)+u[i];
 };
-// Oil used to be purely additive (+10% a flask) while the debt cost climbed 1.5x a rank,
-// so past about rank 6 a rebirth cost 1.5x more and paid exactly the same. The additive
-// part is kept so early flasks feel the same; the 2% compounding tail is what lets oil
-// keep pace once the pick and crew lists have run out of things to buy.
-const OIL_COMPOUND=1.02;
-const oilMult=()=>(1+S.oil*0.1)*Math.pow(OIL_COMPOUND,S.oil);
+// Oil is additive, as it always was: +10% a flask.
+//
+// I briefly had a 2% compounding tail here to stop the late-game stall. Simulating the
+// whole loop killed it: compounding meant each debt paid for the next one faster, so
+// rebirth gaps collapsed (43h, 29h, 20h, 8h, 2h, seconds) and the multiplier ran away
+// entirely by about the thirtieth debt. Scaling the oil PAYOUT with rank fixes the stall
+// on its own without that feedback — see oilOnSeal. A multiplier that compounds on a
+// currency you earn by using the multiplier has no damping term anywhere in it.
+const oilMult=()=>1+S.oil*0.1;
 const DEMAND_CHANCE=.45,DOCK_MS=30*60*1000,DOCK_MULT=.8;
 const docked=()=>Date.now()<(S.dockUntil||0);
 const dockMult=()=>docked()?DOCK_MULT:1;
@@ -1872,8 +1876,10 @@ function bulkQuote(i){
   return {n:buyQty,total};
 }
 // The sqrt(overshoot) term only scales if your income outruns the debt, and it can't once
-// the shop is maxed. The rank term is the floor: a rank-10 debt is worth paying even at
-// exactly the asking price.
+// the shop is maxed — which is why the old game stalled around the sixth debt. The rank
+// term is the whole fix: a rank-10 debt pays about five times a rank-1 debt at the same
+// asking price, so paying stays worth it. Simulated over 21 days the gap between debts
+// falls, bottoms out near 11h, then drifts up gently — no stall, and no runaway either.
 const oilOnSeal=()=>Math.floor(Math.sqrt(S.cash/debtCost()*10)*(1+(S.debts||0)*.45)*(1+perkLv("press")*.35+(FX.oil||0)))+(termNow().id==="double"?2:0);
 let earn=function(n){S.cash+=n;S.lifetime+=n};
 
@@ -2896,9 +2902,9 @@ function render(){
     $("eqPickBtn").disabled=plk||S.cash<np.cost}
   else{$("eqPickName").textContent=PICKS[S.pick].name;$("eqPickInfo").textContent="Best pickaxe";$("eqPickBtn").textContent="Maxed";$("eqPickBtn").disabled=true}
   hintRender();
+  fitRails();          // must settle the rail height first — eqCrewRender measures against it
   eqCrewRender();
   logRender();
-  fitRails();
   const nb=BUNKS[(S.bunk||0)+1];$("bunkName").innerHTML=BUNKS[S.bunk||0].name+`<em>${BUNKS[S.bunk||0].cap}h offline</em>`;
   if(nb){$("bunkDesc").textContent=`Upgrade to the ${nb.name}: workers keep working for ${nb.cap} hours while you're away.`;$("bunkBtn").textContent=fmt(nb.cost);$("bunkBtn").disabled=S.cash<nb.cost}
   else{$("bunkDesc").textContent="The best quarters in the mine. Workers work up to 48 hours while you're gone.";$("bunkBtn").textContent="Maxed";$("bunkBtn").disabled=true}
@@ -3414,6 +3420,15 @@ function hintRender(){
   }
 }
 let eqSig="",railH=-1,eqPg=0;
+// Six rows have never fit the rail — on a 1366x768 laptop there is room for about three,
+// and .eqlist used to be overflow:hidden, so the last rows rendered and then vanished
+// under the pager mid-row (the Ashfall furnace showing a name and nothing else).
+//
+// I first tried sizing this page to the measured space. Don't: the list shrinks to its own
+// contents once they fit, and so does the card above it, so every candidate basis for the
+// measurement is itself downstream of the answer — it collapsed 6 rows to 2 and stuck.
+// The list scrolls instead (see .eqlist), which makes every row reachable at any window
+// size without a measurement that can feed back on itself.
 const EQ_PER=6;
 function eqCrewRender(){
   const vis=[];
@@ -3510,8 +3525,22 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkBuild
 
 // ---- leaderboard ----
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-let boardMode="week",boardData=null;
-document.querySelectorAll("[data-board]").forEach(b=>b.onclick=()=>{boardMode=b.dataset.board;document.querySelectorAll("[data-board]").forEach(x=>x.classList.toggle("on",x===b));if(boardMode==="crews"&&!crewBoard)loadCrewBoard();else renderBoard()});
+let boardMode="all",boardData=null,boardSeason="all";
+// Two top-level views now, Seasons and Crews. Which season you're looking at is a choice
+// within Seasons rather than a tab of its own, so adding season 3 doesn't add a tab.
+function setBoardMode(m){
+  const top=m==="crews"?"crews":"all";
+  boardMode=top==="crews"?"crews":boardSeason;
+  document.querySelectorAll("[data-board]").forEach(x=>x.classList.toggle("on",x.dataset.board===top));
+  const sp=$("seasonPick");if(sp)sp.style.display=top==="crews"?"none":"";
+  if(boardMode==="crews"&&!crewBoard)loadCrewBoard();else renderBoard();
+}
+document.querySelectorAll("[data-board]").forEach(b=>b.onclick=()=>setBoardMode(b.dataset.board));
+document.querySelectorAll("[data-season]").forEach(b=>b.onclick=()=>{
+  boardSeason=b.dataset.season;
+  document.querySelectorAll("[data-season]").forEach(x=>x.classList.toggle("on",x===b));
+  setBoardMode("all");
+});
 let boardErr=null;
 async function loadBoard(){
   boardErr=null;
@@ -3550,8 +3579,10 @@ function renderCrewBoard(){
 
 function renderBoard(){
   if(boardMode==="crews")return renderCrewBoard();
-  const rows=$("boardRows"),list=boardMode==="week"?boardData.week:boardData.all;
-  $("boardSub").textContent=boardMode==="week"?"Most mined since Monday · resets in "+(boardData.weekEnds?eta2(boardData.weekEnds-Date.now()):"—"):"Every debtor, ranked by lifetime cash mined";
+  const rows=$("boardRows"),list=boardMode==="legacy"?(boardData.legacy||[]):boardData.all;
+  $("boardSub").textContent=boardMode==="legacy"
+    ?(boardData.legacyName||"Season 1")+" · closed, kept as it finished"
+    :(boardData.eraName||"This season")+" · ranked by cash mined this season";
   $("champs").innerHTML=boardData.champs&&boardData.champs.length?"Last week's champions: "+boardData.champs.map((c,i)=>`<b style="color:${["#ffd27a","#c9ccd1","#d08a4a"][i]}">${esc(c.name)}</b>`).join(", "):"";
   if(USER&&boardData.champs&&boardData.champs.some(c=>c.id===USER.id)&&!has("weekly")){S.ach.weekly=Date.now();toast("Weekly champion! A new title and the trophy are yours.");save()}
   if(boardErr){
@@ -3559,7 +3590,9 @@ function renderBoard(){
     $("nudge").innerHTML=`<button class="btn" id="boardRetry" style="height:32px;padding:0 14px">Try again</button>`;
     const rb=$("boardRetry");if(rb)rb.onclick=loadBoard;
     return}
-  if(!list.length){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">${boardMode==="week"?"Nobody has mined this week yet. Sign in and be first.":"No one has mined yet. Sign in and be the first."}</td></tr>`;$("nudge").textContent="";return}
+  if(!list.length){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">${
+    boardMode==="legacy"?"Season 1 has no finishers on record."
+    :"A new season just opened — nobody is on the board yet. Sign in and be the first."}</td></tr>`;$("nudge").textContent="";return}
   rows.innerHTML=list.map((p,i)=>`${i===3?`<tr class="cut"><td colspan="3"><span>the rest of the shift</span></td></tr>`:""}<tr data-p="${i}" class="${i<3?'p'+(i+1)+' ':''}${i===2?'lastpod ':''}${USER&&p.id===USER.id?'me':''}"><td>${i+1}</td><td><svg viewBox="0 0 34 34" width="26" height="26" style="vertical-align:middle;margin-right:8px;image-rendering:pixelated"><rect width="34" height="34" rx="6" fill="#1a1512"/>${miner(2,1,"",p.shirt||"#f1e6d2",p.hat||"#f3b24a",null)}</svg>${esc(p.name)}${p.title?` <span style="color:var(--lamp);font-size:12px">${esc(p.title)}</span>`:""}${p.keeps?` <span title="${p.keeps} keepsakes" style="color:var(--gem);font-size:12px">◆${p.keeps}</span>`:""}<em>depth ${p.depth} · ${p.oil} oil</em></td><td>${fmt(p.score)}</td></tr>`).join("");
   rows.querySelectorAll("[data-p]").forEach(tr=>tr.onclick=()=>openRival(list[+tr.dataset.p]));
   const me=USER?list.findIndex(p=>p.id===USER.id):-1;
