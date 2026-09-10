@@ -315,6 +315,16 @@
   .pit .titlebar,.pit .strip,.pit .quest{flex:none}
   .eqcard{display:flex;flex-direction:column;min-height:0}
   .eqlist{min-height:0;overflow:hidden}
+  /* buy-quantity toggle — sits above any list of hires */
+  .qty{display:flex;align-items:center;gap:6px;margin:0 0 8px}
+  .qty span{font-size:11.5px;color:var(--dim);margin-right:2px}
+  .qty button{height:26px;min-width:40px;padding:0 9px;border-radius:8px;border:1px solid var(--line2);
+    background:transparent;color:var(--dim);font-size:12px;font-weight:500;line-height:1;
+    display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+  .qty button:hover{border-color:var(--lamp);color:var(--lamp)}
+  .qty button.on{background:var(--panel2);border-color:var(--lamp);color:var(--lamp)}
+  /* the ×N tag inside a buy button, so the price stays the loudest thing on it */
+  .buy em,.eq button em{font-style:normal;font-size:10.5px;opacity:.7;margin-right:5px;font-weight:500}
   .eqpage{display:flex;align-items:center;justify-content:center;gap:12px;padding:9px 0 1px;margin-top:auto;border-top:1px solid var(--line)}
   .eqpage span{font-size:11.5px;color:var(--dim);font-variant-numeric:tabular-nums;min-width:82px;text-align:center}
   .eqpage button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line2);background:transparent;
@@ -463,7 +473,7 @@
   .tab.on svg{opacity:1}
   .badge{display:none;min-width:18px;height:18px;border-radius:9px;background:var(--lamp);color:#1a1614;font-size:11px;font-weight:600;line-height:18px;text-align:center;padding:0 5px;margin-left:2px}
   .badge.on{display:inline-block;animation:pulse 1.6s ease-in-out infinite}
-  @media(max-width:560px){.badge{position:absolute;top:5px;right:calc(50% - 22px);margin:0}.tab{position:relative;overflow:visible}}
+  @media(max-width:560px){.tab .badge{position:absolute;top:5px;right:calc(50% - 22px);margin:0}.tab{position:relative;overflow:visible}}
   .tsep{width:1px;height:18px;background:var(--line2);margin:0 8px;flex:none}
   .tab{transition:color .15s}
   .tab:hover{color:var(--ink)}
@@ -511,6 +521,33 @@
   /* juice */
   .hero.shake{animation:shake .25s}
   @keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-1px)}}
+  /* ---- fault lines: the active-play beat ---- */
+  .fault{position:absolute;width:52px;height:52px;padding:0;border:0;background:none;z-index:6;cursor:pointer}
+  .fault svg{width:100%;height:100%;display:block;overflow:visible}
+  .fault .fglow{fill:none;stroke:var(--lamp2);stroke-width:7;opacity:.35;filter:blur(3px)}
+  .fault .fcore{fill:none;stroke:#fff6d8;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+  .fault::after{content:"";position:absolute;inset:-14px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,210,122,.3),transparent 66%)}
+  /* the ring is the timer — it closes in as the fault expires, so urgency is visible */
+  .fault::before{content:"";position:absolute;inset:-9px;border-radius:50%;
+    border:2px solid rgba(255,210,122,.85);animation:faultRing var(--flife,3.6s) linear forwards}
+  .fault{animation:faultIn .22s ease-out}
+  .fault:hover{transform:scale(1.1)}
+  .fault.going{animation:faultOut .28s ease-in forwards}
+  .fault.miss::before{border-color:rgba(200,90,80,.7)}
+  @keyframes faultIn{from{opacity:0;transform:scale(.4) rotate(-14deg)}to{opacity:1;transform:scale(1)}}
+  @keyframes faultOut{to{opacity:0;transform:scale(1.9)}}
+  @keyframes faultRing{from{transform:scale(1);opacity:.9}to{transform:scale(.28);opacity:0}}
+  .vein{position:absolute;left:12px;top:12px;background:rgba(20,21,23,.8);border:1px solid var(--line2);
+    border-radius:8px;padding:6px 10px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .2s}
+  .vein.on{opacity:1}
+  .vein small{color:var(--dim);font-size:10px;display:block}
+  .vein b{display:block;color:var(--gem);font-size:14px}
+  .vein i{display:block;height:3px;background:var(--line);border-radius:2px;margin-top:4px;overflow:hidden}
+  .vein i span{display:block;height:100%;width:0;background:var(--gem);transition:width .2s}
+  .pop.fault{color:var(--lamp2);font-size:20px;font-weight:600}
+  @media(prefers-reduced-motion:reduce){.fault,.fault::before{animation:none}}
+  @media(max-width:560px){.fault{width:60px;height:60px}.vein{left:10px;top:10px;padding:5px 8px}}
   .streak{position:absolute;right:12px;top:12px;background:rgba(20,21,23,.8);border:1px solid var(--line2);border-radius:8px;padding:6px 10px;font-size:12px;pointer-events:none;opacity:0;transition:opacity .2s;text-align:right}
   .streak.on{opacity:1}
   .streak b{display:block;color:var(--lamp);font-size:14px}
@@ -1122,8 +1159,7 @@
   <button class="tab" data-tab="upgrades"><i class="ti ti-arrow-big-up-lines" data-fb="⚒"></i><span class="tfull">Upgrades</span><span class="tmini">Gear</span><b class="badge" id="upBadge"></b></button>
   <button class="tab" data-tab="quests"><i class="ti ti-book" data-fb="✎"></i>Quests<b class="badge" id="qBadge"></b></button>
   <span class="tsep"></span>
-  <button class="tab" data-tab="debt"><i class="ti ti-coins" data-fb="⚖"></i>Debt</button>
-  <button class="tab" data-tab="perks"><i class="ti ti-flame" data-fb="✦"></i>Perks<b class="badge" id="pBadge"></b></button>
+  <button class="tab" data-tab="debt"><i class="ti ti-coins" data-fb="⚖"></i>Debt<b class="badge" id="pBadge"></b></button>
   <button class="tab" data-tab="gang"><i class="ti ti-users" data-fb="👥"></i>Crew</button>
   <span class="tsep"></span>
   <button class="tab" data-tab="leaderboard"><i class="ti ti-crown" data-fb="♛"></i><span class="tfull">Leaderboard</span><span class="tmini">Board</span></button>
@@ -1170,6 +1206,14 @@
           <div class="streak" id="streak"><small>Streak</small><b id="streakN">&times;1.00</b><i><span id="streakBar"></span></i></div>
           <div class="hp"><i id="hp"></i></div>
           <div class="tapHint" id="tapHint" aria-hidden="true"><span id="tapHintText">Click anywhere to mine</span></div>
+          <div class="vein" id="vein"><small>Vein</small><b id="veinN">&times;1.0</b><i><span id="veinBar"></span></i></div>
+        </button>
+        <button class="fault" id="fault" hidden aria-label="Strike the fault line">
+          <svg viewBox="0 0 40 40" aria-hidden="true">
+            <path class="fglow" d="M20 3 L15 15 L23 18 L14 37 L18 22 L11 19 Z"/>
+            <path class="fcore" d="M20 3 L15 15 L23 18 L14 37 L18 22 L11 19 Z"/>
+            <path class="fcore" d="M22 10 L31 16 L25 20 L34 30" fill="none" stroke-width="1.6"/>
+          </svg>
         </button>
         <button class="drop" id="drop" hidden aria-label="Grab the dropped purse">
           <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="21" rx="8" ry="2" fill="#000" opacity=".35"/>
@@ -1207,6 +1251,7 @@
         <div class="balrow"><div><small>Balance</small><b id="eqCash">$0</b></div><div><small>Income</small><b class="inc" id="eqCps">$0/sec</b></div></div>
         <div class="eqlist">
           <div class="eq"><div><b id="eqPickName">Wooden pick</b><small id="eqPickInfo"></small></div><button id="eqPickBtn">$60</button></div>
+          <div class="qty"><span>Hire</span><button class="on" data-qty="1">×1</button><button data-qty="10">×10</button><button data-qty="max">Max</button></div>
           <div id="eqCrew"></div>
         </div>
         <div class="eqpage" id="eqPage">
@@ -1231,7 +1276,9 @@
   <div class="balbar"><div><small>Your balance</small><b id="upCash">$0</b></div><div><small>Income</small><b id="upCps" style="color:var(--ore)">$0/sec</b></div><div><small>Per swing</small><b id="upClick" style="color:var(--lamp2)">$1</b></div></div>
   <div class="cols">
     <section><h3>Pickaxes</h3><div id="picks"></div></section>
-    <section><h3>Workers &amp; machines</h3><div id="crew"></div>
+    <section><h3>Workers &amp; machines</h3>
+      <div class="qty"><span>Hire</span><button class="on" data-qty="1">×1</button><button data-qty="10">×10</button><button data-qty="max">Max</button></div>
+      <div id="crew"></div>
       <h3 style="margin-top:18px">Overseer's extras</h3>
       <div class="row"><div><div class="name">Auto-swinger<em id="autoState"></em></div><div class="desc">$10M, any time. Pick a shift — 3, 6, 9 or 12 hours — and a hired hand swings for you, awake or asleep. Shorter shifts swing faster.</div><div class="desc" id="autoDesc"></div></div><button class="buy" id="autoBtn">Start shift</button></div>
       <h3 style="margin-top:18px">Bunkhouse</h3>
@@ -1280,7 +1327,9 @@
   </div>
 </div>
 <div class="panel" id="tab-debt">
-  <div class="titlebar"><h2>The debt</h2><span>What you owe, what paying it unlocks, and the terms of your next run</span></div>
+  <div class="titlebar"><h2>The debt</h2><span>What you owe, what paying it unlocks, and what the oil buys</span></div>
+  <div class="seg" style="max-width:340px;margin:0 0 16px"><button class="on" data-d="owed">What you owe</button><button data-d="perks">Perks<b class="badge" id="pBadge2"></b></button></div>
+  <div class="sub on" id="d-owed">
   <div class="mine">
     <div>
       <div class="card" style="padding:20px">
@@ -1300,14 +1349,14 @@
     </div>
     <div class="side"><div class="card"><h3>What paying unlocks</h3><div id="dUnlocks"></div></div></div>
   </div>
-</div>
-<div class="panel" id="tab-perks">
-  <div class="titlebar"><h2>Perks</h2><span>Spend lantern oil on permanent advantages</span></div>
-  <div class="card" style="padding:16px 18px;margin-bottom:16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
-    <div><small class="note">Lantern oil to spend</small><div style="font-size:26px;font-weight:600;color:var(--lamp2)" id="perkOil">0</div></div>
-    <p class="note" style="max-width:520px">You earn oil by paying Lord Ashcombe's $50M debt — and the mine gives up the odd flask to anyone still swinging. Each flask you hold gives +10% to everything; spending it here trades that for a targeted, permanent perk. Choose what fits how you play.</p>
   </div>
-  <div class="cols" id="perkList"></div>
+  <div class="sub" id="d-perks">
+    <div class="card" style="padding:16px 18px;margin-bottom:16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <div><small class="note">Lantern oil to spend</small><div style="font-size:26px;font-weight:600;color:var(--lamp2)" id="perkOil">0</div></div>
+      <p class="note" style="max-width:520px">You earn oil by paying Lord Ashcombe's debt — and the mine gives up the odd flask to anyone still swinging. Every flask you hold makes everything you earn worth more, and the more you hold the harder each one works. Spending one here trades that for a targeted, permanent perk instead. Choose what fits how you play.</p>
+    </div>
+    <div class="cols" id="perkList"></div>
+  </div>
 </div>
 <div class="panel" id="tab-gang">
   <div class="titlebar"><h2>Crew</h2><span>Team up with up to 3 friends by Discord. Everyone's swings fill a shared XP bar that unlocks crew-wide upgrades.</span></div>
@@ -1355,7 +1404,7 @@
   <div class="titlebar"><h2>Support</h2><span>How to play, the rules, and how to reach the developer</span></div>
   <div class="mine">
     <div>
-      <div class="seg" style="grid-template-columns:repeat(5,1fr);margin:0 0 14px"><button class="on" data-hs="help">How to play</button><button data-hs="fair">Fair play</button><button data-hs="terms">Terms</button><button data-hs="privacy">Privacy</button><button data-hs="contact">Contact</button></div>
+      <div class="seg" style="grid-template-columns:repeat(6,1fr);margin:0 0 14px"><button class="on" data-hs="help">How to play</button><button data-hs="fair">Fair play</button><button data-hs="terms">Terms</button><button data-hs="privacy">Privacy</button><button data-hs="contact">Contact</button><button data-hs="save">Your save</button></div>
       <div class="card" style="padding:20px">
 <div class="hsec on" id="hs-help">
     <h4>The short version</h4>
@@ -1388,6 +1437,17 @@
     <p>Bugs, ideas, name changes, data removal, or just to say the Wyrm is unfair:</p>
     <ul><li><b>Discord:</b> mustache.net</li><li><b>Email:</b> <a href="mailto:info.avila@icloud.com" style="color:var(--lamp)">info.avila@icloud.com</a></li></ul>
     <p>Made by Avila. Thanks for digging.</p>
+  </div>
+
+  <div class="hsec" id="hs-save">
+    <h4>Your save</h4>
+    <p>Signing in with Discord keeps your mine in the cloud and on every device. If you'd rather not, you can take a copy of it yourself — a backup code you can paste back in later, or on another browser.</p>
+    <p class="note">Anyone holding your code can load your mine. Treat it like a password.</p>
+    <div class="btns" style="justify-content:flex-start;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="svExport">Copy backup code</button>
+      <button class="btn" id="svImport">Restore from a code</button>
+    </div>
+    <p class="note" id="svNote" style="margin-top:10px"></p>
   </div>
 
       </div>
@@ -1685,6 +1745,8 @@ const ACH=[
   {id:"debt5",name:"Repeat customer",desc:"Pay the debt five times.",ok:()=>(S.debts||0)>=5,r:3},
   {id:"undercroft",name:"Warm walls",desc:"Reach the Undercroft.",ok:()=>(S.deepest||0)>=7,r:3},
   {id:"warmdark",name:"Paid in full",desc:"Reach The Warm Dark.",ok:()=>(S.deepest||0)>=8,r:5},
+  {id:"vein10",name:"Reading the rock",desc:"Strike 10 fault lines in a row.",ok:()=>(S.bestVein||0)>=10,r:.6},
+  {id:"vein25",name:"The seam runs clean",desc:"Strike 25 fault lines in a row.",ok:()=>(S.bestVein||0)>=25,r:1.5},
   {id:"days7",name:"Regular",desc:"Play on 7 different days.",ok:()=>(S.days||0)>=7,r:.8},
 ];
 const RANKSN=["Debtor","Pit hand","Marked man","Gang boss","Deep hand","Warden's bane","Free miner","Collateral","Paid in full"];
@@ -1697,16 +1759,34 @@ const $=id=>document.getElementById(id);
 const fmt=n=>{
   if(!isFinite(n))return "—";
   if(n<1000)return "$"+(n<10&&n%1?n.toFixed(2):Math.floor(n));
-  const u=["K","M","B","T","Qa","Qi"];let i=-1;
+  const u=["K","M","B","T","Qa","Qi","Sx","Sp","Oc","No","Dc","UDc","DDc","TDc"];let i=-1;
   while(n>=1000&&i<u.length-1){n/=1000;i++}
-  return "$"+n.toFixed(n<10?2:n<100?1:0)+u[i];
+  // 999999.7 used to land on 999.9997 and round up to "$1000K" instead of "$1.00M".
+  // Nudge up a unit when the rounded figure would read as a full thousand.
+  const dp=n<10?2:n<100?1:0;
+  if(+n.toFixed(dp)>=1000&&i<u.length-1){n/=1000;i++}
+  // past the table, an honest exponent beats "$1000000TDc"
+  const d2=n<10?2:n<100?1:0;
+  if(+n.toFixed(d2)>=1000)return "$"+n.toExponential(2).replace("e+","e")+u[i];
+  return "$"+n.toFixed(d2)+u[i];
 };
-const oilMult=()=>1+S.oil*0.1;
+// Oil used to be purely additive (+10% a flask) while the debt cost climbed 1.5x a rank,
+// so past about rank 6 a rebirth cost 1.5x more and paid exactly the same. The additive
+// part is kept so early flasks feel the same; the 2% compounding tail is what lets oil
+// keep pace once the pick and crew lists have run out of things to buy.
+const OIL_COMPOUND=1.02;
+const oilMult=()=>(1+S.oil*0.1)*Math.pow(OIL_COMPOUND,S.oil);
 const DEMAND_CHANCE=.45,DOCK_MS=30*60*1000,DOCK_MULT=.8;
 const docked=()=>Date.now()<(S.dockUntil||0);
 const dockMult=()=>docked()?DOCK_MULT:1;
 const termEarn=()=>termNow().id==="double"?2:1;
-const depthMult=()=>(1+S.depth*0.3)*oilMult()*throneMult()*termEarn()*dockMult()*seamMult();
+// Depth used to add a flat +0.3 a layer: nine layers moved earnings from x1.0 to x3.4 while
+// the descend price climbed from $800 to $6B. Spending that money on crew was strictly
+// better at every single layer, so descending was something you did for the story and the
+// gems, never because it paid. Multiplicative fixes that — each layer is worth the same
+// proportional jump, so the descend button competes with the shop instead of losing to it.
+const DEPTH_STEP=1.5;
+const depthMult=()=>Math.pow(DEPTH_STEP,S.depth)*oilMult()*throneMult()*termEarn()*dockMult()*seamMult();
 const BUNKS=[{name:"Straw pallet",cap:8,cost:0},{name:"Wooden bunk",cap:12,cost:200000},{name:"Private cell",cap:24,cost:5e6},{name:"Foreman's quarters",cap:48,cost:1e8}];
 const bunkCap=()=>(BUNKS[S.bunk||0].cap+perkLv("shift")*4+(FX.off||0))*3600;
 const PERKS=[
@@ -1729,7 +1809,9 @@ const PERKS=[
 ];
 const perkLv=id=>(S.perks&&S.perks[id])||0;
 const throneMult=()=>S.throne?1.25:1;
-const EXC_GOAL=1e8,EXC_TITHE=.15;
+// Scaled with depthMult: at the Throne the multiplicative curve pays about 4x what the old
+// additive one did, so a fixed $100M tithe target would now complete almost immediately.
+const EXC_GOAL=4e8,EXC_TITHE=.15;
 const EXC_TEXT=[[0,"Something is buried under the throne. Every coin the crew earns down here, 15% goes into the dig."],[.25,"The crew has cleared the rubble. The seat isn't stone. It's older than the mine."],[.5,"There are names carved beneath the seat. One of them is Ashcombe."],[.75,"The floor beneath the throne is hollow. Something answers when the picks strike."],[1,"The throne is empty, and it always was. The lord was never the one you owed. What's beneath pays better than he ever did."]];
 const SHIFTS=[{h:3,rate:3},{h:6,rate:2},{h:9,rate:1.5},{h:12,rate:1}];  // paid, available any time; longer shifts swing slower
 const AUTO_RATE=()=>(S.autoRate||3)*(1+perkLv("foreman")*.35);
@@ -1768,7 +1850,31 @@ const partyShiftMult=()=>1+((PARTY&&PARTY.shift)||0)*.25;
 const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1+(FX.swing||0))*(termNow().id==="blood"?.5:1)*partyPickMult();
 const cps=()=>CREW.reduce((a,c,i)=>a+c.rate*(S.crew[i]||0)*crewMult(S.crew[i]||0),0)*depthMult()*buffMult()*(1+perkLv("veins")*.08+(FX.crew||0))*(termNow().id==="quiet"?1.5:1);
 const crewCost=i=>Math.floor(CREW[i].base*Math.pow(1.2,S.crew[i])*(1-perkLv("labor")*.06));
-const oilOnSeal=()=>Math.floor(Math.sqrt(S.cash/debtCost()*10)*(1+perkLv("press")*.35+(FX.oil||0)))+(termNow().id==="double"?2:0);
+// ---- buying in bulk ----
+// Costs are floored per hire, so the run is summed rather than solved, which also keeps
+// it honest with the single-buy price. 1.2^n runs away fast enough that the cap is never
+// the thing that stops you.
+let buyQty=1;   // 1, 10, or "max"
+const BULK_CAP=500;
+const crewCostAt=(i,n)=>Math.floor(CREW[i].base*Math.pow(1.2,n)*(1-perkLv("labor")*.06));
+function bulkPlan(i,want){
+  const have=S.crew[i]||0;let n=0,total=0;
+  const lim=want==="max"?BULK_CAP:want;
+  while(n<lim){const c=crewCostAt(i,have+n);if(total+c>S.cash)break;total+=c;n++}
+  return {n,total};
+}
+// A fixed ×10 shows the full price even when you can't cover it, so you know what to save
+// for. Max only ever shows what you can actually take.
+function bulkQuote(i){
+  const have=S.crew[i]||0;
+  if(buyQty==="max"){const p=bulkPlan(i,"max");return p.n?p:{n:1,total:crewCost(i)}}
+  let total=0;for(let k=0;k<buyQty;k++)total+=crewCostAt(i,have+k);
+  return {n:buyQty,total};
+}
+// The sqrt(overshoot) term only scales if your income outruns the debt, and it can't once
+// the shop is maxed. The rank term is the floor: a rank-10 debt is worth paying even at
+// exactly the asking price.
+const oilOnSeal=()=>Math.floor(Math.sqrt(S.cash/debtCost()*10)*(1+(S.debts||0)*.45)*(1+perkLv("press")*.35+(FX.oil||0)))+(termNow().id==="double"?2:0);
 let earn=function(n){S.cash+=n;S.lifetime+=n};
 
 let USER=null;
@@ -1873,6 +1979,57 @@ function renderAccount(){
     :`<button class="who" id="openMiner"><span class="av" style="background:var(--line2);color:var(--ink)">?</span><span class="uname">Bunkhouse</span><span style="color:var(--dim);font-weight:400;font-size:12px">›</span></button><a href="/api/login" class="primary"><span class="dcfull">Sign in with Discord</span><span class="dcshort">Sign in</span></a>`;
   $("openMiner").onclick=openModal;
   $("boardNote").textContent=USER?(saveErr?`Cloud saving is failing (${saveErr}). Progress is safe in this browser.`:"Your mine saves to the cloud automatically."):"Anyone can read the board — no account needed. Sign in with Discord only if you want your own mine saved and your name up here.";
+}
+// ---- backup codes ----
+// Before this, a player who didn't want to hand over a Discord account had exactly one
+// copy of their mine and no way to move it. The code is base64 so it survives being
+// pasted through chat clients that would otherwise mangle raw JSON.
+const SAVE_TAG="IDLEDEPTHS1:";
+function exportSave(){
+  S.last=Date.now();
+  const json=JSON.stringify(S);
+  return SAVE_TAG+btoa(unescape(encodeURIComponent(json)));
+}
+function parseSave(code){
+  const raw=String(code||"").trim();
+  if(!raw.startsWith(SAVE_TAG))return null;
+  try{
+    const d=JSON.parse(decodeURIComponent(escape(atob(raw.slice(SAVE_TAG.length)))));
+    // a real save always has these; anything else is a typo or somebody else's clipboard
+    if(!d||typeof d!=="object"||typeof d.lifetime!=="number"||!Array.isArray(d.crew))return null;
+    return d;
+  }catch(e){return null}
+}
+async function doExport(){
+  const code=exportSave(),note=$("svNote");
+  let copied=false;
+  try{await navigator.clipboard.writeText(code);copied=true}catch(e){}
+  if(copied){note.textContent=`Copied — ${code.length.toLocaleString()} characters. Paste it somewhere safe.`;toast("Backup code copied to your clipboard.")}
+  else{
+    // clipboard is blocked on plenty of mobile browsers, so fall back to something selectable
+    note.innerHTML=`Your browser wouldn't let us copy it. Select the code below and copy it by hand:<textarea readonly style="width:100%;height:110px;margin-top:8px;background:var(--panel2);color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:8px;font-size:11px"></textarea>`;
+    const ta=note.querySelector("textarea");ta.value=code;ta.focus();ta.select();
+  }
+}
+async function doImport(){
+  const code=await askText({title:"Restore from a code",text:"Paste a backup code. This replaces the mine in this browser.",placeholder:SAVE_TAG+"…",ok:"Restore",max:400000,
+    check:v=>!v?"Paste your backup code.":parseSave(v)?"":"That doesn't look like an Idle Depths backup code."});
+  if(!code)return;
+  const d=parseSave(code);if(!d)return;
+  const mine=S.lifetime||0,theirs=d.lifetime||0;
+  const warn=theirs<mine
+    ?`The code you pasted has mined ${fmt(theirs)}. The mine in this browser has ${fmt(mine)} — that progress will be replaced.`
+    :`This code has mined ${fmt(theirs)}. It will replace the mine in this browser.`;
+  if(!await ask("Restore this save?",warn,"Restore"))return;
+  S={...fresh(),oil:0,lifetime:0,profile:{name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a"},...d};
+  S.profile={name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a",...(d.profile||{})};
+  if(S.crew.length<CREW.length)S.crew=[...S.crew,...CREW.map(()=>0)].slice(0,CREW.length);
+  S.story=S.story||{active:null,prog:{},done:{},pick:{},keeps:[]};S.story.keeps=S.story.keeps||[];
+  S.ach=S.ach||{};S.tips=S.tips||{};ensureLedger();
+  S.shelf=(S.shelf||[]).filter(n=>S.story.keeps.includes(n)).slice(0,shelfCap());recalcFx();
+  await save();
+  toast("Mine restored. Reloading…");
+  setTimeout(()=>location.reload(),700);
 }
 // ---- in-page confirm (browser confirm() can be blocked) ----
 function ask(title,text,yes="Confirm"){return new Promise(res=>{$("askTitle").textContent=title;$("askText").textContent=text;$("askYes").textContent=yes;$("ask").classList.add("on");
@@ -2601,7 +2758,8 @@ const TIPS=[
   {id:"auto",when:()=>dailyReady()&&!autoOn(),tab:"mine",el:"#dailyPill",ic:"🏮",t:"Your free shift is ready",p:"Every 24 hours the overseer lets a hand work your pick for six hours, free — even with the game closed. The clock starts when you claim it, not at midnight, so there is no bad time to come back. You can still pay for a longer shift from the Upgrades tab any time."},
   {id:"wyrm",when:()=>(S.bosses||0)>=1,tab:"mine",el:"#rock",ic:"🐍",t:"You killed the Wyrm",p:"It surfaces at random. Cut it down inside 30 seconds and you get the Sunforged pick — everything doubles for five minutes. The Wyrm bait perk makes it show up more often."},
   {id:"candebt",when:()=>S.cash>=debtCost(),tab:"debt",el:"#tab-debt .card",ic:"⚖",t:"You can pay Ashcombe",p:"Paying resets the mine but hands you lantern oil: a permanent bonus to everything and the currency for perks. Each payment also unlocks things the first run can't reach."},
-  {id:"perks",when:()=>(S.oil||0)>=1,tab:"perks",el:"#perkList",ic:"✦",t:"You have lantern oil",p:"Unspent oil gives +10% to everything each. Spent oil buys permanent perks instead. Neither is wrong — decide whether you want a fatter multiplier or a different way to play."},
+  {id:"perks",when:()=>(S.oil||0)>=1,tab:"debt",pre:()=>showDebtSub("perks"),el:"#perkList",ic:"✦",t:"You have lantern oil",p:"Oil you hold makes everything you earn worth more, and the bonus grows faster the more flasks you sit on. Oil you spend here buys a permanent perk instead. Neither is wrong — decide whether you want a fatter multiplier or a different way to play."},
+  {id:"fault",when:()=>(S.bestVein||0)>=1,tab:"mine",el:"#rock",ic:"⚡",t:"That was a fault line",p:"Faults open on the face while you're watching the mine, and close after a few seconds. Strike one and it pays well; strike them back to back and the vein multiplier climbs to ×4. Let one close and the vein resets. They never open while you're away, so there is nothing to miss by leaving."},
   {id:"silver",when:()=>S.depth===4,tab:"mine",el:"#rock",ic:"✦",t:"Read the walls",p:"Silvergrave is covered in the names of miners who never came back up. They're real: the people from the stories, everyone on the leaderboard, and you. Your own name is the bright one."},
   {id:"warmdark",when:()=>!!S.throne,tab:"mine",el:".side .card:first-child",ic:"◈",t:"The floor opened",p:"The throne was empty, and now there's a way under it. The Warm Dark is the deepest layer in the mine, and whatever is down there settles up in full and on time. Ashcombe never did."},
 ];
@@ -2647,6 +2805,17 @@ $("help").onclick=()=>openHelp("help");
 document.querySelectorAll("[data-hs]").forEach(b=>b.onclick=()=>openHelp(b.dataset.hs));
 document.querySelectorAll("[data-help]").forEach(a=>a.onclick=e=>{e.preventDefault();openHelp(a.dataset.help)});
 $("helpTour").onclick=tourStart;$("helpTour2").onclick=tourStart;
+// ---- debt / perks sub-tabs ----
+// Perks used to be its own tab. It's the same currency and the same decision as the debt
+// page, and eight tabs didn't fit a phone, so the two share one now.
+const perksOpen=()=>$("tab-debt").classList.contains("on")&&$("d-perks").classList.contains("on");
+function showDebtSub(k){
+  document.querySelectorAll("[data-d]").forEach(b=>b.classList.toggle("on",b.dataset.d===k));
+  ["owed","perks"].forEach(x=>$("d-"+x).classList.toggle("on",x===k));
+  if(k==="perks")renderPerks();
+  render();
+}
+document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>showDebtSub(b.dataset.d));
 document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-q]").forEach(x=>x.classList.toggle("on",x===b));["ledger","stories","contracts"].forEach(k=>$("q-"+k).classList.toggle("on",b.dataset.q===k));if(b.dataset.q==="ledger")renderLedger()});
 $("lgClaim").onclick=ledgerSign;
 $("newBuildGo").onclick=async()=>{await save();location.reload()};
@@ -2704,7 +2873,9 @@ function render(){
   $("layerDesc").textContent=L.desc;
   $("hp").style.width=Math.max(0,S.rockHp/L.hp*100)+"%";drawFace();
   $("heroLayer").textContent=L.name;$("heroDepth").textContent="Depth "+(S.depth+1);
-  $("mult").textContent="×"+depthMult().toFixed(2);
+  // depthMult carries oil compounding too, so this can run into the millions late — keep it
+  // to a few characters instead of letting "×1234567.89" break the stat strip
+  {const m=depthMult();$("mult").textContent="×"+(m<1000?m.toFixed(2):fmt(m).slice(1))}
   $("cpsStat").textContent=fmt(cps());
   const next=LAYERS[S.depth+1],dBtn=$("descend");
   $("depthNow").textContent="Depth "+(S.depth+1);
@@ -2712,7 +2883,11 @@ function render(){
   else if(L.rank&&(S.debts||0)<L.rank){$("depthNext").textContent=next.name;dBtn.disabled=true;dBtn.textContent=`Pay the debt ×${L.rank} to descend`;$("progFill").style.width="0%";$("progText").textContent="Sealed";$("progPct").textContent="";$("etaText").textContent=`Opens at debt rank ${L.rank}`}
   else if(next.needsThrone&&!S.throne){$("depthNext").textContent=next.name;dBtn.disabled=true;dBtn.textContent="Excavate the throne to descend";$("progFill").style.width="0%";$("progText").textContent="Solid floor";$("progPct").textContent="";$("etaText").textContent="Whatever is under the throne opens the way"}
   else{const dc=descendCost();$("depthNext").textContent=next.name;dBtn.disabled=S.cash<dc;dBtn.textContent=S.cash<dc?"Need "+fmt(dc-S.cash)+" more":"Descend ↑";
-    const pct=Math.min(100,S.cash/dc*100);$("progFill").style.width=pct+"%";$("progText").textContent=fmt(S.cash)+" / "+fmt(dc);$("progPct").textContent=Math.floor(pct)+"% of the way";$("etaText").textContent="Est. descend: "+eta(dc)}
+    const pct=Math.min(100,S.cash/dc*100);$("progFill").style.width=pct+"%";$("progText").textContent=fmt(S.cash)+" / "+fmt(dc);$("progPct").textContent=Math.floor(pct)+"% of the way";
+    // "x2.80" on its own tells you nothing about whether the descend cost is worth paying,
+    // and the gem jump — the bigger half of the reward — was never shown at all.
+    const em=DEPTH_STEP,gm=next.gem/LAYERS[S.depth].gem;
+    $("etaText").textContent=`Est. ${eta(dc)} · ${next.name} pays ×${em.toFixed(2)} and finds ×${gm.toFixed(1)} the gems`}
   const np=PICKS[S.pick+1];
   if(np){const plk=np.rank&&(S.debts||0)<np.rank;
     $("eqPickName").textContent=np.name;
@@ -2751,8 +2926,11 @@ function render(){
      if(!S.story.active&&STORIES.some(st=>sOpen(st)&&!S.story.done[st.id])){lastQNudge=Date.now()+420000;toast("No story active. Pick one in Quests — mining uncovers it while you dig.")}
    }}
   {const o=S.oil||0,canPerk=PERKS.some(pk=>perkLv(pk.id)<pk.max&&o>=pk.cost(perkLv(pk.id)));
-   const pb=$("pBadge");pb.textContent=o;pb.classList.toggle("on",canPerk&&!$("tab-perks").classList.contains("on"));
-   if(canPerk&&!$("tab-perks").classList.contains("on")&&Date.now()>lastPNudge){lastPNudge=Date.now()+600000;toast(`You're holding ${o} lantern oil — spend it on a perk.`)}}
+   const open=perksOpen();
+   const pb=$("pBadge");pb.textContent=o;pb.classList.toggle("on",canPerk&&!open);
+   // the sub-button carries its own count now that Perks isn't a tab of its own
+   const pb2=$("pBadge2");pb2.textContent=o;pb2.classList.toggle("on",canPerk&&!open);
+   if(canPerk&&!open&&Date.now()>lastPNudge){lastPNudge=Date.now()+600000;toast(`You're holding ${o} lantern oil — spend it on a perk under Debt.`)}}
   if($("sealBtn")){$("sealBtn").disabled=S.cash<debtCost();$("sealBtn").textContent=S.cash<debtCost()?"Need "+fmt(debtCost()-S.cash)+" more":"Pay & go back down";
   $("sealInfo").textContent=S.cash<debtCost()?`The lord wants ${fmt(debtCost())} · ${S.oil} oil held`:`+${oilOnSeal()} lantern oil if you pay now`;}
   PICKS.forEach((p,i)=>{if(!i)return;const row=$("pick"+i);if(!row)return;const b=row.querySelector("button");
@@ -2761,8 +2939,8 @@ function render(){
     else if(lk){row.classList.add("locked");b.disabled=true;b.textContent="Debt ×"+p.rank}
     else if(i>S.pick+1){row.classList.add("locked");b.disabled=true;b.textContent=fmt(p.cost)}
     else{row.classList.remove("locked");b.disabled=S.cash<p.cost;b.textContent=fmt(p.cost)}});
-  CREW.forEach((c,i)=>{const row=$("crew"+i);if(!row)return;row.style.display=c.rank&&(S.debts||0)<c.rank?"none":"";const b=row.querySelector("button"),cost=crewCost(i);
-    b.disabled=S.cash<cost;b.textContent=fmt(cost);
+  CREW.forEach((c,i)=>{const row=$("crew"+i);if(!row)return;row.style.display=c.rank&&(S.debts||0)<c.rank?"none":"";const b=row.querySelector("button"),q=bulkQuote(i);
+    b.disabled=S.cash<q.total;b.innerHTML=(q.n>1?`<em>×${q.n}</em>`:"")+fmt(q.total);
     const n=S.crew[i]||0,m=crewMult(n),nm=nextMile(n);
     $("crewN"+i).textContent=n?"×"+n:"";$("crewM"+i).textContent=m>1?`×${m} power`:"";
     $("crewR"+i).innerHTML="+"+fmt(c.rate*m*depthMult())+"/sec each"+(n?`<b style="display:block;color:var(--green);font-weight:500">Earning ${fmt(crewTotal(i))}/sec</b>`:"");
@@ -3075,6 +3253,93 @@ function dropClaim(){
   else {const v=nice(worth);earn(v);toast(`A dropped purse: ${fmt(v)}.`);confetti(22)}
   render();save();
 }
+// ---- seam finds ----
+// Gem chance climbs 33x from the Cutting to the Warm Dark, but it only ever paid out on a
+// manual swing, so the whole reason to descend was invisible to anyone playing idle. Once
+// a second the crew gets the same roll, paid against worker income instead of swing power.
+// This is what makes a deep layer worth the descend cost rather than just a nicer backdrop.
+// Halved once depthMult went multiplicative: seam finds existed to give idle players a
+// reason to descend, and depth now does that itself. Leaving both at full strength would
+// pay twice for the same thing.
+const SEAM_SHARE=.25;
+function seamTick(){
+  if(cps()<=0)return;
+  const chance=LAYERS[S.depth].gem*(1+perkLv("lucky")*.25+(FX.gem||0));
+  if(Math.random()>=chance)return;
+  let r=Math.random()*100,g=GEMS[0];for(const x of GEMS){if(r<x.w){g=x;break}r-=x.w}
+  const v=cps()*g.mult*SEAM_SHARE*(termNow().id==="blood"?10:1);
+  earn(v);S.gems++;S.crewEarned=(S.crewEarned||0)+v;
+  // only worth interrupting for the rare ones; amethysts would be constant noise
+  if(g.mult>=80)toast(`The crew struck a seam — ${g.name}, ${fmt(v)}.`);
+  if(g.mult>=250)confetti(30);
+}
+// ---- fault lines ----
+// The mine had exactly one verb: hit the rock. Everything with any depth to it — the wheel,
+// the slots, the blackjack — lived at the warden's table, which meant the most interesting
+// place to spend an active session was the one place that takes your money.
+//
+// A fault opens somewhere on the face for a few seconds. Strike it and it pays, and the
+// vein chain climbs; let one close and the chain is gone. Idle play is untouched: faults
+// only open while you are actually looking at the mine, and missing them costs nothing you
+// had. It is a reason to stay at the screen rather than a tax for leaving it.
+const FAULT_LIFE=3600,FAULT_MIN=9000,FAULT_VAR=7000;
+const VEIN_STEP=.25,VEIN_CAP=12;   // +25% a link, capped at x4
+let faultNext=Date.now()+25000,faultGone=0,vein=0;
+const veinMult=()=>1+Math.min(vein,VEIN_CAP)*VEIN_STEP;
+// Not for brand-new players: the first few minutes are already teaching the rock, the
+// crew and the descend button.
+const faultReady=()=>S.seen&&(S.swings||0)>=25&&!boss&&$("drop").hidden
+  &&document.visibilityState==="visible"&&$("tab-mine").classList.contains("on");
+function faultSpawn(){
+  const f=$("fault");if(!f||!f.hidden||!faultReady())return;
+  f.style.left=(10+Math.random()*72)+"%";
+  f.style.top=(14+Math.random()*46)+"%";
+  f.style.setProperty("--flife",FAULT_LIFE+"ms");
+  f.classList.remove("going","miss");
+  f.hidden=false;faultGone=Date.now()+FAULT_LIFE;
+}
+function faultHide(missed){
+  const f=$("fault");if(!f||f.hidden)return;
+  if(missed)f.classList.add("miss");
+  f.classList.add("going");
+  setTimeout(()=>{f.hidden=true;f.classList.remove("going","miss")},280);
+  faultNext=Date.now()+FAULT_MIN+Math.random()*FAULT_VAR;faultGone=0;
+}
+function faultTick(){
+  const f=$("fault");if(!f)return;
+  // `going` is the 280ms exit animation. The element is still visible during it and
+  // faultGone has already been zeroed, so without this guard a successful strike reads
+  // as an expiry on the very next tick and wipes the vein the player just earned.
+  if(f.classList.contains("going"))return;
+  if(!f.hidden){
+    if(Date.now()>faultGone){   // let one close and the chain goes with it
+      if(vein>0){vein=0;veinRender();toast("The fault closed. The vein is lost.")}
+      faultHide(true)}
+    return}
+  if(Date.now()>faultNext){if(faultReady())faultSpawn();else faultNext=Date.now()+4000}
+}
+function veinRender(){
+  const v=$("vein");if(!v)return;
+  v.classList.toggle("on",vein>0);
+  $("veinN").textContent="×"+veinMult().toFixed(2);
+  $("veinBar").style.width=Math.min(100,vein/VEIN_CAP*100)+"%";
+}
+function faultHit(e){
+  const f=$("fault");if(!f||f.hidden)return;
+  faultHide(false);
+  vein++;if(vein>(S.bestVein||0))S.bestVein=vein;
+  // scaled off both halves of the economy so it stays worth hitting at every stage
+  const val=Math.max(clickPower()*12,cps()*3,60)*veinMult();
+  earn(val);S.swings++;S.rockHp-=clickPower()*12*veinMult();partyGainXp();
+  pop(`Fault! +${fmt(val)}`,e,"fault");
+  veinRender();
+  if(vein===VEIN_CAP){toast(`The vein is running clean — fault strikes now pay ×${veinMult().toFixed(1)}.`);confetti(30)}
+  const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake");
+  if(S.rockHp<=0){const bonus=clickPower()*3+cps()*2;earn(bonus);shatter();S.rockHp=LAYERS[S.depth].hp;S.clears=(S.clears||0)+1;flash();drawFace(true);
+    toast(`Rock cleared! Bonus ${fmt(bonus)}.`)}
+  render();save();
+}
+$("fault").onclick=e=>{e.preventDefault();e.stopPropagation();faultHit(e)};
 function confetti(n=40){const cols=["#f2b24c","#ffd27a","#8fdc6a","#5ec9b6","#c48cff","#f07a5b"];for(let i=0;i<n;i++){const c=document.createElement("i");c.className="conf";c.style.left="50%";c.style.top="40%";c.style.background=cols[i%cols.length];c.style.setProperty("--dx",(Math.random()*500-250)+"px");c.style.setProperty("--dy",(Math.random()*300-120)+"px");document.body.appendChild(c);setTimeout(()=>c.remove(),1200)}}
 function flash(){const f=$("flash");f.classList.remove("on");void f.offsetWidth;f.classList.add("on")}
 function pop(txt,e,cls){const p=document.createElement("div");p.className="pop"+(cls?" "+cls:"");p.textContent=txt;
@@ -3164,20 +3429,23 @@ function eqCrewRender(){
     host.querySelectorAll("[data-crew]").forEach(b=>b.onclick=()=>buyCrew(+b.dataset.crew));
   }
   slice.forEach(i=>{
-    const c=CREW[i],cost=crewCost(i),n=S.crew[i]||0,nm=nextMile(n),lk=c.rank&&(S.debts||0)<c.rank;
+    const c=CREW[i],q=bulkQuote(i),n=S.crew[i]||0,nm=nextMile(n),lk=c.rank&&(S.debts||0)<c.rank;
     $("eqR"+i).classList.toggle("lk",!!lk);
     $("eqC"+i+"n").textContent=c.name;
     $("eqC"+i+"l").textContent=lk?"":"×"+n+(crewMult(n)>1?` · ×${crewMult(n)}`:"");
     $("eqC"+i+"i").innerHTML=lk?c.desc:"+"+fmt(c.rate*crewMult(n)*depthMult())+"/sec each"+(nm?` · ${nm-n} to ×${crewMult(n)*2}`:"")+(n?`<span class="earn">Earning ${fmt(crewTotal(i))}/sec</span>`:"");
     const b=$("eqC"+i+"b");
     if(lk){b.textContent="Debt ×"+c.rank;b.disabled=true}
-    else{b.textContent=fmt(cost);b.disabled=S.cash<cost}
+    else{b.innerHTML=(q.n>1?`<em>×${q.n}</em>`:"")+fmt(q.total);b.disabled=S.cash<q.total}
   });
   $("eqPage").style.display=pages>1?"":"none";
   $("eqNum").textContent=`Page ${eqPg+1} of ${pages}`;
   $("eqPrev").disabled=eqPg===0;
   $("eqNext").disabled=eqPg>=pages-1;
 }
+document.querySelectorAll("[data-qty]").forEach(b=>b.onclick=()=>setBuyQty(b.dataset.qty));
+$("svExport").onclick=doExport;
+$("svImport").onclick=doImport;
 $("eqPrev").onclick=()=>{eqPg--;eqCrewRender()};
 $("eqNext").onclick=()=>{eqPg++;eqCrewRender()};
 function fitRails(){
@@ -3189,14 +3457,29 @@ function fitRails(){
 }
 addEventListener("resize",()=>{fitPage();fitRails()});
 addEventListener("load",()=>{fitPage();fitRails()});
-function buyCrew(i){const c=crewCost(i);if(S.cash>=c){S.cash-=c;S.crew[i]++;if(MILES.includes(S.crew[i])){toast(`${CREW[i].name}s hit ${S.crew[i]}: they now work at ×${crewMult(S.crew[i])} power.`);confetti(30)}drawScene();render();save()}}
+function buyCrew(i){
+  const q=bulkQuote(i);
+  if(!q.n||S.cash<q.total)return;
+  const before=crewMult(S.crew[i]||0);
+  S.cash-=q.total;S.crew[i]=(S.crew[i]||0)+q.n;
+  const after=crewMult(S.crew[i]);
+  if(after>before){toast(`${CREW[i].name}s hit ${S.crew[i]}: they now work at ×${after} power.`);confetti(30)}
+  else if(q.n>1)toast(`Hired ${q.n} × ${CREW[i].name} for ${fmt(q.total)}.`);
+  drawScene();render();save();
+}
+function setBuyQty(q){
+  buyQty=q==="max"?"max":+q;
+  document.querySelectorAll("[data-qty]").forEach(b=>b.classList.toggle("on",String(b.dataset.qty)===String(buyQty)));
+  eqSig="";   // labels change shape, so force the mine-tab rail to rebuild
+  render();
+}
 function descend(){const L=LAYERS[S.depth],nx=LAYERS[S.depth+1];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}
   if(nx&&nx.needsThrone&&!S.throne){toast("The floor here is solid. Excavate the Hollow Throne first — whatever is under it opens the way.");return}
   const dc=descendCost();if(S.cash>=dc&&LAYERS[S.depth+1]){S.cash-=dc;S.depth++;const rec=S.depth>(S.deepest||0);S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);if(rec)feedPost("depth",S.depth+1);confetti(40);drawScene();render();save()}}
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
-  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,dailyNext:S.dailyNext,dailyTaken:S.dailyTaken,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
+  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,dailyNext:S.dailyNext,dailyTaken:S.dailyTaken,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,bestVein:S.bestVein,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
   toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);feedPost("debt",S.debts);drawScene();render();save();
 }
@@ -3841,6 +4124,8 @@ setInterval(()=>{const c=cps()/10;earn(c);S.crewEarned=(S.crewEarned||0)+c;
   if(autoOn()&&++autoTick%Math.round(10/AUTO_RATE())===0)mine({},true);
   if(S.depth>=6&&!S.throne){S.exc=(S.exc||0)+c*EXC_TITHE;if(S.exc>=EXC_GOAL){S.throne=true;S.oil=(S.oil||0)+5;toast("The throne is empty. Its blessing is yours: +25% to everything, forever, and 5 flasks of lantern oil.");drawScene();render();save()}}
   dropTick();
+  faultTick();
+  if(tick%10===0)seamTick();
   if(boss){bossRender();if(Date.now()>boss.until)bossEnd(false)}else if(termNow().id!=="quiet"&&Date.now()>bossCooldown&&document.visibilityState==="visible"&&Math.random()<BOSS_CHANCE*(1+perkLv("bait")*.5))spawnBoss();
   if($("tour").classList.contains("on"))tourGate();
   if(wasBuffed&&!buffOn()){wasBuffed=false;toast("The Sunforged pick crumbles to ash. Back to your own tools.");drawScene();render()}if(++tick%10===0){render();tipCheck()}if(tick%150===0)save();if(tick%600===0)loadBoard()},100);
