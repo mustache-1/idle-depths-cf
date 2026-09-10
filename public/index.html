@@ -269,8 +269,8 @@
     #tab-mine.on ~ footer{display:none}
     .pit{display:grid;grid-template-columns:236px minmax(0,1fr) 286px;gap:13px;align-items:stretch;
       height:calc(100vh - 108px);min-height:0}
-    .pit .side,.pit .stage{height:100%;min-height:0}
-    .pit .side{overflow-y:auto;scrollbar-width:thin}
+    .pit .stage{height:100%;min-height:0}
+    .pit .side{align-self:start;max-height:100%;min-height:0;overflow-y:auto;scrollbar-width:thin}
     .pit .side .card{padding:11px 13px}
     .pit .hero{flex:none;width:min(100%,calc((100vh - 320px) * 1.79));margin:0 auto;display:flex;flex-direction:column}
     .pit .rock{flex:none;aspect-ratio:340/190;min-height:0}
@@ -846,11 +846,6 @@
         <small class="note" id="thText"></small>
         <div class="prog"><i id="thFill" style="background:linear-gradient(90deg,#8a5cc8,var(--gem));box-shadow:0 0 10px rgba(196,140,255,.5)"></i></div>
         <div class="meta"><span id="thProg"></span><span id="thPct"></span></div>
-      </div>
-      <div class="card seal">
-        <h3>Pay the debt</h3>
-        <small class="note" id="sealInfo"></small>
-        <button class="big" id="sealBtn">Pay &amp; go back down</button>
       </div>
     </aside>
 
@@ -1729,6 +1724,7 @@ function render(){
   if(np){$("eqPickName").textContent=np.name;$("eqPickInfo").textContent="+"+fmt((np.power-PICKS[S.pick].power)*depthMult())+"/swing";$("eqPickBtn").textContent=fmt(np.cost);$("eqPickBtn").disabled=S.cash<np.cost}
   else{$("eqPickName").textContent=PICKS[S.pick].name;$("eqPickInfo").textContent="Best pickaxe";$("eqPickBtn").textContent="Maxed";$("eqPickBtn").disabled=true}
   eqCrewRender();
+  fitRails();
   const nb=BUNKS[(S.bunk||0)+1];$("bunkName").innerHTML=BUNKS[S.bunk||0].name+`<em>${BUNKS[S.bunk||0].cap}h offline</em>`;
   if(nb){$("bunkDesc").textContent=`Upgrade to the ${nb.name}: workers keep working for ${nb.cap} hours while you're away.`;$("bunkBtn").textContent=fmt(nb.cost);$("bunkBtn").disabled=S.cash<nb.cost}
   else{$("bunkDesc").textContent="The best quarters in the mine. Workers work up to 48 hours while you're gone.";$("bunkBtn").textContent="Maxed";$("bunkBtn").disabled=true}
@@ -1754,8 +1750,8 @@ function render(){
   {const o=S.oil||0,canPerk=PERKS.some(pk=>perkLv(pk.id)<pk.max&&o>=pk.cost(perkLv(pk.id)));
    const pb=$("pBadge");pb.textContent=o;pb.classList.toggle("on",canPerk&&!$("tab-perks").classList.contains("on"));
    if(canPerk&&!$("tab-perks").classList.contains("on")&&Date.now()>lastPNudge){lastPNudge=Date.now()+600000;toast(`You're holding ${o} lantern oil — spend it on a perk.`)}}
-  $("sealBtn").disabled=S.cash<debtCost();$("sealBtn").textContent=S.cash<debtCost()?"Need "+fmt(debtCost()-S.cash)+" more":"Pay & go back down";
-  $("sealInfo").textContent=S.cash<debtCost()?`The lord wants ${fmt(debtCost())} · ${S.oil} oil held`:`+${oilOnSeal()} lantern oil if you pay now`;
+  if($("sealBtn")){$("sealBtn").disabled=S.cash<debtCost();$("sealBtn").textContent=S.cash<debtCost()?"Need "+fmt(debtCost()-S.cash)+" more":"Pay & go back down";
+  $("sealInfo").textContent=S.cash<debtCost()?`The lord wants ${fmt(debtCost())} · ${S.oil} oil held`:`+${oilOnSeal()} lantern oil if you pay now`;}
   PICKS.forEach((p,i)=>{if(!i)return;const row=$("pick"+i),b=row.querySelector("button");
     if(i<=S.pick){row.classList.add("locked");b.disabled=true;b.textContent="Owned"}
     else if(i>S.pick+1){row.classList.add("locked");b.disabled=true;b.textContent=fmt(p.cost)}
@@ -2057,7 +2053,15 @@ function mine(e,auto){
   render();
 }
 function buyPick(i){if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cost;S.pick=i;drawScene();render();save();toast(`You picked up the ${PICKS[i].name}.`)}}
-let eqSig="";
+let eqSig="",railH=-1;
+function fitRails(){
+  const rails=document.querySelectorAll("#tab-mine .rail");
+  if(rails.length<2)return;
+  if(innerWidth<1100){if(railH!==-1){rails[1].style.height="";railH=-1}return}
+  const h=Math.round(rails[0].getBoundingClientRect().height);
+  if(h&&h!==railH){railH=h;rails[1].style.height=h+"px"}
+}
+addEventListener("resize",()=>{railH=-1;fitRails()});
 function eqCrewRender(){
   const vis=[];
   for(let i=0;i<CREW.length;i++)vis.push(i);
@@ -2163,7 +2167,8 @@ $("rivalModal").onclick=e=>{if(e.target===$("rivalModal"))$("rivalModal").classL
 $("rock").onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();mine({})}};
 $("descend").onclick=descend;
 $("eqPickBtn").onclick=()=>buyPick(S.pick+1);
-$("sealBtn").onclick=rebirth;$("dPay").onclick=rebirth;
+if($("sealBtn"))$("sealBtn").onclick=rebirth;
+$("dPay").onclick=rebirth;
 $("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. Your workers now work ${nb.cap}h while you're away.`);render();save()};
 document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>switchTab(b.dataset.goto));
 $("rebirth").onclick=rebirth;
