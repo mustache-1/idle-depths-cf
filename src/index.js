@@ -128,10 +128,21 @@ async function handle(request, env) {
     const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     const newCode = () => Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
 
+    // Touch "last seen" at most once an hour, so reading the crew page is not a KV write storm.
+    const touchSeen = crew => {
+      crew.seen = crew.seen || {};
+      const last = crew.seen[s.id] || 0;
+      if (Date.now() - last < 3600000) return false;
+      crew.seen[s.id] = Date.now();
+      return true;
+    };
+
     if (p === "/api/crew") {
       const cid = await crewIdFor(s.id);
       const crew = await loadCrew(cid);
-      return json(crew || null);
+      if (!crew) return json(null);
+      if (touchSeen(crew)) await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      return json(crew);
     }
 
 
@@ -215,13 +226,20 @@ async function handle(request, env) {
       const body = await request.json().catch(() => ({}));
       const amount = Math.max(0, Math.min(500000, Number(body.amount) || 0));
       const rolled = rollDig(crew);
+      const seen = touchSeen(crew);
       if (amount > 0) {
         crew.dig.total += amount;
         crew.dig.by[s.id] = (crew.dig.by[s.id] || 0) + amount;
       }
       const hit = crew.dig.total >= crew.dig.need && !crew.dig.paid;
-      if (hit) { crew.dig.paid = true; crew.xp += 4000 * crew.members.length; }
-      if (rolled || amount > 0 || hit) await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      if (hit) {
+        crew.dig.paid = true;
+        crew.xp += 4000 * crew.members.length;
+        crew.digsDone = (crew.digsDone || 0) + 1;
+        // A week where everyone contributed counts double toward the crew's standing.
+        if (crew.members.every(m => (crew.dig.by[m.id] || 0) > 0)) crew.fullWeeks = (crew.fullWeeks || 0) + 1;
+      }
+      if (rolled || seen || amount > 0 || hit) await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
       return json({ ...crew, justFinished: hit });
     }
 
