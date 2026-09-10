@@ -18,6 +18,9 @@ const ERA_NAMES = { 1: "Season 1 · Ashcombe's ledger", 2: "Season 2 · The deep
 
 const TITLES = { "": "", coalhand: "Coalhand", ironjaw: "Ironjaw", silverback: "Gravewalker", abyssal: "Throne-touched", gemhunter: "Gem hunter", sealed: "Debt-free", lamplighter: "Lamplighter", wyrmslayer: "Wyrmslayer", cardsharp: "Card sharp", regular: "Regular", champion: "Weekly champion", beneath: "Throne-keeper" };
 
+// Set once per isolate; a deploy replaces the isolate, so it never goes stale.
+let BUILD_ID = null;
+
 export default {
   async fetch(request, env) {
     try {
@@ -69,15 +72,25 @@ async function handle(request, env) {
     }
 
     // ---- version (public) ----
-    // Cloudflare's asset pipeline changes the ETag of index.html on every deploy, so it
-    // works as a build id with nothing to bump by hand. Falls back to last-modified.
+    // This used to report the ETag of index.html. That header is not dependable enough
+    // to hang a forced reload on - it can survive a deploy, and it can go missing - so
+    // players stayed on the old build. Hash the actual bytes instead: the id changes
+    // when and only when the file changes.
+    //
+    // BUILD_ID is module scope, so it is computed once per isolate and every deploy
+    // gets fresh isolates. That makes this one digest per cold start, not per request.
     if (p === "/api/version") {
       try {
-        const r = await env.ASSETS.fetch(new Request(`${url.origin}/index.html`, { method: "GET" }));
-        const build = r.headers.get("etag") || r.headers.get("last-modified") || "";
-        return json({ build: build.replace(/"/g, "") }, 200, { "cache-control": "no-store" });
+        if (!BUILD_ID) {
+          const r = await env.ASSETS.fetch(new Request(`${url.origin}/index.html`, { method: "GET" }));
+          const buf = await r.arrayBuffer();
+          const digest = await crypto.subtle.digest("SHA-256", buf);
+          BUILD_ID = [...new Uint8Array(digest).slice(0, 10)]
+            .map((b) => b.toString(16).padStart(2, "0")).join("");
+        }
+        return json({ build: BUILD_ID }, 200, { "cache-control": "no-store" });
       } catch (e) {
-        return json({ build: "" });
+        return json({ build: "" }, 200, { "cache-control": "no-store" });
       }
     }
 
