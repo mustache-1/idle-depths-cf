@@ -209,6 +209,8 @@
   .eq button:not(:disabled){border-color:var(--lamp);color:var(--lamp)}
   .eq button:not(:disabled):hover{background:var(--lamp);color:#1a1614;box-shadow:0 0 12px rgba(242,178,76,.35)}
   .eq button:disabled{color:var(--mute);cursor:not-allowed;border-style:dashed}
+  .eq.lk{opacity:.42}
+  .eq.lk button{border-style:dashed;border-color:var(--line2)}
   .seal b{color:var(--gem)}
   .seal .big:not(:disabled){background:linear-gradient(180deg,#d9b0ff,var(--gem));box-shadow:0 4px 14px rgba(196,140,255,.3)}
 
@@ -2058,22 +2060,22 @@ function buyPick(i){if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cos
 let eqSig="";
 function eqCrewRender(){
   const vis=[];
-  for(let i=0;i<CREW.length;i++){
-    if(CREW[i].rank&&(S.debts||0)<CREW[i].rank)continue;
-    vis.push(i);
-  }
-  const host=$("eqCrew"),sig=vis.join(",");
+  for(let i=0;i<CREW.length;i++)vis.push(i);
+  const host=$("eqCrew"),sig=vis.join(",")+"|"+(S.debts||0);
   if(sig!==eqSig){
     eqSig=sig;
-    host.innerHTML=vis.map(i=>`<div class="eq"><div><b><span id="eqC${i}n"></span><em id="eqC${i}l"></em></b><small id="eqC${i}i"></small></div><button id="eqC${i}b" data-crew="${i}"></button></div>`).join("");
+    host.innerHTML=vis.map(i=>`<div class="eq" id="eqR${i}"><div><b><span id="eqC${i}n"></span><em id="eqC${i}l"></em></b><small id="eqC${i}i"></small></div><button id="eqC${i}b" data-crew="${i}"></button></div>`).join("");
     host.querySelectorAll("[data-crew]").forEach(b=>b.onclick=()=>buyCrew(+b.dataset.crew));
   }
   vis.forEach(i=>{
-    const c=CREW[i],cost=crewCost(i),n=S.crew[i]||0,nm=nextMile(n);
+    const c=CREW[i],cost=crewCost(i),n=S.crew[i]||0,nm=nextMile(n),lk=c.rank&&(S.debts||0)<c.rank;
+    $("eqR"+i).classList.toggle("lk",!!lk);
     $("eqC"+i+"n").textContent=c.name;
-    $("eqC"+i+"l").textContent="×"+n+(crewMult(n)>1?` · ×${crewMult(n)}`:"");
-    $("eqC"+i+"i").innerHTML="+"+fmt(c.rate*crewMult(n)*depthMult())+"/sec each"+(nm?` · ${nm-n} to ×${crewMult(n)*2}`:"")+(n?`<span class="earn">Earning ${fmt(crewTotal(i))}/sec</span>`:"");
-    const b=$("eqC"+i+"b");b.textContent=fmt(cost);b.disabled=S.cash<cost;
+    $("eqC"+i+"l").textContent=lk?"":"×"+n+(crewMult(n)>1?` · ×${crewMult(n)}`:"");
+    $("eqC"+i+"i").innerHTML=lk?c.desc:"+"+fmt(c.rate*crewMult(n)*depthMult())+"/sec each"+(nm?` · ${nm-n} to ×${crewMult(n)*2}`:"")+(n?`<span class="earn">Earning ${fmt(crewTotal(i))}/sec</span>`:"");
+    const b=$("eqC"+i+"b");
+    if(lk){b.textContent="Debt ×"+c.rank;b.disabled=true}
+    else{b.textContent=fmt(cost);b.disabled=S.cash<cost}
   });
 }
 function buyCrew(i){const c=crewCost(i);if(S.cash>=c){S.cash-=c;S.crew[i]++;if(MILES.includes(S.crew[i])){toast(`${CREW[i].name}s hit ${S.crew[i]}: they now work at ×${crewMult(S.crew[i])} power.`);confetti(30)}drawScene();render();save()}}
