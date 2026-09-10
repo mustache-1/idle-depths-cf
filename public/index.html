@@ -253,6 +253,23 @@
   .coffee small{display:block;color:var(--dim);font-size:11.5px;line-height:1.35}
   .coffee:hover{background:rgba(255,176,31,.2);box-shadow:0 0 16px rgba(255,176,31,.18)}
   .fcoffee{max-width:340px;margin:14px 0}
+  .log{padding:14px 16px;display:flex;flex-direction:column;min-height:0}
+  .log h3{font-size:15px;font-weight:600;display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+  .log h3 em{font-style:normal;font-size:12px;color:var(--mute);font-weight:400;margin-left:auto}
+  .logstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding-bottom:11px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+  .logstats small{display:block;font-size:11px;color:var(--dim)}
+  .logstats b{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+  .logstats div:nth-child(1) b{color:var(--green)}
+  .logstats div:nth-child(2) b{color:var(--ore)}
+  .logstats div:nth-child(3) b{color:var(--lamp2)}
+  .logstats div:nth-child(4) b{color:var(--gem)}
+  #logList{list-style:none;min-height:0;overflow-y:auto;scrollbar-width:thin}
+  #logList li{display:flex;gap:10px;align-items:baseline;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+  #logList li:last-child{border-bottom:0}
+  #logList li i{font-style:normal;flex:none;width:16px;text-align:center;opacity:.85}
+  #logList li span{flex:1;min-width:0;color:var(--ink)}
+  #logList li time{flex:none;font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
+  #logList .empty{color:var(--dim);font-size:13px;padding:10px 0;border:0}
   .links .coffee{margin:6px 4px 2px}
   .pit .titlebar,.pit .strip,.pit .quest{flex:none}
   .eqcard{display:flex;flex-direction:column;min-height:0}
@@ -279,6 +296,7 @@
     .pit .rock{flex:none;aspect-ratio:340/190;min-height:0}
     .pit .links{flex:none}
     .pit .eqcard{flex:1;min-height:0}
+    .pit .log{flex:1;min-height:0}
     .pit .titlebar h2{font-size:20px}
     .pit .titlebar span{font-size:13px}
     .pit .rank b{font-size:20px}
@@ -833,6 +851,16 @@
         <div class="qhead"><span class="ic"><i class="ti ti-book" data-fb="&#128214;"></i></span><div><small id="stKicker">Story</small><b id="stSummary">Loading&hellip;</b></div><button class="btn" data-goto="quests" style="margin-left:auto;height:34px;padding:0 14px">Open</button></div>
         <div class="minis" id="stMinis"></div>
       </div>
+      <div class="card log" id="logCard">
+        <h3>The mine feed <em id="lgClock"></em></h3>
+        <div class="logstats">
+          <div><small>Balance</small><b id="lgCash">$0</b></div>
+          <div><small>Per second</small><b id="lgCps">$0</b></div>
+          <div><small>Total mined</small><b id="lgLife">$0</b></div>
+          <div><small>Debts paid</small><b id="lgDebts">0</b></div>
+        </div>
+        <ul id="logList"></ul>
+      </div>
     </main>
 
     <aside class="side rail">
@@ -1382,6 +1410,61 @@ $("mSave").onclick=()=>{
   const sh=SHIRTS.find(o=>o.c===draft.shirt),ht=HATS.find(o=>o.c===draft.hat);if(sh&&!unlocked(sh))draft.shirt=SHIRTS[0].c;if(ht&&!unlocked(ht))draft.hat=HATS[0].c;
   S.profile=draft;closeModal();renderAccount();drawScene();save();toast("Miner updated.");
 };
+// ---- global feed (every signed-in player's milestones) ----
+var feedData=null,feedSig="",feedErr=null,feedAt=0,feedBusy=false;
+var FEED_POLL=45000;
+function logEsc(s){return String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function ago(ms){const s=Math.max(0,Math.floor(ms/1000));if(s<60)return s+"s";const m=Math.floor(s/60);if(m<60)return m+"m";const h=Math.floor(m/60);if(h<24)return h+"h";return Math.floor(h/24)+"d"}
+function feedLine(e){
+  const who=logEsc(e.name||"A miner");
+  if(e.kind==="debt")return{i:"\u2696",t:`<b>${who}</b> paid debt ${e.n} and went back down.`};
+  if(e.kind==="depth"){const L=LAYERS[Math.max(0,Math.min(LAYERS.length-1,(e.n||1)-1))];
+    return{i:"\u2193",t:`<b>${who}</b> broke through into ${logEsc(L?L.name:"the deep")}.`}}
+  if(e.kind==="wyrm")return{i:"\u2620",t:`<b>${who}</b> slew the Deep Wyrm.`};
+  if(e.kind==="win")return{i:"\u2666",t:`<b>${who}</b> took ${fmt(e.n)} off the warden's table.`};
+  return{i:"\u00b7",t:`<b>${who}</b> did something down there.`};
+}
+async function feedLoad(force){
+  if(feedBusy)return;
+  if(!force&&Date.now()-feedAt<FEED_POLL)return;
+  feedBusy=true;feedAt=Date.now();
+  try{
+    const r=await fetch("/api/feed");
+    const j=await r.json().catch(()=>null);
+    if(j&&Array.isArray(j.feed)){feedData=j.feed;feedErr=null}
+    else feedErr="couldn't read the feed";
+  }catch(e){feedErr="couldn't reach the server"}
+  feedBusy=false;feedSig="";logRender();
+}
+// Server builds the text from kind + n, so a modified client can't post free strings.
+// A table win only reaches the feed if it's both a real multiple and a real sum.
+function feedWin(profit,stake){if(profit>=stake*3&&profit>=50000)feedPost("win",profit)}
+async function feedPost(kind,n){
+  if(!USER)return;
+  try{await fetch("/api/feed",{method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({kind,n:Math.floor(n||0)})});feedLoad(true)}catch(e){}
+}
+function logRender(){
+  if(!$("logList"))return;
+  $("lgCash").textContent=fmt(S.cash);
+  $("lgCps").textContent=fmt(cps())+"/sec";
+  $("lgLife").textContent=fmt(S.lifetime||0);
+  $("lgDebts").textContent=S.debts||0;
+  const l=feedData||[];
+  const sig=(feedData?l.length+"|"+(l[0]?l[0].t:0):"none")+"|"+feedErr+"|"+Math.floor(Date.now()/15000);
+  if(sig===feedSig)return;
+  feedSig=sig;
+  const list=$("logList");
+  if(!feedData&&!feedErr){list.innerHTML=`<li class="empty">Loading the feed\u2026</li>`}
+  else if(feedErr){list.innerHTML=`<li class="empty">${logEsc(feedErr)} \u2014 it'll retry shortly.</li>`}
+  else if(!l.length){list.innerHTML=`<li class="empty">Nothing yet. Pay a debt, break into a new layer, kill a Wyrm or win big and the whole mine hears about it.</li>`}
+  else list.innerHTML=l.map(e=>{const f=feedLine(e);
+    return `<li><i>${f.i}</i><span>${f.t}</span><time>${ago(Date.now()-e.t)}</time></li>`}).join("");
+  $("lgClock").textContent=feedData&&l.length?"last "+ago(Date.now()-l[0].t)+" ago":"";
+}
+setInterval(()=>{if(!document.hidden&&$("tab-mine").classList.contains("on"))feedLoad()},15000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)feedLoad()});
+feedLoad(true);
 function toast(msg){const t=$("toast");t.textContent=msg;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),4500)}
 
 const nice=v=>{const m=Math.pow(10,Math.max(0,Math.floor(Math.log10(v))-1));return Math.round(v/m)*m};
@@ -1691,7 +1774,7 @@ document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.t
 function eta2(ms){const s=Math.ceil(ms/1000);return s<3600?Math.floor(s/60)+"m":Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m"}
 function eta(cost){const need=cost-S.cash;if(need<=0)return "Ready now";const r=cps();if(r<=0)return "Keep swinging";const s=need/r;if(s<60)return Math.ceil(s)+"s";if(s<3600)return Math.floor(s/60)+"m "+Math.ceil(s%60)+"s";if(s<86400)return Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m";return Math.floor(s/86400)+"d "+Math.floor(s%86400/3600)+"h"}
 function buildUI(){
-  if(S.crew.length<CREW.length)S.crew=[...S.crew,...CREW.map(()=>0)].slice(0,CREW.length);
+    if(S.crew.length<CREW.length)S.crew=[...S.crew,...CREW.map(()=>0)].slice(0,CREW.length);
   $("picks").innerHTML=PICKS.slice(1).map((p,i)=>`<div class="row" id="pick${i+1}">
       <div><div class="name">${p.name}<em>${fmt(p.power)}/swing</em></div><div class="desc">Swing harder, break more rock.</div></div>
       <button class="buy" data-pick="${i+1}"></button></div>`).join("");
@@ -1727,6 +1810,7 @@ function render(){
   if(np){$("eqPickName").textContent=np.name;$("eqPickInfo").textContent="+"+fmt((np.power-PICKS[S.pick].power)*depthMult())+"/swing";$("eqPickBtn").textContent=fmt(np.cost);$("eqPickBtn").disabled=S.cash<np.cost}
   else{$("eqPickName").textContent=PICKS[S.pick].name;$("eqPickInfo").textContent="Best pickaxe";$("eqPickBtn").textContent="Maxed";$("eqPickBtn").disabled=true}
   eqCrewRender();
+  logRender();
   fitRails();
   const nb=BUNKS[(S.bunk||0)+1];$("bunkName").innerHTML=BUNKS[S.bunk||0].name+`<em>${BUNKS[S.bunk||0].cap}h offline</em>`;
   if(nb){$("bunkDesc").textContent=`Upgrade to the ${nb.name}: workers keep working for ${nb.cap} hours while you're away.`;$("bunkBtn").textContent=fmt(nb.cost);$("bunkBtn").disabled=S.cash<nb.cost}
@@ -1783,7 +1867,7 @@ function spawnBoss(){const base=clickPower()/buffMult();const max=Math.max(base*
   $("bossbar").classList.add("on");toast("Something big is coming up the shaft. Hit it before it slips away!");drawScene();bossRender()}
 function bossRender(){if(!boss)return;$("bossHp").style.width=Math.max(0,boss.hp/boss.max*100)+"%";$("bossTimer").textContent=Math.max(0,Math.ceil((boss.until-Date.now())/1000))+"s"}
 function bossEnd(win){$("bossbar").classList.remove("on");boss=null;bossCooldown=Date.now()+8*60*1000;
-  if(win){S.buffUntil=Date.now()+BUFF_MS;S.bosses=(S.bosses||0)+1;toast("The Deep Wyrm is slain. It drops the Sunforged pick: everything ×2 for 5 minutes!");confetti(60);const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake")}
+  if(win){S.buffUntil=Date.now()+BUFF_MS;S.bosses=(S.bosses||0)+1;feedPost("wyrm",S.bosses);toast("The Deep Wyrm is slain. It drops the Sunforged pick: everything ×2 for 5 minutes!");confetti(60);const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake")}
   else toast("The Wyrm slipped back into the dark. It'll be back.");
   drawScene();render();save()}
 const streakMult=()=>1+Math.min(50,Math.floor(streak/10)*5)/100;
@@ -1891,7 +1975,7 @@ function spin(){
     $("wCenter").textContent=win.label;
     const back=Math.floor(st*win.m);
     if(back>0){S.cash+=back;S.wheelWins=(S.wheelWins||0)+1;if(win.m>=4)S.bigSpins=(S.bigSpins||0)+1;
-      const p=back-st;
+      const p=back-st;feedWin(p,st);
       $("wRes").textContent=p>0?`${win.label} — you win ${fmt(p)}.`:`${win.label} — ${fmt(back)} back.`;
       $("wRes").className="result "+(win.m>=4?"win jackpot":p>0?"win":"lose");
       if(win.m>=4)confetti(win.m>=10?60:25);
@@ -1939,7 +2023,7 @@ function slotSettle(res,st){
   else if(a.k===c.k){mult=SLOT_PAIR;label=`Two ${a.n.toLowerCase()}`;hits=[0,2]}
   const back=Math.floor(st*mult);
   if(back>0){
-    S.cash+=back;S.slotWins=(S.slotWins||0)+1;
+    S.cash+=back;S.slotWins=(S.slotWins||0)+1;feedWin(back-st,st);
     hits.forEach(i=>$("r"+i).classList.add("hit"));
     const p=back-st;
     $("sRes").textContent=p>0?`${label} — you win ${fmt(p)}.`:`${label} — ${fmt(back)} back.`;
@@ -2007,7 +2091,7 @@ function bjSettle(){
   else if(pv<dv){msg=`${dv} beats ${pv}. The warden keeps ${fmt(bet)}.`;cls="lose"}
   else {back=bet;msg=`Push at ${pv}. Stake returned.`;cls=""}
   if(back>0)S.cash+=back;
-  if(back>bet){S.bjWins=(S.bjWins||0)+1;if(pbj)confetti(40)}
+  if(back>bet){S.bjWins=(S.bjWins||0)+1;feedWin(back-bet,bet);if(pbj)confetti(40)}
   $("bRes").textContent=msg;$("bRes").className="result "+cls;
   render();save();bjRender()}
 $("bDeal").onclick=bjDeal;$("bHit").onclick=bjHit;
@@ -2086,13 +2170,13 @@ function eqCrewRender(){
   });
 }
 function buyCrew(i){const c=crewCost(i);if(S.cash>=c){S.cash-=c;S.crew[i]++;if(MILES.includes(S.crew[i])){toast(`${CREW[i].name}s hit ${S.crew[i]}: they now work at ×${crewMult(S.crew[i])} power.`);confetti(30)}drawScene();render();save()}}
-function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}if(S.cash>=L.cost&&LAYERS[S.depth+1]){S.cash-=L.cost;S.depth++;S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);confetti(40);drawScene();render();save()}}
+function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}if(S.cash>=L.cost&&LAYERS[S.depth+1]){S.cash-=L.cost;S.depth++;const rec=S.depth>(S.deepest||0);S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);if(rec)feedPost("depth",S.depth+1);confetti(40);drawScene();render();save()}}
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
   S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
-  toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);drawScene();render();save();
+  toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);feedPost("debt",S.debts);drawScene();render();save();
 }
 
 // ---- leaderboard ----
