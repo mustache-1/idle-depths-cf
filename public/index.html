@@ -1411,7 +1411,7 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free shift</b> — every 24 hours you can put a hand on the pick for 6 hours at 2 swings/sec, at no cost. The clock starts when you claim, so claiming late never wastes a day.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
+    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer through the first nine and earn keepsakes. Mining uncovers clues.</li><li><b>Below the Warm Dark</b> — forty-one more layers, no story and no mercy. Each pays ×2.2, and the descend costs are tuned so a floor takes about an hour near the top of the deep and several days near the bottom. New crew and picks unlock every three floors.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free shift</b> — every 24 hours you can put a hand on the pick for 6 hours at 2 swings/sec, at no cost. The clock starts when you claim, so claiming late never wastes a day.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
@@ -1619,6 +1619,16 @@ const PICKS=[
   {name:"Lightbreaker",power:440000,cost:3.5e14,rank:4},
   {name:"The First Tool",power:1300000,cost:3e15,rank:5},
 ];
+// ---- deep kit ----
+// Thirteen more tiers of each, one every three floors, so there is always something to
+// work toward on the way down. Power climbs x3 a tier while price climbs x4.5, so a new
+// tier is a step up you have to earn rather than a solved game. Generated from the curve
+// instead of typed out, because these numbers and the descend costs were solved together.
+const DEEPPICKS=["The Paymaster's own","Cinderwake head","Long payroll pick","Gravelight",
+  "Drowned ledger pick","Saltbone","The Sleeping Wheel","Slagheart","Wyrmfall","Nightglass",
+  "The Ninth Lamp","Marrowglass","The Undug"];
+DEEPPICKS.forEach((name,k)=>PICKS.push({
+  name,power:3.8e6*Math.pow(3,k),cost:2.8e16*Math.pow(4.5,k),deep:12+3*k}));
 const CREW=[
   {name:"Digger",desc:"A miner with a shovel and no complaints.",base:30,rate:0.028},
   {name:"Ore cart",desc:"Hauls rubble so diggers dig, not carry.",base:400,rate:0.14},
@@ -1636,6 +1646,23 @@ const CREW=[
   {name:"The Deep Engine",desc:"Older than the mine. It was here first.",base:9e13,rate:1.8e8,rank:5},
   {name:"The Paymaster",desc:"It settles up at the end of every shift. Nobody hired it.",base:7.5e14,rate:1.1e9,rank:6},
 ];
+const DEEPCREW=[
+  ["The long payroll","Every name ever written down the shaft, still on shift."],
+  ["Cinderwake furnace","Banked for a century. It only needed asking."],
+  ["The sunken shift","A gang that never clocked off. They do not want paying."],
+  ["The tallying floor","It does the accounts. The accounts come out in your favour."],
+  ["Ashglass cutters","They work the black sheets by their own reflections."],
+  ["The sleeping wheel","Three storeys of winding gear, woken up."],
+  ["Drowned ledger crew","They work waist-deep and never look down."],
+  ["Saltbone gang","Preserved mid-shift. Still knows the seam."],
+  ["The counting dark","It counts. Whatever it counts, it hands over."],
+  ["Slagheart engine","Fed on everything the mine ever threw away."],
+  ["Wyrmfall rig","Built inside the ribs. It uses them for leverage."],
+  ["The second throne","Empty, like the first. It still signs off on the work."],
+  ["The undug","It does not break the rock. The rock stops being there."],
+];
+DEEPCREW.forEach(([name,desc],k)=>CREW.push({
+  name,desc,base:6e15*Math.pow(4.5,k),rate:7e9*Math.pow(3,k),deep:11+3*k}));
 const LAYERS=[
   {name:"The Cutting",desc:"Loose earth and broken carts. Every debtor Lord Ashcombe throws down here starts in the Cutting.",hp:10,cost:800,gem:.006},
   {name:"Rustveins",desc:"Copper threads in red clay. The overseers start writing your name in the ledger.",hp:40,cost:12000,gem:.01},
@@ -1645,8 +1672,69 @@ const LAYERS=[
   {name:"The Glimmer",desc:"Crystal that hums in the dark. Nobody who reaches it wants to leave.",hp:10000,cost:8e7,gem:.05},
   {name:"The Hollow Throne",desc:"Where the lord's debt ends and something older begins.",hp:50000,cost:5e8,gem:.08,rank:2},
   {name:"The Undercroft",desc:"Beneath the throne. The walls are warm. Whatever Ashcombe was paying, it lives here.",hp:250000,cost:6e9,gem:.12},
-  {name:"The Warm Dark",desc:"No lord. No ledger. No debt. Something down here settles up in full and on time, and has done since before the mine was cut.",hp:1400000,cost:Infinity,gem:.2,needsThrone:true},
+  {name:"The Warm Dark",desc:"No lord. No ledger. No debt. Something down here settles up in full and on time, and has done since before the mine was cut.",hp:1400000,cost:4e10,gem:.2,needsThrone:true},
 ];
+// ---- below the Warm Dark ----
+// The story ends at nine. Depths 10-50 are the long grind: the mine stops explaining
+// itself and the numbers stop being polite. Names are written by hand, the curve is not
+// - each layer costs 8x the one above and pays 2.2x, so a descent is always a real
+// climb rather than a button you press on the way past.
+const DEEP=[
+ ["The Long Payroll","Names scratched down the shaft wall go back further than the mine does. Some of them are still being paid."],
+ ["Cinderwake","The rock is warm on both sides. Nothing here has burned in a long time and all of it is still smouldering."],
+ ["The Sunken Shift","A whole gang went down at this level and the timesheet was never closed. It still ticks over."],
+ ["Hollowmarrow","The stone is light in the hand and hollow when struck, like something drained it from the inside."],
+ ["The Tallying Floor","Perfectly flat, perfectly level, ruled into columns. Someone did their accounts down here."],
+ ["Ashglass","Fused black sheets that take the lamp and give nothing back. You can see your own face in the seam."],
+ ["The Sleeping Wheel","A winding wheel three storeys tall, buried to the axle. It turns a quarter-notch a year."],
+ ["Ninefold Seam","One vein that crosses itself nine times without ever ending. Cut it anywhere and it pays."],
+ ["The Drowned Ledger","Waist-deep and cold. Paper floats past in the water, still legible, still adding up."],
+ ["Saltbone Reach","White pillars that were not cut. The salt has kept whatever they used to be."],
+ ["The Quiet Wage","No echo down here. Your pick lands and the sound simply does not come back."],
+ ["Emberfall","Sparks drift upward from below, steadily, like snow going the wrong way."],
+ ["The Turning Shaft","The passage bends the way you did not walk. You come back to the same face from the far side."],
+ ["Gravelight","A pale glow with no source, exactly bright enough to work by and never any brighter."],
+ ["The Unmarked Gang","Tools laid down mid-shift, boots still under the bench. No names anywhere on any of it."],
+ ["The Half Door","A doorframe in solid rock, cut off at the waist. The rock behind it is a different rock."],
+ ["Slagheart","Everything the mine ever threw away, packed hard and hot. You are mining the tailings of something enormous."],
+ ["The Counting Dark","Stand still long enough and you hear it: a slow, patient count, and it is counting you."],
+ ["Wyrmfall Deep","Ribs the width of a cart, arched over the tunnel. It came down here to die and something ate the rest."],
+ ["The Bitten Vein","The ore has been chewed out in mouthfuls. The teeth marks do not match anything with a name."],
+ ["Nightglass Reach","Black crystal in fields, snapping underfoot. Every shard shows a lamp that is not yours."],
+ ["The Owed Hour","Your watch loses exactly sixty minutes at this depth. It never gives them back."],
+ ["Cold Furnace","A smelter big enough to hold the Cutting, banked and dark. The bricks are still warm."],
+ ["The Second Throne","Same shape as the first, and empty in the same way. Nobody built this one either."],
+ ["Marrowglass","Bone gone to glass, or glass grown into bone. Neither answer improves the situation."],
+ ["The Debt Below","Figures cut into the wall, six times what Ashcombe ever asked. No name against them yet."],
+ ["Stillwater Shaft","A flooded drop with no current and no bottom. Drop a lamp and it keeps going down, lit."],
+ ["The Ninth Lamp","Eight lamps burn along the wall and a bracket for a ninth. Whatever hangs in it is not fire."],
+ ["Ironsilence","Metal ore that will not ring. You can hammer it all shift and hear only your own breathing."],
+ ["The Rendering Floor","Channels cut in the stone, sloping to a drain. Everything here was built to run downhill."],
+ ["Gloamvein","The ore is the colour of the hour after sunset, and it stays that colour under any light."],
+ ["The Last Overseer","A chair, a book, a lamp. The book is open. The pen is wet."],
+ ["Emberless","Cold that eats the lamp down to a coal. The crew works by feel and does not complain."],
+ ["The Shut Ledger","A book the size of a door, closed and fused to the rock. You are not going to open it."],
+ ["Deadlight Reach","Light with nothing behind it. Things down here cast shadows in the wrong direction."],
+ ["The Older Cut","Tool marks that predate iron, predate stone tools, predate hands as you would recognise them."],
+ ["Starless Seam","Rock with holes in it in a pattern. Not a random pattern. A sky with everything taken out."],
+ ["The First Shaft","Straight, square, perfect. Someone dug down to this depth before anyone dug down at all."],
+ ["Where The Mine Began","Not the top of the mine. The bottom, and the mine has been climbing toward the surface ever since."],
+ ["The Undug","Rock that has never been broken and does not intend to start. Your pick works anyway."],
+ ["The Bottom of the Book","The last line, and a space after it for one more figure. There is room for your name."],
+];
+// Descend costs down here are not a geometric guess. They were solved against a
+// simulation of the game's own numbers so that each floor takes a target amount of
+// wall-clock time: about an hour at the top of the deep, a day and a half by depth 30,
+// and four to five days at the bottom. The curve is steep early (x17 a floor) and
+// eases to about x3.3, because income accelerates faster than any flat ratio can track.
+// Re-solve rather than hand-edit these: changing crew rates changes what they should be.
+const DEEPCOST=[6.81e11,1.14e13,1.88e14,3.01e15,4.64e16,6.8e17,9.38e18,1.21e20,1.43e21,1.56e22,1.54e23,1.38e24,1.11e25,8e25,3.91e26,1.86e27,8.62e27,3.91e28,1.73e29,7.52e29,3.19e30,1.33e31,5.4e31,2.15e32,8.41e32,3.23e33,1.22e34,4.5e34,1.64e35,5.89e35,2.09e36,7.29e36,2.52e37,8.61e37,2.92e38,9.8e38,3.27e39,1.09e40,3.6e40,1.19e41];
+DEEP.forEach(([name,desc],i)=>{
+  LAYERS.push({name,desc,deep:true,
+    hp:Math.round(1.4e6*Math.pow(3,i+1)),
+    cost:i<DEEPCOST.length?DEEPCOST[i]:Infinity,
+    gem:Math.min(.45,.2+(i+1)*.006)});
+});
 const GEMS=[
   {name:"Amethyst",mult:10,w:60},{name:"Emerald",mult:30,w:25},{name:"Sapphire",mult:80,w:10},{name:"Star ruby",mult:250,w:5},
 ];
@@ -1698,7 +1786,11 @@ function recalcFx(){
 const activeSets=()=>{const on=S.shelf||[];return STORIES.filter(st=>SETFX[st.id]&&st.keeps.every(k=>on.includes(k.n)))};
 const termNow=()=>TERMS.find(t=>t.id===(S.terms||"none"))||TERMS[0];
 const descendCost=()=>Math.floor((LAYERS[S.depth].cost||0)*(1-perkLv("shortcut")*.10-(FX.desc||0)));
-const debtCost=()=>REBIRTH_BASE*Math.pow(1.5,S.debts||0)*(termNow().id==="double"?3:1);
+// Debt used to be a flat 1.5^n, which meant a late crew earned the 29th debt back in
+// under a minute and rebirth stopped being a decision. The exponent now grows with the
+// count, so each debt costs meaningfully more of a run than the one before it.
+const debtCost=()=>{const n=S.debts||0;
+  return REBIRTH_BASE*Math.pow(1.6,n)*Math.pow(1.05,n*n)*(termNow().id==="double"?3:1)};
 const RANK_UNLOCKS=[
   {rank:1,title:"Ashcombe's terms",desc:"Choose the terms of your next run before you go back down."},
   {rank:1,title:"Wyrm handler",desc:"A new hire. Keeps a leashed wyrmling that digs where men won't."},
@@ -1749,11 +1841,30 @@ const ACH=[
   {id:"vein10",name:"Reading the rock",desc:"Strike 10 fault lines in a row.",ok:()=>(S.bestVein||0)>=10,r:.6},
   {id:"vein25",name:"The seam runs clean",desc:"Strike 25 fault lines in a row.",ok:()=>(S.bestVein||0)>=25,r:1.5},
   {id:"days7",name:"Regular",desc:"Play on 7 different days.",ok:()=>(S.days||0)>=7,r:.8},
+  // ---- below the Warm Dark ----
+  {id:"deep20",name:"Past the payroll",desc:"Reach depth 20.",ok:()=>(S.deepest||0)>=19,r:6},
+  {id:"deep30",name:"The counting dark",desc:"Reach depth 30.",ok:()=>(S.deepest||0)>=29,r:10},
+  {id:"deep40",name:"Deadlight",desc:"Reach depth 40.",ok:()=>(S.deepest||0)>=39,r:18},
+  {id:"deep50",name:"The bottom of the book",desc:"Reach depth 50. There is nothing under it.",ok:()=>(S.deepest||0)>=49,r:40},
+  {id:"debt10",name:"Ten times over",desc:"Pay the debt ten times.",ok:()=>(S.debts||0)>=10,r:6},
+  {id:"debt20",name:"The lord is dead, the book is not",desc:"Pay the debt twenty times.",ok:()=>(S.debts||0)>=20,r:15},
 ];
 const RANKSN=["Debtor","Pit hand","Marked man","Gang boss","Deep hand","Warden's bane","Free miner","Collateral","Paid in full"];
+// Past the Warm Dark the ladder is long enough that one name per layer would be noise.
+// One name per five layers, and the last one has nowhere left to go.
+const DEEPRANKS=["Ledger-bound","Wage of the dark","Long payroll","Countinghouse hand","Overseer of nothing","Keeper of the second throne","Older than the cut","The undug","Bottom of the book"];
+const rankName=()=>S.depth<=8?RANKSN[S.depth]:DEEPRANKS[Math.min(DEEPRANKS.length-1,Math.floor((S.depth-9)/5))];
 const has=id=>!!(S.ach&&S.ach[id]);
+// ---- gates ----
+// Story-era kit unlocks on debts paid. Everything below the Warm Dark unlocks on how
+// deep you have been instead: debt is no longer something you clear on a schedule, and
+// gating the deep picks and crew behind it would leave you at depth 15 with nothing
+// left to buy and no way to afford the next floor.
+const locked=o=>!!((o.rank&&(S.debts||0)<o.rank)||(o.deep&&(S.deepest||0)<o.deep-1));
+const lockText=o=>o.deep?"Depth "+o.deep:"Debt ×"+o.rank;
+const lockWhy=o=>o.deep?`Reach depth ${o.deep} to lift it`:`Pay the debt ${o.rank} time${o.rank>1?"s":""} to lift it`;
 function checkAch(){if(!S.ach)S.ach={};for(const a of ACH){if(!S.ach[a.id]&&a.ok()){S.ach[a.id]=Date.now();const v=nice(Math.max(50,(clickPower()*120+cps()*300)*a.r*(1+perkLv("favor")*.25+(FX.quest||0))));earn(v);toast(`Trophy: ${a.name} — +${fmt(v)}`);confetti(24)}}}
-const TITLES=[{id:"",name:"No title",ok:()=>true},{id:"coalhand",name:"Coalhand",ok:()=>S.depth>=2},{id:"ironjaw",name:"Ironjaw",ok:()=>S.depth>=3},{id:"silverback",name:"Gravewalker",ok:()=>S.depth>=4},{id:"abyssal",name:"Throne-touched",ok:()=>S.depth>=6},{id:"gemhunter",name:"Gem hunter",ok:()=>S.gems>=25},{id:"sealed",name:"Debt-free",ok:()=>S.oil>=1},{id:"lamplighter",name:"Lamplighter",ok:()=>S.oil>=10},{id:"wyrmslayer",name:"Wyrmslayer",ok:()=>(S.bosses||0)>=1},{id:"cardsharp",name:"High roller",ok:()=>(S.bigSpins||0)>=1},{id:"regular",name:"Regular",ok:()=>(S.days||0)>=7},{id:"champion",name:"Weekly champion",ok:()=>has("weekly")},{id:"beneath",name:"Throne-keeper",ok:()=>!!S.throne},{id:"warmdark",name:"Paid in full",ok:()=>(S.deepest||0)>=8}];
+const TITLES=[{id:"",name:"No title",ok:()=>true},{id:"coalhand",name:"Coalhand",ok:()=>S.depth>=2},{id:"ironjaw",name:"Ironjaw",ok:()=>S.depth>=3},{id:"silverback",name:"Gravewalker",ok:()=>S.depth>=4},{id:"abyssal",name:"Throne-touched",ok:()=>S.depth>=6},{id:"gemhunter",name:"Gem hunter",ok:()=>S.gems>=25},{id:"sealed",name:"Debt-free",ok:()=>S.oil>=1},{id:"lamplighter",name:"Lamplighter",ok:()=>S.oil>=10},{id:"wyrmslayer",name:"Wyrmslayer",ok:()=>(S.bosses||0)>=1},{id:"cardsharp",name:"High roller",ok:()=>(S.bigSpins||0)>=1},{id:"regular",name:"Regular",ok:()=>(S.days||0)>=7},{id:"champion",name:"Weekly champion",ok:()=>has("weekly")},{id:"beneath",name:"Throne-keeper",ok:()=>!!S.throne},{id:"warmdark",name:"Paid in full",ok:()=>(S.deepest||0)>=8},{id:"gravelight",name:"Gravelighter",ok:()=>(S.deepest||0)>=22},{id:"counted",name:"Counted",ok:()=>(S.deepest||0)>=29},{id:"undug",name:"The Undug",ok:()=>(S.deepest||0)>=49}];
 const displayName=()=>S.profile.name||(USER?USER.name:"Miner");
 
 const $=id=>document.getElementById(id);
@@ -1789,8 +1900,11 @@ const termEarn=()=>termNow().id==="double"?2:1;
 // better at every single layer, so descending was something you did for the story and the
 // gems, never because it paid. Multiplicative fixes that — each layer is worth the same
 // proportional jump, so the descend button competes with the shop instead of losing to it.
-const DEPTH_STEP=1.5;
-const depthMult=()=>Math.pow(DEPTH_STEP,S.depth)*oilMult()*throneMult()*termEarn()*dockMult()*seamMult();
+const DEPTH_STEP=1.5;      // depths 1-9, the story
+const DEEP_STEP=2.2;       // below the Warm Dark, where the pay has to keep up with the wall
+const depthScale=d=>Math.pow(DEPTH_STEP,Math.min(d,8))*Math.pow(DEEP_STEP,Math.max(0,d-8));
+const depthStepAt=d=>d>8?DEEP_STEP:DEPTH_STEP;
+const depthMult=()=>depthScale(S.depth)*oilMult()*throneMult()*termEarn()*dockMult()*seamMult();
 const BUNKS=[{name:"Straw pallet",cap:8,cost:0},{name:"Wooden bunk",cap:12,cost:200000},{name:"Private cell",cap:24,cost:5e6},{name:"Foreman's quarters",cap:48,cost:1e8}];
 const bunkCap=()=>(BUNKS[S.bunk||0].cap+perkLv("shift")*4+(FX.off||0))*3600;
 const PERKS=[
@@ -2125,7 +2239,7 @@ function renderShelf(){
 function openModal(){
   draft={...S.profile};renderSwatches();previewSvg();renderRecord();renderTrophies();renderShelf();
   $("mWho").textContent=displayName();const tt=TITLES.find(t=>t.id===S.profile.title);{const kept=((S.story&&S.story.keeps)||[]).length,out=(S.shelf||[]).length;
-    $("mSub").textContent=(tt&&tt.id?tt.name+" · ":"")+RANKSN[Math.min(RANKSN.length-1,S.depth)]+(S.oil?` · ${S.oil} lantern oil`:"")+(kept?` · ${out}/${shelfCap()} on the shelf`:"");}
+    $("mSub").textContent=(tt&&tt.id?tt.name+" · ":"")+rankName()+(S.oil?` · ${S.oil} lantern oil`:"")+(kept?` · ${out}/${shelfCap()} on the shelf`:"");}
   $("mName").value=draft.name;$("nameCount").textContent=draft.name.length+"/24";$("nameErr").style.display="none";
   $("mTitle").innerHTML=TITLES.map(t=>`<option value="${t.id}" ${t.ok()?"":"disabled"} ${draft.title===t.id?"selected":""}>${t.name}${t.ok()?"":" (locked)"}</option>`).join("");
   $("mAcct").textContent=USER?`Signed in with Discord as ${USER.name}. Your saved mine stays with your account.`:"You're not signed in. Progress only lives in this browser until you sign in with Discord.";
@@ -2756,7 +2870,7 @@ const TOUR=[
 const TIPS=[
   {id:"canhire",when:()=>S.cash>=crewCost(0)&&CREW.reduce((a,c,i)=>a+S.crew[i],0)===0,tab:"mine",el:".side .card:nth-child(3)",ic:"⚒",t:"You can afford a digger",p:"Hire him. He earns while you swing, while you sleep, and while you're doing something else entirely. Every hire of the same type costs 20% more than the last."},
   {id:"firstcrew",when:()=>CREW.reduce((a,c,i)=>a+S.crew[i],0)>=1,tab:"mine",el:".stats",ic:"$",t:"Per second is moving",p:"That number is money you get for doing nothing. Grow it and the mine runs itself. Close the game and your crew keeps working at half pace for up to 8 hours."},
-  {id:"candescend",when:()=>S.depth===0&&S.cash>=descendCost(),tab:"mine",el:".side .card:first-child",ic:"↓",t:"You can go deeper",p:"Descending costs cash but raises everything you earn, changes the ore, and opens a new story. There are nine layers. You're on the first."},
+  {id:"candescend",when:()=>S.depth===0&&S.cash>=descendCost(),tab:"mine",el:".side .card:first-child",ic:"↓",t:"You can go deeper",p:"Descending costs cash but raises everything you earn, changes the ore, and opens a new story. There are fifty layers. You're on the first."},
   {id:"gem",when:()=>S.gems>=1,tab:"mine",el:"#rock",ic:"◆",t:"That was a gem",p:"Gems turn up at random while you swing and pay a big multiple of the hit. Deeper layers drop them more often, and the Lucky strike perk pushes the odds further."},
   {id:"contract",when:()=>S.contracts&&S.contracts.list.some(c=>!c.claimed&&cProg(c)>=c.n),tab:"quests",el:"#q-contracts",ic:"✎",t:"A contract is finished",p:"Contracts run in the background and refresh every six hours. Collect everything that's done with one button — progress counts while you're away, too."},
   {id:"demand",when:()=>S.contracts&&S.contracts.list.some(c=>c.demand&&!c.claimed),tab:"quests",el:"#q-contracts",ic:"!",t:"The warden wants something",p:"A demand is a contract with a deadline. Meet it and the pay is far better than a normal job. Miss it and he docks everything you earn by 20% for half an hour."},
@@ -2824,7 +2938,7 @@ function showDebtSub(k){
 document.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>showDebtSub(b.dataset.d));
 document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-q]").forEach(x=>x.classList.toggle("on",x===b));["ledger","stories","contracts"].forEach(k=>$("q-"+k).classList.toggle("on",b.dataset.q===k));if(b.dataset.q==="ledger")renderLedger()});
 $("lgClaim").onclick=ledgerSign;
-$("newBuildGo").onclick=async()=>{await save();location.reload()};
+$("newBuildGo").onclick=async()=>{await save();hardReload()};
 $("newBuildLater").onclick=()=>{$("newBuild").classList.remove("on")};
 function switchTab(t){document.body.classList.toggle("minetab",t==="mine");document.documentElement.classList.toggle("minetab",t==="mine");if(t==="leaderboard")loadBoard();document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests"){renderLedger();renderStories()}}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
@@ -2858,7 +2972,7 @@ function buildUI(){
       <div><div class="name">${p.name}<em>${fmt(p.power)}/swing</em></div><div class="desc">Swing harder, break more rock.</div></div>
       <button class="buy" data-pick="${i+1}"></button></div>`,redraw);
   // Crew locked behind a debt rank are hidden entirely, so page over what's actually shown.
-  const shownCrew=CREW.map((c,i)=>({c,i})).filter(x=>!(x.c.rank&&(S.debts||0)<x.c.rank));
+  const shownCrew=CREW.map((c,i)=>({c,i})).filter(x=>!locked(x.c));
   paged("crew",shownCrew,PER_PAGE.crew,"crew",x=>`<div class="row" id="crew${x.i}">
       <div><div class="name">${x.c.name}<em id="crewN${x.i}"></em><em id="crewM${x.i}" class="mile"></em></div><div class="desc">${x.c.desc} <span id="crewR${x.i}"></span></div><div class="mprog" id="crewP${x.i}"><i></i></div><div class="desc" id="crewT${x.i}"></div></div>
       <button class="buy" data-crew="${x.i}"></button></div>`,redraw);
@@ -2892,13 +3006,13 @@ function render(){
     const pct=Math.min(100,S.cash/dc*100);$("progFill").style.width=pct+"%";$("progText").textContent=fmt(S.cash)+" / "+fmt(dc);$("progPct").textContent=Math.floor(pct)+"% of the way";
     // "x2.80" on its own tells you nothing about whether the descend cost is worth paying,
     // and the gem jump — the bigger half of the reward — was never shown at all.
-    const em=DEPTH_STEP,gm=next.gem/LAYERS[S.depth].gem;
+    const em=depthStepAt(S.depth+1),gm=next.gem/LAYERS[S.depth].gem;
     $("etaText").textContent=`Est. ${eta(dc)} · ${next.name} pays ×${em.toFixed(2)} and finds ×${gm.toFixed(1)} the gems`}
   const np=PICKS[S.pick+1];
-  if(np){const plk=np.rank&&(S.debts||0)<np.rank;
+  if(np){const plk=locked(np);
     $("eqPickName").textContent=np.name;
-    $("eqPickInfo").textContent=plk?`Pay the debt ${np.rank} time${np.rank>1?"s":""} to lift it`:"+"+fmt((np.power-PICKS[S.pick].power)*depthMult())+"/swing";
-    $("eqPickBtn").textContent=plk?"Debt ×"+np.rank:fmt(np.cost);
+    $("eqPickInfo").textContent=plk?lockWhy(np):"+"+fmt((np.power-PICKS[S.pick].power)*depthMult())+"/swing";
+    $("eqPickBtn").textContent=plk?lockText(np):fmt(np.cost);
     $("eqPickBtn").disabled=plk||S.cash<np.cost}
   else{$("eqPickName").textContent=PICKS[S.pick].name;$("eqPickInfo").textContent="Best pickaxe";$("eqPickBtn").textContent="Maxed";$("eqPickBtn").disabled=true}
   hintRender();
@@ -2916,13 +3030,13 @@ function render(){
   renderThrone();renderPerks();renderDebt();renderParty();
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
   document.querySelectorAll(".eq button,button.buy[data-pick],button.buy[data-crew]").forEach(b=>b.classList.toggle("can",!b.disabled));
-  $("rankName").textContent="· "+RANKSN[Math.min(RANKSN.length-1,S.depth)]+(S.oil?` · ${S.oil} oil`:"");
+  $("rankName").textContent="· "+rankName()+(S.oil?` · ${S.oil} oil`:"");
   {const rp=$("dailyPill"),sm=innerWidth<=560;
    // The phone top bar is tight, so short labels there.
    if(autoOn()){rp.classList.add("wait");rp.textContent=(sm?"⛏ ":"⛏ Swinging · ")+eta2(S.autoUntil-Date.now())}
    else if(dailyReady()){rp.classList.remove("wait");rp.textContent=sm?"🏮 Free":"🏮 Free shift ready"}
    else{rp.classList.add("wait");rp.textContent=sm?"🏮 "+eta2(dailyLeft()):"🏮 Free shift in "+eta2(dailyLeft())}}
-  {const np=PICKS[S.pick+1];let n=0;if(np&&S.cash>=np.cost)n++;CREW.forEach((c,i)=>{if(i>2&&!(c.rank&&(S.debts||0)<c.rank)&&S.cash>=crewCost(i))n++});const nb=BUNKS[(S.bunk||0)+1];if(nb&&S.cash>=nb.cost)n++;
+  {const np=PICKS[S.pick+1];let n=0;if(np&&S.cash>=np.cost)n++;CREW.forEach((c,i)=>{if(i>2&&!locked(c)&&S.cash>=crewCost(i))n++});const nb=BUNKS[(S.bunk||0)+1];if(nb&&S.cash>=nb.cost)n++;
    const badge=$("upBadge");badge.textContent=n;badge.classList.toggle("on",n>0&&!$("tab-upgrades").classList.contains("on"));
    if(n>0&&!$("tab-upgrades").classList.contains("on")&&Date.now()-lastNudge>180000&&S.lifetime>500){lastNudge=Date.now();toast(`You can afford ${n} more upgrade${n>1?"s":""} — don't sit on your cash. Check Upgrades.`)}}
   {const on=$("tab-quests").classList.contains("on");
@@ -2940,12 +3054,12 @@ function render(){
   if($("sealBtn")){$("sealBtn").disabled=S.cash<debtCost();$("sealBtn").textContent=S.cash<debtCost()?"Need "+fmt(debtCost()-S.cash)+" more":"Pay & go back down";
   $("sealInfo").textContent=S.cash<debtCost()?`The lord wants ${fmt(debtCost())} · ${S.oil} oil held`:`+${oilOnSeal()} lantern oil if you pay now`;}
   PICKS.forEach((p,i)=>{if(!i)return;const row=$("pick"+i);if(!row)return;const b=row.querySelector("button");
-    const lk=p.rank&&(S.debts||0)<p.rank;
+    const lk=locked(p);
     if(i<=S.pick){row.classList.add("locked");b.disabled=true;b.textContent="Owned"}
     else if(lk){row.classList.add("locked");b.disabled=true;b.textContent="Debt ×"+p.rank}
     else if(i>S.pick+1){row.classList.add("locked");b.disabled=true;b.textContent=fmt(p.cost)}
     else{row.classList.remove("locked");b.disabled=S.cash<p.cost;b.textContent=fmt(p.cost)}});
-  CREW.forEach((c,i)=>{const row=$("crew"+i);if(!row)return;row.style.display=c.rank&&(S.debts||0)<c.rank?"none":"";const b=row.querySelector("button"),q=bulkQuote(i);
+  CREW.forEach((c,i)=>{const row=$("crew"+i);if(!row)return;row.style.display=locked(c)?"none":"";const b=row.querySelector("button"),q=bulkQuote(i);
     b.disabled=S.cash<q.total;b.innerHTML=(q.n>1?`<em>×${q.n}</em>`:"")+fmt(q.total);
     const n=S.crew[i]||0,m=crewMult(n),nm=nextMile(n);
     $("crewN"+i).textContent=n?"×"+n:"";$("crewM"+i).textContent=m>1?`×${m} power`:"";
@@ -3376,7 +3490,7 @@ function mine(e,auto){
     toast(`Rock cleared! Bonus ${fmt(bonus)}.`)}
   render();
 }
-function buyPick(i){const pr=PICKS[i];if(pr.rank&&(S.debts||0)<pr.rank){toast(`Only miners who have paid the debt ${pr.rank} time${pr.rank>1?"s":""} may lift the ${pr.name}.`);return}
+function buyPick(i){const pr=PICKS[i];if(locked(pr)){toast(pr.deep?`The ${pr.name} is not cut for anyone who has not stood at depth ${pr.deep}.`:`Only miners who have paid the debt ${pr.rank} time${pr.rank>1?"s":""} may lift the ${pr.name}.`);return}
   if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cost;S.pick=i;drawScene();render();save();toast(`You picked up the ${PICKS[i].name}.`)}}
 // The scene used to get whatever was left after the title, story card and feed, so on a
 // short window (a 1366x768 laptop) it collapsed to a sliver while the feed kept its full
@@ -3444,13 +3558,13 @@ function eqCrewRender(){
     host.querySelectorAll("[data-crew]").forEach(b=>b.onclick=()=>buyCrew(+b.dataset.crew));
   }
   slice.forEach(i=>{
-    const c=CREW[i],q=bulkQuote(i),n=S.crew[i]||0,nm=nextMile(n),lk=c.rank&&(S.debts||0)<c.rank;
+    const c=CREW[i],q=bulkQuote(i),n=S.crew[i]||0,nm=nextMile(n),lk=locked(c);
     $("eqR"+i).classList.toggle("lk",!!lk);
     $("eqC"+i+"n").textContent=c.name;
     $("eqC"+i+"l").textContent=lk?"":"×"+n+(crewMult(n)>1?` · ×${crewMult(n)}`:"");
     $("eqC"+i+"i").innerHTML=lk?c.desc:"+"+fmt(c.rate*crewMult(n)*depthMult())+"/sec each"+(nm?` · ${nm-n} to ×${crewMult(n)*2}`:"")+(n?`<span class="earn">Earning ${fmt(crewTotal(i))}/sec</span>`:"");
     const b=$("eqC"+i+"b");
-    if(lk){b.textContent="Debt ×"+c.rank;b.disabled=true}
+    if(lk){b.textContent=lockText(c);b.disabled=true}
     else{b.innerHTML=(q.n>1?`<em>×${q.n}</em>`:"")+fmt(q.total);b.disabled=S.cash<q.total}
   });
   $("eqPage").style.display=pages>1?"":"none";
@@ -3473,6 +3587,7 @@ function fitRails(){
 addEventListener("resize",()=>{fitPage();fitRails()});
 addEventListener("load",()=>{fitPage();fitRails()});
 function buyCrew(i){
+  if(locked(CREW[i]))return;   // the row is hidden, but the row was the only thing stopping this
   const q=bulkQuote(i);
   if(!q.n||S.cash<q.total)return;
   const before=crewMult(S.crew[i]||0);
@@ -3500,10 +3615,18 @@ async function rebirth(){
 }
 
 // ---- new build watch ----
-// The Worker reports the ETag of index.html, which Cloudflare changes on every deploy.
-// We never reload mid-swing: we save first, and only reload while the tab is hidden
-// or when the player says so.
+// The Worker hashes the bytes of index.html, so the build id changes when and only when
+// the file does. The ETag it used to report was not reliable enough to hang this on.
+// We never reload mid-swing: we save first, and only reload while the tab is hidden or
+// when the player says so.
+//
+// location.reload() was the other half of the bug — it will happily re-serve the page
+// out of the HTTP or PWA cache, so players sat on the old build after tapping the
+// lantern. Reloading onto a one-off query string can't hit any of those caches, and the
+// URL is tidied away again on the next boot.
 let BUILD=null,buildPrompted=false;
+function hardReload(){location.replace(location.pathname+"?b="+Date.now()+location.hash)}
+if(location.search)try{history.replaceState(null,"",location.pathname+location.hash)}catch(e){}
 async function checkBuild(){
   try{
     const r=await fetch("/api/version",{cache:"no-store"});
@@ -3512,7 +3635,7 @@ async function checkBuild(){
     if(BUILD===null){BUILD=d.build;return}
     if(d.build===BUILD)return;
     await save();
-    if(document.hidden){location.reload();return}
+    if(document.hidden){hardReload();return}
     if(buildPrompted)return;
     buildPrompted=true;
     const bar=$("newBuild");
@@ -3520,8 +3643,11 @@ async function checkBuild(){
     const go=$("newBuildGo");if(go)go.focus();
   }catch(e){}
 }
-setInterval(checkBuild,4*60*1000);
+setInterval(checkBuild,90*1000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkBuild()});
+// Coming back through the back/forward cache restores a whole stale document, so the
+// interval above never fired for it. Check the moment it is shown again.
+addEventListener("pageshow",e=>{if(e.persisted)checkBuild()});
 
 // ---- leaderboard ----
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -3883,6 +4009,24 @@ const PAL=[
  {sky:"#1a0f12",wall:["#4a2a30","#5a3a40","#3a1a20","#6a4a50"],ore:"#ff6b6b",floor:"#4a2a30",floor2:"#3a1a20"},
  {sky:"#1c0d06",wall:["#5e3220","#70402a","#4a2416","#864f34"],ore:"#ffb340",floor:"#5e3220",floor2:"#3f1f11"},
 ];
+// ---- palettes below the Warm Dark ----
+// Forty-one palettes by hand would be forty-one chances to pick a bad one. The deep
+// layers walk the hue wheel instead, in steps big enough that no two neighbours look
+// alike, getting colder and dimmer as the ore gets brighter against them.
+(()=>{
+  const hex=(h,s,l)=>{h=((h%360)+360)%360;s=Math.max(0,Math.min(100,s))/100;l=Math.max(0,Math.min(100,l))/100;
+    const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;
+    const v=h<60?[c,x,0]:h<120?[x,c,0]:h<180?[0,c,x]:h<240?[0,x,c]:h<300?[x,0,c]:[c,0,x];
+    return "#"+v.map(n=>Math.round((n+m)*255).toString(16).padStart(2,"0")).join("")};
+  for(let i=0;i<41;i++){
+    const h=(i*47+276)%360,t=i/40,sat=16+(i*7)%13,lit=17-t*6;
+    PAL.push({
+      sky:hex(h,sat+8,6+(1-t)*3),
+      wall:[hex(h,sat,lit+8),hex(h,sat,lit+13),hex(h,sat,lit+3),hex(h,sat-4,lit+19)],
+      ore:hex(h+150,62+t*20,56+t*10),
+      floor:hex(h,sat,lit+9),floor2:hex(h,sat,lit+2)});
+  }
+})();
 function stones(r,x0,y0,w,h,pal,ore,seed,sh){let g="",R=rnd(seed);
   for(let y=y0;y<y0+h;y+=9){for(let x=x0-6;x<x0+w;){
     const sw=11+Math.floor(R()*16),sht=8+Math.floor(R()*4),c=pal.wall[Math.floor(R()*pal.wall.length)];
