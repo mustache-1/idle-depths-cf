@@ -269,6 +269,7 @@
   #logList li i{font-style:normal;flex:none;width:16px;text-align:center;opacity:.85}
   #logList li span{flex:1;min-width:0;color:var(--ink)}
   #logList li time{flex:none;font-size:11px;color:var(--mute);font-variant-numeric:tabular-nums}
+  #logList li.std{opacity:.62}
   #logList .empty{color:var(--dim);font-size:13px;padding:10px 0;border:0}
   .links .coffee{margin:6px 4px 2px}
   .pit .titlebar,.pit .strip,.pit .quest{flex:none}
@@ -1422,6 +1423,8 @@ function feedLine(e){
     return{i:"\u2193",t:`<b>${who}</b> broke through into ${logEsc(L?L.name:"the deep")}.`}}
   if(e.kind==="wyrm")return{i:"\u2620",t:`<b>${who}</b> slew the Deep Wyrm.`};
   if(e.kind==="win")return{i:"\u2666",t:`<b>${who}</b> took ${fmt(e.n)} off the warden's table.`};
+  if(e.kind==="at"){const L=LAYERS[Math.max(0,Math.min(LAYERS.length-1,(e.n||1)-1))];
+    return{i:"\u25cf",t:`<b>${who}</b> is working ${logEsc(L?L.name:"the deep")}.`,std:true}}
   return{i:"\u00b7",t:`<b>${who}</b> did something down there.`};
 }
 async function feedLoad(force){
@@ -1459,8 +1462,9 @@ function logRender(){
   else if(feedErr){list.innerHTML=`<li class="empty">${logEsc(feedErr)} \u2014 it'll retry shortly.</li>`}
   else if(!l.length){list.innerHTML=`<li class="empty">Nothing yet. Pay a debt, break into a new layer, kill a Wyrm or win big and the whole mine hears about it.</li>`}
   else list.innerHTML=l.map(e=>{const f=feedLine(e);
-    return `<li><i>${f.i}</i><span>${f.t}</span><time>${ago(Date.now()-e.t)}</time></li>`}).join("");
-  $("lgClock").textContent=feedData&&l.length?"last "+ago(Date.now()-l[0].t)+" ago":"";
+    const when=f.std?`Depth ${e.n||1}`:ago(Date.now()-e.t);
+    return `<li${f.std?' class="std"':''}><i>${f.i}</i><span>${f.t}</span><time>${when}</time></li>`}).join("");
+  const ev=l.find(e=>e.t);$("lgClock").textContent=ev?"last "+ago(Date.now()-ev.t)+" ago":"";
 }
 setInterval(()=>{if(!document.hidden&&$("tab-mine").classList.contains("on"))feedLoad()},15000);
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)feedLoad()});
