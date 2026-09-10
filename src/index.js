@@ -54,6 +54,19 @@ async function handle(request, env) {
       return new Response(null, { status: 302, headers: { location: url.origin, "set-cookie": cookieHeader(await makeSession(user, env.SESSION_SECRET)) } });
     }
 
+    // ---- version (public) ----
+    // Cloudflare's asset pipeline changes the ETag of index.html on every deploy, so it
+    // works as a build id with nothing to bump by hand. Falls back to last-modified.
+    if (p === "/api/version") {
+      try {
+        const r = await env.ASSETS.fetch(new Request(`${url.origin}/index.html`, { method: "GET" }));
+        const build = r.headers.get("etag") || r.headers.get("last-modified") || "";
+        return json({ build: build.replace(/"/g, "") }, 200, { "cache-control": "no-store" });
+      } catch (e) {
+        return json({ build: "" });
+      }
+    }
+
     // ---- logout ----
     if (p === "/api/logout")
       return new Response(null, { status: 302, headers: { location: url.origin, "set-cookie": cookieHeader("") } });
