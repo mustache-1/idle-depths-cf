@@ -96,6 +96,17 @@
   .pkGlow{animation:pkPulse 2.4s ease-in-out infinite;transform-origin:center}
   @keyframes pkPulse{0%,100%{opacity:.55}50%{opacity:1}}
   @media(prefers-reduced-motion:reduce){.pkGlow{animation:none;opacity:.8}}
+  .drop{position:absolute;width:44px;height:44px;padding:0;border:0;background:none;z-index:5;cursor:pointer;
+    filter:drop-shadow(0 0 10px rgba(255,200,90,.55));animation:dropIn .35s ease-out,dropBob 1.5s ease-in-out .35s infinite}
+  .drop svg{width:100%;height:100%;display:block}
+  .drop::after{content:"";position:absolute;inset:-10px;border-radius:50%;background:radial-gradient(circle,rgba(255,200,90,.28),transparent 68%)}
+  .drop:hover{transform:scale(1.08)}
+  .drop.going{animation:dropOut .3s ease-in forwards}
+  @keyframes dropIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+  @keyframes dropBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @keyframes dropOut{to{opacity:0;transform:scale(1.7) translateY(-24px)}}
+  @media(prefers-reduced-motion:reduce){.drop{animation:none}}
+  @media(max-width:560px){.drop{width:52px;height:52px}}
   .tapHint.off{opacity:0}
   @keyframes tapBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
   @media(prefers-reduced-motion:reduce){.tapHint{animation:none}}
@@ -898,6 +909,13 @@
           <div class="streak" id="streak"><small>Streak</small><b id="streakN">&times;1.00</b><i><span id="streakBar"></span></i></div>
           <div class="hp"><i id="hp"></i></div>
           <div class="tapHint" id="tapHint" aria-hidden="true"><span id="tapHintText">Click anywhere to mine</span></div>
+        </button>
+        <button class="drop" id="drop" hidden aria-label="Grab the dropped purse">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="21" rx="8" ry="2" fill="#000" opacity=".35"/>
+            <path d="M7 8 h10 l3 10 a8 8 0 0 1 -16 0z" fill="#c98a1e"/>
+            <path d="M7 8 h10 l1 3 h-12z" fill="#e8ad3a"/>
+            <path d="M9 5 q3 -3 6 0 l1 3 h-8z" fill="#8a5a12"/>
+            <circle cx="12" cy="15" r="3.2" fill="#ffd76a"/><circle cx="12" cy="15" r="1.4" fill="#b3801a"/></svg>
         </button>
         <div class="strip">
           <div><small>Pickaxe</small><b id="pickName" style="color:var(--ink)">Bare hands</b><span class="buff" id="autoBadge" style="display:none">auto</span></div>
@@ -2211,6 +2229,46 @@ function checkIcons(){
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(checkIcons);else setTimeout(checkIcons,1500);
 setTimeout(()=>{if(iconsOk===null)checkIcons()},3000);
 function chips(){const rk=$("rock"),r=rk.getBoundingClientRect(),sx=r.width/340,x=(200)*sx,y=(140)*sx;for(let i=0;i<6;i++){const c=document.createElement("i");c.className="chip";c.style.left=x+"px";c.style.top=y+"px";c.style.setProperty("--dx",(Math.random()*60-30)+"px");c.style.setProperty("--dy",(-20-Math.random()*40)+"px");c.style.background=Math.random()<.3?"#5ec9b6":"#8d8d94";rk.appendChild(c);setTimeout(()=>c.remove(),600)}}
+// ---- random drops ----
+// A purse falls somewhere on the rock face now and then. Grab it before it fades.
+let dropNext=Date.now()+45000+Math.random()*45000,dropGone=0;
+const DROP_MIN=70000,DROP_VAR=90000,DROP_LIFE=13000;
+function dropReady(){
+  return !boss && !document.hidden
+    && $("tab-mine").classList.contains("on")
+    && !document.querySelector(".modal.on")
+    && !$("tour").classList.contains("on")
+    && $("splash").style.display==="none";
+}
+function dropSpawn(){
+  const d=$("drop");if(!d||!d.hidden||!dropReady())return;
+  d.style.left=(9+Math.random()*74)+"%";
+  d.style.top=(12+Math.random()*48)+"%";
+  d.classList.remove("going");d.hidden=false;
+  dropGone=Date.now()+DROP_LIFE;
+}
+function dropHide(){const d=$("drop");if(!d||d.hidden)return;
+  d.classList.add("going");setTimeout(()=>{d.hidden=true;d.classList.remove("going")},300);
+  dropNext=Date.now()+DROP_MIN+Math.random()*DROP_VAR;dropGone=0}
+function dropTick(){
+  const d=$("drop");if(!d)return;
+  if(!d.hidden){if(Date.now()>dropGone)dropHide();return}
+  if(Date.now()>dropNext){if(dropReady())dropSpawn();else dropNext=Date.now()+8000}
+}
+function dropClaim(){
+  const d=$("drop");if(!d||d.hidden)return;
+  dropHide();
+  const worth=Math.max(clickPower()*40,cps()*60,50);
+  const r=Math.random();
+  if(r<.05&&(S.debts||0)>0){S.oil=(S.oil||0)+1;toast("A flask of lantern oil, still corked. +1 oil.");confetti(60)}
+  else if(r<.16){S.buffUntil=Math.max(S.buffUntil||0,Date.now())+90000;
+    toast("The purse held a shard of sunmetal — everything ×2 for 90 seconds.");confetti(50);drawScene()}
+  else if(r<.30){const v=nice(worth*5);earn(v);S.gems=(S.gems||0)+3;
+    toast(`A knotted pouch: ${fmt(v)} and three loose gems.`);confetti(50)}
+  else if(r<.55){const v=nice(worth*2.2);earn(v);toast(`Someone's lost wages: ${fmt(v)}.`);confetti(34)}
+  else {const v=nice(worth);earn(v);toast(`A dropped purse: ${fmt(v)}.`);confetti(22)}
+  render();save();
+}
 function confetti(n=40){const cols=["#f2b24c","#ffd27a","#8fdc6a","#5ec9b6","#c48cff","#f07a5b"];for(let i=0;i<n;i++){const c=document.createElement("i");c.className="conf";c.style.left="50%";c.style.top="40%";c.style.background=cols[i%cols.length];c.style.setProperty("--dx",(Math.random()*500-250)+"px");c.style.setProperty("--dy",(Math.random()*300-120)+"px");document.body.appendChild(c);setTimeout(()=>c.remove(),1200)}}
 function flash(){const f=$("flash");f.classList.remove("on");void f.offsetWidth;f.classList.add("on")}
 function pop(txt,e,cls){const p=document.createElement("div");p.className="pop"+(cls?" "+cls:"");p.textContent=txt;
@@ -2405,6 +2463,7 @@ $("rivalModal").onclick=e=>{if(e.target===$("rivalModal"))$("rivalModal").classL
 })();
 $("rock").onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();mine({})}};
 $("descend").onclick=descend;
+$("drop").onclick=e=>{e.stopPropagation();dropClaim()};
 $("eqPickBtn").onclick=()=>buyPick(S.pick+1);
 if($("sealBtn"))$("sealBtn").onclick=rebirth;
 $("dPay").onclick=rebirth;
@@ -2752,6 +2811,7 @@ let autoTick=0;
 setInterval(()=>{const c=cps()/10;earn(c);S.crewEarned=(S.crewEarned||0)+c;
   if(autoOn()&&++autoTick%Math.round(10/AUTO_RATE())===0)mine({},true);
   if(S.depth>=6&&!S.throne){S.exc=(S.exc||0)+c*EXC_TITHE;if(S.exc>=EXC_GOAL){S.throne=true;S.oil=(S.oil||0)+5;toast("The throne is empty. Its blessing is yours: +25% to everything, forever, and 5 flasks of lantern oil.");drawScene();render();save()}}
+  dropTick();
   if(boss){bossRender();if(Date.now()>boss.until)bossEnd(false)}else if(termNow().id!=="quiet"&&Date.now()>bossCooldown&&document.visibilityState==="visible"&&Math.random()<BOSS_CHANCE*(1+perkLv("bait")*.5))spawnBoss();
   if(wasBuffed&&!buffOn()){wasBuffed=false;toast("The Sunforged pick crumbles to ash. Back to your own tools.");drawScene();render()}if(++tick%10===0)render();if(tick%150===0)save();if(tick%600===0)loadBoard()},100);
 load();
