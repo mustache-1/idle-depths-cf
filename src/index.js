@@ -93,6 +93,31 @@ async function handle(request, env) {
       return json(data);
     }
 
+    // ---- crew board (public) ----
+    if (p === "/api/crews") {
+      const cached = await env.SAVES.get("cache:crews", { type: "json" });
+      if (cached && Date.now() - cached.at < 60000) return json(cached.data);
+      const rows = [];
+      let cur;
+      do {
+        const page = await env.SAVES.list({ prefix: "crew:", cursor: cur, limit: 1000 });
+        for (const k of page.keys) {
+          const c = await env.SAVES.get(k.name, { type: "json" });
+          if (!c || !Array.isArray(c.members) || !c.members.length) continue;
+          rows.push({
+            id: c.id, name: c.name || "Crew", size: c.members.length,
+            digs: c.digsDone || 0, full: c.fullWeeks || 0, xp: Math.floor(c.xp || 0),
+            lead: (c.members.find(m => m.id === c.owner) || c.members[0]).name,
+          });
+        }
+        cur = page.list_complete ? null : page.cursor;
+      } while (cur);
+      // Digs cleared is the thing a crew earns together; xp only breaks ties.
+      const data = { crews: rows.sort((a, b) => b.digs - a.digs || b.full - a.full || b.xp - a.xp).slice(0, 15) };
+      await env.SAVES.put("cache:crews", JSON.stringify({ at: Date.now(), data }), { expirationTtl: 120 });
+      return json(data);
+    }
+
     // ---- global feed (public read) ----
     // One rolling KV key holding the last FEED_MAX entries. Read-modify-write, so
     // two events landing in the same instant can drop one — acceptable for a feed,
@@ -196,6 +221,56 @@ async function handle(request, env) {
       if (crew.members.length === 0) await env.SAVES.delete(`crew:${cid}`);
       else { if (crew.owner === s.id) crew.owner = crew.members[0].id; await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew)); }
       return json({ ok: true });
+    }
+
+    if (p === "/api/crew/rename") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      const cid = await crewIdFor(s.id);
+      const crew = await loadCrew(cid);
+      if (!crew) return json({ error: "Not in a crew." }, 400);
+      if (crew.owner !== s.id) return json({ error: "Only the crew lead can rename the crew." }, 403);
+      const body = await request.json().catch(() => ({}));
+      const name = typeof body.name === "string" ? body.name.trim().slice(0, 24) : "";
+      if (!/^[A-Za-z0-9 '._-]{2,24}$/.test(name)) return json({ error: "Use 2-24 letters, numbers or spaces." }, 400);
+      crew.name = name;
+      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      await env.SAVES.delete("cache:crews");
+      return json(crew);
+    }
+
+    if (p === "/api/crew/kick") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      const cid = await crewIdFor(s.id);
+      const crew = await loadCrew(cid);
+      if (!crew) return json({ error: "Not in a crew." }, 400);
+      if (crew.owner !== s.id) return json({ error: "Only the crew lead can remove members." }, 403);
+      const body = await request.json().catch(() => ({}));
+      const target = String(body.id || "");
+      if (target === s.id) return json({ error: "Hand the crew over before you leave." }, 400);
+      if (!crew.members.some(m => m.id === target)) return json({ error: "They're not in this crew." }, 404);
+      crew.members = crew.members.filter(m => m.id !== target);
+      if (crew.seen) delete crew.seen[target];
+      if (crew.dig && crew.dig.by) delete crew.dig.by[target];
+      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      // Only clear their pointer if it still points here — they may have rejoined elsewhere.
+      if ((await env.SAVES.get(`crewof:${target}`)) === cid) await env.SAVES.delete(`crewof:${target}`);
+      await env.SAVES.delete("cache:crews");
+      return json(crew);
+    }
+
+    if (p === "/api/crew/promote") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      const cid = await crewIdFor(s.id);
+      const crew = await loadCrew(cid);
+      if (!crew) return json({ error: "Not in a crew." }, 400);
+      if (crew.owner !== s.id) return json({ error: "Only the crew lead can hand it over." }, 403);
+      const body = await request.json().catch(() => ({}));
+      const target = String(body.id || "");
+      if (!crew.members.some(m => m.id === target)) return json({ error: "They're not in this crew." }, 404);
+      crew.owner = target;
+      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      await env.SAVES.delete("cache:crews");
+      return json(crew);
     }
 
     if (p === "/api/crew/xp") {
