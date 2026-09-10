@@ -750,7 +750,7 @@
     <section><h3>Pickaxes</h3><div id="picks"></div></section>
     <section><h3>Crew &amp; machines</h3><div id="crew"></div>
       <h3 style="margin-top:18px">Overseer's extras</h3>
-      <div class="row"><div><div class="name">Auto-swinger<em id="autoState"></em></div><div class="desc">$15M, any time. Pick a shift — 3, 6, 9 or 12 hours — and a hired hand swings for you, awake or asleep. Shorter shifts swing faster.</div><div class="desc" id="autoDesc"></div></div><button class="buy" id="autoBtn">Start shift</button></div>
+      <div class="row"><div><div class="name">Auto-swinger<em id="autoState"></em></div><div class="desc">$10M, any time. Pick a shift — 3, 6, 9 or 12 hours — and a hired hand swings for you, awake or asleep. Shorter shifts swing faster.</div><div class="desc" id="autoDesc"></div></div><button class="buy" id="autoBtn">Start shift</button></div>
       <h3 style="margin-top:18px">Bunkhouse</h3>
       <div class="row"><div><div class="name" id="bunkName">Straw pallet<em id="bunkCap">8h offline</em></div><div class="desc" id="bunkDesc">A better bed means the crew keeps working longer while you're gone.</div></div><button class="buy" id="bunkBtn">$50.0K</button></div>
     </section>
@@ -832,7 +832,7 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Auto-swinger</b> — for $15M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
+    <ul><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer and earn keepsakes. Mining uncovers clues.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
@@ -987,7 +987,7 @@
 </div></div>
 <div class="modal" id="shiftModal" style="z-index:66"><div class="dlg" style="max-width:440px">
   <header><h3>Start a shift</h3><button class="x" id="shiftClose" aria-label="Close">×</button></header>
-  <p class="note" style="margin-bottom:12px">Costs $15M, any time — no waiting, no daily limit. Shorter shifts swing faster, longer ones last through the night. Every shift keeps your streak at max (+50%). Tap along while it runs to stack an overtime bonus up to +100% on top. It keeps going even if you close the game.</p>
+  <p class="note" style="margin-bottom:12px">Costs $10M, any time — no waiting, no daily limit. Shorter shifts swing faster, longer ones last through the night. Every shift keeps your streak at max (+50%). Tap along while it runs to stack an overtime bonus up to +100% on top. It keeps going even if you close the game.</p>
   <div class="shifts" id="shiftList"></div>
 </div></div>
 <div class="modal" id="loginModal" style="z-index:64"><div class="dlg" style="max-width:420px;text-align:center">
@@ -1424,7 +1424,7 @@ function renderStories(){
 const _earn=earn;earn=function(n){_earn(n);if(S.story&&S.story.active&&n>0)storyClueRaw(n)};
 function storyClueRaw(n){storyClue(n)}
 // ---- auto-swinger (paid, pick a shift, available any time) ----
-const AUTO_COST=15e6;
+const AUTO_COST=10e6;
 const autoReady=()=>!autoOn()&&S.cash>=AUTO_COST;
 function openShift(){if(autoOn()){toast(`The auto-swinger is on shift — ${eta2(S.autoUntil-Date.now())} left.`);return}
   if(!autoReady()){toast(`Hiring an auto-swinger costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`);return}
@@ -1441,7 +1441,7 @@ const TOUR=[
   {tab:"mine",el:".side .card:nth-child(2)",ic:"⚒",t:"Equipment",p:"Better pickaxes hit harder. Crew and machines earn every second, even while you're away — at half pace, for up to 8 hours (longer with a better bunk)."},
   {tab:"mine",el:".side .card:first-child",ic:"↓",t:"Descend",p:"Save up to break into the next layer. Each layer pays more, changes the ore, and unlocks a story. Seven layers down is the Hollow Throne; what's beneath it needs a paid debt to reach."},
   {tab:"mine",el:".quest",ic:"📖",t:"Your story",p:"Your active story sits here. Pick one in Quests and ordinary mining uncovers its four clues while you dig — offline progress counts too. Contracts still run in the background; they'll pop up on their own when one is finished."},
-  {tab:"mine",el:"#rationPill",ic:"⛏",t:"Auto-swinger",p:"For $15M, a hired hand works the pick for you — any time, no daily limit. Choose a 3, 6, 9 or 12 hour shift. It keeps swinging even when the game is closed. When this glows gold, tap it."},
+  {tab:"mine",el:"#rationPill",ic:"⛏",t:"Auto-swinger",p:"For $10M, a hired hand works the pick for you — any time, no daily limit. Choose a 3, 6, 9 or 12 hour shift. It keeps swinging even when the game is closed. When this glows gold, tap it."},
   {tab:"upgrades",el:"#tab-upgrades .cols",ic:"⚒",t:"Upgrades",p:"The full shop: every pickaxe, every crew type, and your bunk. Crew get 20% pricier with each hire. The bunk stretches offline earnings from 8 hours up to 48. Every 20 of the same crew doubles their power — 20, 40, 60, 80, 100 — so stacking one type pays off."},
   {tab:"quests",el:"#sList",ic:"📖",t:"Stories",p:"Every layer has a story with a character and four clues. Pick one as your active story and ordinary mining uncovers it. Finishing earns a keepsake that shows beside your name on the leaderboard."},
   {tab:"quests",el:"#q-contracts",ic:"✎",t:"Collecting contracts",p:"This is where contract rewards are collected. One button grabs everything that's finished. New contracts land at 00:00, 06:00, 12:00 and 18:00 UTC.",pre:()=>document.querySelector("[data-q=contracts]").click(),post:()=>document.querySelector("[data-q=stories]").click()},
