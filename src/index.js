@@ -134,6 +134,7 @@ async function handle(request, env) {
       return json(crew || null);
     }
 
+
     if (p === "/api/crew/create") {
       if (request.method !== "POST") return json({ error: "POST only" }, 405);
       if (await crewIdFor(s.id)) return json({ error: "You're already in a crew." }, 400);
@@ -183,6 +184,45 @@ async function handle(request, env) {
       crew.xp += amount;
       await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
       return json(crew);
+    }
+
+    // ---- crew dig: one shared weekly target, per-member contribution ----
+    // Server-side so a member can see who actually showed up. Reset is lazy:
+    // the first request in a new ISO week rolls the board over.
+    const DIG_GOALS = [
+      { id: "haul",  name: "Clear the east gallery", verb: "hauled", need: 240000 },
+      { id: "props", name: "Set the roof props",     verb: "carried", need: 180000 },
+      { id: "flood", name: "Pump out the low seam",  verb: "drained", need: 320000 },
+      { id: "vein",  name: "Follow the deep vein",   verb: "cut",     need: 400000 },
+    ];
+    const rollDig = crew => {
+      const wk = weekKey();
+      if (crew.dig && crew.dig.week === wk) return false;
+      if (crew.dig && crew.dig.total >= crew.dig.need) crew.digsDone = (crew.digsDone || 0) + 1;
+      // Deterministic from the week + crew id, so every member sees the same job.
+      let n = 0; for (const ch of (wk + crew.id)) n = (n * 31 + ch.charCodeAt(0)) % 9973;
+      const g = DIG_GOALS[n % DIG_GOALS.length];
+      crew.dig = { week: wk, id: g.id, name: g.name, verb: g.verb,
+                   need: g.need * Math.max(1, crew.members.length), total: 0, by: {}, paid: false };
+      return true;
+    };
+
+    if (p === "/api/crew/dig") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      const cid = await crewIdFor(s.id);
+      const crew = await loadCrew(cid);
+      if (!crew) return json({ error: "Not in a crew." }, 400);
+      const body = await request.json().catch(() => ({}));
+      const amount = Math.max(0, Math.min(500000, Number(body.amount) || 0));
+      const rolled = rollDig(crew);
+      if (amount > 0) {
+        crew.dig.total += amount;
+        crew.dig.by[s.id] = (crew.dig.by[s.id] || 0) + amount;
+      }
+      const hit = crew.dig.total >= crew.dig.need && !crew.dig.paid;
+      if (hit) { crew.dig.paid = true; crew.xp += 4000 * crew.members.length; }
+      if (rolled || amount > 0 || hit) await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      return json({ ...crew, justFinished: hit });
     }
 
     if (p === "/api/crew/upgrade") {
