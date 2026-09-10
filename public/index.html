@@ -642,6 +642,13 @@
     footer{flex-direction:column;gap:8px}
   }
   @media(prefers-reduced-motion:reduce){.pop{animation:none;display:none}.crewman,.crewman .arm,.bit,.bit2,.wheel,.mote,.lamp,.cartroll,.cartroll .wh,.spark,.chip,.face{animation:none}}
+  .lamp2{animation:flicker 3.4s ease-in-out infinite;animation-delay:-1.4s}
+  .grit{animation:grit 4s linear infinite}
+  @keyframes grit{0%{transform:translateY(-6px);opacity:0}12%{opacity:.5}100%{transform:translateY(46px);opacity:0}}
+  .auger{animation:turn .9s linear infinite}
+  .puff{animation:puff 2.6s ease-out infinite}
+  @keyframes puff{0%{transform:translate(0,0) scale(.6);opacity:.45}100%{transform:translate(-4px,-16px) scale(1.5);opacity:0}}
+  @keyframes bore{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
 </style>
 </head>
 <body>
@@ -2036,26 +2043,75 @@ $("rebirth").onclick=rebirth;
 $("reset").onclick=async()=>{if(await ask("Start over?","Everything — cash, workers, lantern oil, perks, trophies and stories — will be lost. This can't be undone.","Reset everything"))
   {S={...fresh(),oil:0,lifetime:0,profile:S.profile};local.del();closeModal();drawScene();render();save()}};
 
-const SUNFORGED={h:"#ffd27a",e:"#f2b24c"};
-const PICK_LOOK=[null,{h:"#8a5a2b",e:"#6b4a2c"},{h:"#8d8d94",e:"#5f5f66"},{h:"#c9ccd1",e:"#8d8d94"},{h:"#8fb3d9",e:"#4f7fb0"},{h:"#f0a04a",e:"#c05a1e"},{h:"#6fd3c4",e:"#2c8a7c"},{h:"#c77dff",e:"#6a3aa8"}];
-function miner(x,y,cls,shirt,hat="#f3b24a",pick=undefined){
+const SUNFORGED={h:"#ffd27a",e:"#fff3cf",s:"#c07f14"};
+const PICK_LOOK=[null,{h:"#8a5a2b",e:"#b0834f",s:"#5a3818"},{h:"#8f8f98",e:"#b6b6bf",s:"#5d5d66"},{h:"#9aa0a6",e:"#d3d8dd",s:"#5f676e"},{h:"#8fb3d9",e:"#cfe3f7",s:"#4f7fb0"},{h:"#f0a04a",e:"#ffd6a3",s:"#a85e1c"},{h:"#6fd3c4",e:"#d8fff8",s:"#2c8a7c"},{h:"#c77dff",e:"#ecd8ff",s:"#6a3aa8"}];
+function shade(hex,amt){const n=parseInt(hex.slice(1),16);let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  r=Math.max(0,Math.min(255,r+amt));g=Math.max(0,Math.min(255,g+amt));b=Math.max(0,Math.min(255,b+amt));
+  return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
+function pickHead(pk){if(!pk)return `<rect x="9" y="22" width="4.5" height="4" rx="1.4" fill="#d9a074"/>`;
+  const e=pk.e,h=pk.h,s=pk.s||pk.e;
+  return `<g transform="translate(11,24) rotate(38)">
+  <rect x="-1.2" y="-25" width="3.4" height="27" rx="1.2" fill="#5a3f26"/>
+  <rect x="-1.2" y="-25" width="1.2" height="27" fill="#8a6a4a"/>
+  <rect x="-1.2" y="-8" width="3.4" height="3" fill="#3a2716" opacity=".7"/>
+  <path d="M-11 -27.5 L11 -27.5 L13.5 -25 L10 -23.8 L-10 -23.8 L-13.5 -25z" fill="${h}"/>
+  <path d="M-11 -27.5 L11 -27.5 L13.5 -25 L11.5 -25.4 L-11.5 -25.4z" fill="${e}"/>
+  <path d="M-10 -23.8 L10 -23.8 L13.5 -25 L11 -22.6 L-11 -22.6z" fill="${s}"/>
+  <rect x="-3" y="-28.4" width="6" height="5" rx="1.5" fill="${s}"/>
+  <rect x="-2.2" y="-27.8" width="4.4" height="1.4" fill="${e}" opacity=".7"/></g>`}
+function miner(x,y,cls,shirt,hat="#f3b24a",pick=undefined,opt){
+  opt=opt||{};
   const pk=pick===undefined?(buffOn()?SUNFORGED:PICK_LOOK[S.pick]):pick;
-  const tool=pk?`<g transform="translate(15,25) rotate(40)">
-    <rect x="-1" y="-26" width="3" height="28" fill="#6b4a2c"/><rect x="-1" y="-26" width="1" height="28" fill="#8a6a4a"/>
-    <rect x="-10" y="-28" width="22" height="3" fill="${pk.h}"/>
-    <rect x="-12" y="-27" width="3" height="3" fill="${pk.h}"/><rect x="-13" y="-25" width="2" height="3" fill="${pk.e}"/>
-    <rect x="11" y="-27" width="3" height="3" fill="${pk.h}"/><rect x="13" y="-25" width="2" height="3" fill="${pk.e}"/>
-    <rect x="-8" y="-29" width="18" height="1" fill="#fff" opacity=".4"/><rect x="-3" y="-28" width="7" height="4" fill="${pk.e}"/>
-  </g>`:`<rect x="13" y="24" width="5" height="4" fill="#e8b48a"/>`;
-  return `<g transform="translate(${x},${y})"><g class="${cls}" style="${cls==="crewman"?`animation-delay:${-(x%3)*.35}s`:""}">
-  <rect x="2" y="14" width="12" height="11" fill="${shirt}"/><rect x="2" y="14" width="12" height="3" fill="rgba(0,0,0,.18)"/>
-  <rect x="2" y="25" width="5" height="7" fill="#2f4a8a"/><rect x="9" y="25" width="5" height="7" fill="#2f4a8a"/>
-  <rect x="2" y="30" width="5" height="2" fill="#1a1614"/><rect x="9" y="30" width="5" height="2" fill="#1a1614"/>
-  <rect x="3" y="4" width="10" height="10" fill="#e8b48a"/><rect x="3" y="4" width="10" height="3" fill="#6b4a2c"/>
-  <rect x="5" y="9" width="2" height="2" fill="#fff"/><rect x="9" y="9" width="2" height="2" fill="#fff"/><rect x="6" y="9" width="1" height="2" fill="#2f4a8a"/><rect x="10" y="9" width="1" height="2" fill="#2f4a8a"/>
-  <rect x="2" y="1" width="12" height="4" fill="${hat}"/><rect x="6" y="2" width="4" height="2" fill="#fff4c2" opacity=".7"/>
-  <g class="arm" style="${cls==="crewman"?`animation-delay:${-(x%3)*.35}s`:""}"><rect x="13" y="15" width="4" height="10" fill="${shirt}"/>${tool}</g>
-</g></g>`}
+  const inScene=!!cls;
+  const sL=shade(shirt,26),sD=shade(shirt,-40),sX=shade(shirt,-72);
+  const hL=shade(hat,30),hD=shade(hat,-52);
+  const skin="#e2ab80",skinL="#f2c79c",skinD="#b57e56";
+  const delay=cls==="crewman"?`animation-delay:${-(x%3)*.37}s`:"";
+  return `<g transform="translate(${x},${y})"><g class="${cls}" style="${delay}">
+  ${inScene?`<ellipse cx="9" cy="33.4" rx="8.4" ry="2.2" fill="#000" opacity=".5"/>`:""}
+  <path d="M3.4 15 h3.2 v9 h-3.2z" fill="${sX}"/>
+  <path d="M4 24.5 h4.4 v6.6 h-4.4z" fill="#33406b"/><path d="M9.4 24.5 h4.4 v6.6 h-4.4z" fill="#3b4a7d"/>
+  <path d="M4 24.5 h1.4 v6.6 h-1.4z" fill="#4a5c96"/><path d="M9.4 24.5 h1.4 v6.6 h-1.4z" fill="#4a5c96"/>
+  <path d="M4 27.4 h4.4 v1.1 h-4.4z" fill="#26314f" opacity=".8"/><path d="M9.4 27.4 h4.4 v1.1 h-4.4z" fill="#26314f" opacity=".8"/>
+  <path d="M3.2 30.8 h5.4 v2.8 h-5.4z" fill="#2a1d13"/><path d="M9.2 30.8 h5.4 v2.8 h-5.4z" fill="#332417"/>
+  <path d="M3.2 32.9 h5.4 v.9 h-5.4z" fill="#171009"/><path d="M9.2 32.9 h5.4 v.9 h-5.4z" fill="#171009"/>
+  <path d="M3.2 30.8 h5.4 v.7 h-5.4z" fill="#5a4029"/><path d="M9.2 30.8 h5.4 v.7 h-5.4z" fill="#5a4029"/>
+  <path d="M3.6 13.6 h10.8 v11.4 h-10.8z" fill="${shirt}"/>
+  <path d="M3.6 13.6 h2.2 v11.4 h-2.2z" fill="${sL}"/>
+  <path d="M11.8 13.6 h2.6 v11.4 h-2.6z" fill="${sD}"/>
+  <path d="M3.6 13.6 h10.8 v2 h-10.8z" fill="${sX}" opacity=".55"/>
+  <path d="M6 13.6 h1.5 v8.4 h-1.5z" fill="#4a3016"/><path d="M10.6 13.6 h1.5 v8.4 h-1.5z" fill="#4a3016"/>
+  <path d="M3.6 21.8 h10.8 v2.4 h-10.8z" fill="#4a3016"/><path d="M3.6 21.8 h10.8 v.7 h-10.8z" fill="#6b4a2c"/>
+  <path d="M7.8 21.6 h2.6 v2.8 h-2.6z" fill="#c9a24a"/><path d="M8.4 22.3 h1.4 v1.4 h-1.4z" fill="#7a5f24"/>
+  ${opt.satchel?`<path d="M13.4 18 h3.4 v5.2 h-3.4z" fill="#5a3f26"/><path d="M13.4 18 h3.4 v1 h-3.4z" fill="#8a6a4a"/>`:""}
+  <path d="M6.6 11.6 h4.8 v2.6 h-4.8z" fill="${skinD}"/>
+  <path d="M5.8 12.6 h6.4 v2.2 l-3.2 1.6 l-3.2 -1.6z" fill="#a8412f"/>
+  <path d="M5.8 12.6 h6.4 v.8 h-6.4z" fill="#c65a44"/>
+  <path d="M4.4 4 h9.2 v8.2 h-9.2z" fill="${skin}"/>
+  <path d="M4.4 4 h2 v8.2 h-2z" fill="${skinL}"/>
+  <path d="M11.8 4 h1.8 v8.2 h-1.8z" fill="${skinD}"/>
+  <path d="M4.4 4 h9.2 v2.2 h-9.2z" fill="${skinD}" opacity=".55"/>
+  <path d="M5.6 6.6 h2.6 v1 h-2.6z" fill="#3a2716" opacity=".7"/><path d="M9.8 6.6 h2.6 v1 h-2.6z" fill="#3a2716" opacity=".7"/>
+  <path d="M6 8 h2.2 v2.2 h-2.2z" fill="#f7f3ea"/><path d="M9.8 8 h2.2 v2.2 h-2.2z" fill="#f7f3ea"/>
+  <path d="M6.9 8.4 h1.2 v1.8 h-1.2z" fill="#2f4a8a"/><path d="M10.7 8.4 h1.2 v1.8 h-1.2z" fill="#2f4a8a"/>
+  <path d="M5.4 10.7 h3 v.8 h-3z" fill="${skinD}" opacity=".6"/>
+  <path d="M4 4.6 q0 -4.4 5 -4.4 q5 0 5 4.4 z" fill="${hat}"/>
+  <path d="M4 4.6 q0 -4.4 5 -4.4 q1.6 0 2.7 .8 q-3.4 .5 -4.1 3.6z" fill="${hL}"/>
+  <path d="M12.2 1.6 q1.8 1.2 1.8 3 h-2.2 q0 -1.8 -1.2 -2.6z" fill="${hD}"/>
+  <path d="M2.8 4.4 h12.4 v1.8 q-6.2 1.1 -12.4 0z" fill="${hat}"/>
+  <path d="M2.8 4.4 h12.4 v.7 h-12.4z" fill="${hL}"/>
+  <path d="M2.8 5.6 q6.2 1 12.4 0 v.6 q-6.2 1.1 -12.4 0z" fill="${hD}"/>
+  ${inScene?`<g class="lamp"><path d="M7.4 2.4 h3.4 v2.4 h-3.4z" fill="#d8dde2"/>
+   <path d="M8 2.9 h2.2 v1.4 h-2.2z" fill="#fff4c2"/>
+   <path d="M10.8 3 L20 -1 L20 8 z" fill="#ffcf7a" opacity=".16"/>
+   <circle cx="9.1" cy="3.6" r="5.4" fill="#ffcf7a" opacity=".13"/></g>`:""}
+  <g class="arm" style="${delay}">
+   <path d="M11.4 14.6 h3.6 v8.4 h-3.6z" fill="${shirt}"/>
+   <path d="M11.4 14.6 h1.2 v8.4 h-1.2z" fill="${sL}"/>
+   <path d="M11.4 19.6 h3.6 v1.2 h-3.6z" fill="${sX}" opacity=".5"/>
+   <path d="M11 22.6 h4.2 v3 h-4.2z" fill="${skin}"/><path d="M11 22.6 h4.2 v.9 h-4.2z" fill="${skinL}"/>
+   ${pickHead(pk)}
+  </g></g></g>`}
 function wyrm(x,y){return `<g transform="translate(${x},${y})"><g class="wyrm">
   <rect x="0" y="30" width="60" height="18" fill="#1e2a2a"/><rect x="6" y="22" width="52" height="12" fill="#243434"/><rect x="14" y="14" width="42" height="12" fill="#2b3d3d"/>
   <rect x="40" y="6" width="26" height="20" fill="#2b3d3d"/><rect x="44" y="0" width="22" height="10" fill="#324747"/>
@@ -2066,11 +2122,70 @@ function wyrm(x,y){return `<g transform="translate(${x},${y})"><g class="wyrm">
   <rect x="8" y="34" width="6" height="14" fill="#1a2424"/><rect x="28" y="34" width="6" height="14" fill="#1a2424"/><rect x="46" y="30" width="6" height="18" fill="#1a2424"/>
   <circle cx="54" cy="10" r="30" fill="#5ec9b6" opacity=".06"/></g></g>`}
 function label(){return ""}  // counts live in the Equipment card, not on the scene
-function cart(x,y){return `<g transform="translate(${x},${y})"><rect x="0" y="14" width="30" height="3" fill="#3a3a40"/><rect x="2" y="2" width="26" height="12" fill="#6b4a2c"/><rect x="2" y="2" width="26" height="3" fill="#8a6a4a"/><rect x="5" y="-3" width="20" height="6" fill="#5f5f66"/><rect x="8" y="-6" width="5" height="4" fill="#72727a"/><rect x="16" y="-6" width="7" height="4" fill="#4c4c52"/><g class="wh" style="transform-origin:8px 16px"><circle cx="8" cy="16" r="3" fill="#2b2b30"/><rect x="7.5" y="13.5" width="1" height="5" fill="#777"/></g><g class="wh" style="transform-origin:22px 16px"><circle cx="22" cy="16" r="3" fill="#2b2b30"/><rect x="21.5" y="13.5" width="1" height="5" fill="#777"/></g></g>`}
-function drill(x,y){return `<g transform="translate(${x},${y})"><rect x="6" y="-30" width="16" height="30" fill="#4c4c52"/><rect x="6" y="-30" width="16" height="4" fill="#72727a"/><rect x="3" y="-34" width="22" height="5" fill="#8d8d94"/><rect x="10" y="-22" width="8" height="6" fill="#f3b24a"/><g class="bit"><rect x="11" y="0" width="6" height="14" fill="#c9ccd1"/><rect x="9" y="12" width="10" height="3" fill="#8d8d94"/><rect x="11" y="15" width="6" height="3" fill="#8d8d94"/><rect x="13" y="18" width="2" height="3" fill="#8d8d94"/></g><rect x="0" y="18" width="28" height="3" fill="#3a3a40"/></g>`}
-function blast(x,y){return `<g transform="translate(${x},${y})"><rect x="0" y="6" width="18" height="12" fill="#b03a2e"/><rect x="0" y="6" width="18" height="3" fill="#d85a30"/><rect x="3" y="10" width="3" height="6" fill="#7a1f16"/><rect x="8" y="10" width="3" height="6" fill="#7a1f16"/><rect x="13" y="10" width="3" height="6" fill="#7a1f16"/><rect x="22" y="2" width="10" height="16" fill="#6b4a2c"/><rect x="26" y="-8" width="2" height="10" fill="#8d8d94"/><rect x="22" y="-10" width="10" height="3" fill="#8d8d94"/><path d="M18 6 L22 6" stroke="#3a3a40" stroke-width="2"/></g>`}
-function bore(x,y){return `<g transform="translate(${x},${y})"><rect x="0" y="0" width="34" height="18" fill="#5f5f66"/><rect x="0" y="0" width="34" height="4" fill="#8d8d94"/><rect x="4" y="6" width="10" height="6" fill="#f3b24a"/><rect x="18" y="6" width="12" height="6" fill="#2f2f34"/><g class="bit2"><rect x="34" y="4" width="14" height="10" fill="#c9ccd1"/><rect x="48" y="6" width="6" height="6" fill="#8d8d94"/><rect x="54" y="8" width="3" height="2" fill="#8d8d94"/></g><rect x="-2" y="18" width="38" height="3" fill="#3a3a40"/><circle cx="8" cy="21" r="3" fill="#2b2b30"/><circle cx="26" cy="21" r="3" fill="#2b2b30"/></g>`}
-function harvester(x,y){return `<g transform="translate(${x},${y})"><rect x="0" y="4" width="30" height="16" fill="#3f4a4a"/><rect x="0" y="4" width="30" height="3" fill="#5f6e6e"/><rect x="4" y="9" width="8" height="8" fill="#6fd3c4"/><rect x="6" y="11" width="4" height="4" fill="#e6fffb"/><rect x="16" y="9" width="10" height="4" fill="#2f2f34"/><rect x="16" y="14" width="10" height="3" fill="#2c8a7c"/><rect x="8" y="-6" width="4" height="10" fill="#6fd3c4"/><rect x="14" y="-10" width="4" height="14" fill="#9be8dd"/><rect x="20" y="-4" width="4" height="8" fill="#6fd3c4"/><circle cx="15" cy="4" r="22" fill="#6fd3c4" opacity=".08"/></g>`}
+function cart(x,y){return `<g transform="translate(${x},${y})">
+ <ellipse cx="15" cy="19" rx="15" ry="2.4" fill="#000" opacity=".45"/>
+ <path d="M1 1 h28 l-2.5 13 h-23z" fill="#4a3016"/><path d="M1 1 h28 v2.4 h-28z" fill="#7a5a3a"/>
+ <path d="M3.5 3.4 h23 l-2 10.6 h-19z" fill="#33210f"/>
+ <path d="M5 -3 q4 -3 9 -1 q4 -2.5 8 .5 q3 1 3 3.5 h-23 q0 -2 3 -3z" fill="#6f6f78"/>
+ <path d="M7 -3.4 q3 -2 6 -.6 q-3 .4 -4.6 1.6z" fill="#9a9aa4"/>
+ <path d="M16 -2.6 q3 -1.4 5.4 .8 q-2.8 -.4 -4.6 .4z" fill="#8a8a94"/>
+ <path d="M1.2 12.4 h27.6 v2 h-27.6z" fill="#2c2c31"/>
+ <g class="wh" style="transform-origin:8px 16.5px"><circle cx="8" cy="16.5" r="3.4" fill="#26262b"/><circle cx="8" cy="16.5" r="1.2" fill="#6f6f78"/><path d="M7.5 13.3 h1 v6.4 h-1z" fill="#57575e"/><path d="M4.8 16 h6.4 v1 h-6.4z" fill="#57575e"/></g>
+ <g class="wh" style="transform-origin:22px 16.5px;animation-delay:-.4s"><circle cx="22" cy="16.5" r="3.4" fill="#26262b"/><circle cx="22" cy="16.5" r="1.2" fill="#6f6f78"/><path d="M21.5 13.3 h1 v6.4 h-1z" fill="#57575e"/><path d="M18.8 16 h6.4 v1 h-6.4z" fill="#57575e"/></g></g>`}
+function drill(x,y){return `<g transform="translate(${x},${y})">
+ <ellipse cx="14" cy="20" rx="15" ry="2.4" fill="#000" opacity=".45"/>
+ <path d="M2 12 h24 v7 h-24z" fill="#3d3d44"/><path d="M2 12 h24 v1.6 h-24z" fill="#5e5e68"/>
+ <path d="M0 17 h28 v3 h-28z" fill="#26262b"/>
+ ${[0,1,2,3,4,5].map(i=>`<path d="M${1.5+i*4.4} 17.2 h3 v2.6 h-3z" fill="#44444c"/>`).join("")}
+ <path d="M6 -22 h14 v34 h-14z" fill="#43434b"/><path d="M6 -22 h3.4 v34 h-3.4z" fill="#5e5e68"/>
+ <path d="M16.6 -22 h3.4 v34 h-3.4z" fill="#2e2e34"/>
+ <path d="M4 -26 h18 v4.4 h-18z" fill="#7d7d88"/><path d="M4 -26 h18 v1.4 h-18z" fill="#a2a2ac"/>
+ <path d="M8.6 -16 h6.8 v5 h-6.8z" fill="#f3b24a"/><path d="M8.6 -16 h6.8 v1.4 h-6.8z" fill="#ffd27a"/>
+ <path d="M9.6 -15 h2 v3 h-2z" fill="#8a5f16"/><path d="M12.4 -15 h2 v3 h-2z" fill="#8a5f16"/>
+ <g class="bit"><path d="M10.4 12 h5.2 v9 h-5.2z" fill="#b8c0c8"/><path d="M10.4 12 h1.6 v9 h-1.6z" fill="#e4ebf1"/>
+  <path d="M8.6 20 h8.8 v2.4 h-8.8z" fill="#8a929a"/><path d="M10.4 22.4 h5.2 v2.2 h-5.2z" fill="#8a929a"/>
+  <path d="M11.6 24.6 h2.8 l-1.4 2.6z" fill="#6f767d"/></g>
+ <circle class="puff" cx="13" cy="20" r="3" fill="#8d8d94" opacity=".35"/></g>`}
+function blast(x,y){return `<g transform="translate(${x},${y})">
+ <ellipse cx="16" cy="19" rx="17" ry="2.4" fill="#000" opacity=".45"/>
+ <path d="M1 4 q-1 7 0 14 h17 q1 -7 0 -14z" fill="#9c3628"/>
+ <path d="M1 4 q-1 7 0 14 h4 q-1 -7 0 -14z" fill="#c04a35"/>
+ <path d="M14 4 q1 7 0 14 h4 q1 -7 0 -14z" fill="#75241a"/>
+ <path d="M0 6.6 h19 v2 h-19z" fill="#5a3f26"/><path d="M0 13.4 h19 v2 h-19z" fill="#5a3f26"/>
+ <path d="M0 6.6 h19 v.7 h-19z" fill="#8a6a4a"/><path d="M0 13.4 h19 v.7 h-19z" fill="#8a6a4a"/>
+ <path d="M22 2 h11 v16 h-11z" fill="#4a3016"/><path d="M22 2 h11 v2 h-11z" fill="#7a5a3a"/>
+ <path d="M22 2 h2.4 v16 h-2.4z" fill="#5f3d1c"/>
+ <path d="M26.6 -9 h2.4 v11 h-2.4z" fill="#a2a2ac"/>
+ <path d="M22.6 -11.6 h11 v3 h-11z" fill="#8a929a"/><path d="M22.6 -11.6 h11 v1 h-11z" fill="#c2cad2"/>
+ <path d="M19 8 q2.4 -1.6 3 1 t3 .4" fill="none" stroke="#2c2c31" stroke-width="1.6"/></g>`}
+function bore(x,y){return `<g transform="translate(${x},${y})">
+ <ellipse cx="20" cy="23" rx="20" ry="2.6" fill="#000" opacity=".45"/>
+ <path d="M0 0 h34 v18 h-34z" fill="#4c4c55"/><path d="M0 0 h34 v2.6 h-34z" fill="#75757f"/>
+ <path d="M0 0 h4 v18 h-4z" fill="#5f5f6a"/><path d="M28 0 h6 v18 h-6z" fill="#38383f"/>
+ <path d="M4 5 h9 v6 h-9z" fill="#f3b24a"/><path d="M4 5 h9 v1.4 h-9z" fill="#ffd27a"/>
+ <path d="M17 5 h9 v6 h-9z" fill="#23232a"/><path d="M18 6 h3 v4 h-3z" fill="#6fd3c4" opacity=".65"/>
+ <path d="M-2 18 h38 v4 h-38z" fill="#26262b"/>
+ <circle cx="7" cy="22" r="3.4" fill="#1e1e23"/><circle cx="7" cy="22" r="1.2" fill="#6f6f78"/>
+ <circle cx="27" cy="22" r="3.4" fill="#1e1e23"/><circle cx="27" cy="22" r="1.2" fill="#6f6f78"/>
+ <path d="M34 4 h4 v10 h-4z" fill="#8a929a"/>
+ <g class="auger" style="transform-origin:46px 9px"><path d="M38 3.4 h12 v11.2 h-12z" fill="#b8c0c8"/>
+  ${[0,1,2].map(i=>`<path d="M${38+i*4} 3.4 l3 0 l-3 11.2 l-3 0z" fill="#8a929a" opacity=".9"/>`).join("")}
+  <path d="M50 5.6 h4 v6.8 h-4z" fill="#9aa2aa"/><path d="M54 7.4 h3 l-1.5 3.2z" fill="#e4ebf1"/></g></g>`}
+function harvester(x,y){return `<g transform="translate(${x},${y})">
+ <ellipse cx="15" cy="21" rx="16" ry="2.4" fill="#000" opacity=".45"/>
+ <path d="M0 3 h30 v16 h-30z" fill="#36444a"/><path d="M0 3 h30 v2.4 h-30z" fill="#556a72"/>
+ <path d="M0 3 h3.4 v16 h-3.4z" fill="#485a62"/><path d="M25 3 h5 v16 h-5z" fill="#263136"/>
+ <path d="M-1 17 h32 v3.4 h-32z" fill="#20292d"/>
+ <path d="M3.6 8 h8 v8 h-8z" fill="#0f2622"/>
+ <path d="M4.6 9 h6 v6 h-6z" fill="#6fd3c4"/><path d="M5.6 10 h2.4 v2.4 h-2.4z" fill="#e6fffb"/>
+ <path d="M16 8 h9 v3.4 h-9z" fill="#23232a"/><path d="M16 12.6 h9 v2.6 h-9z" fill="#2c8a7c"/>
+ <path d="M7 -8 l3.4 -1 l1.6 5.6 l-1.6 7.4 l-3.4 0z" fill="#3f5a58"/>
+ <g class="face"><path d="M12.6 -13 l4 -1.4 l2.4 3.4 l-1.4 5 l-4 .6 l-2 -4z" fill="#6fd3c4"/>
+  <path d="M12.6 -13 l4 -1.4 l1 1.4 l-3.6 1.6z" fill="#c9fff5"/>
+  <path d="M17.6 -11 l1.4 .4 l-1.4 5 l-1.6 .2z" fill="#2c8a7c"/>
+  <path d="M20.4 -6 l3 -1 l1.4 2.6 l-1.6 3 l-2.6 .2z" fill="#6fd3c4"/>
+  <path d="M20.4 -6 l3 -1 l.8 1.2 l-2.8 1z" fill="#c9fff5"/></g>
+ <circle cx="16" cy="-6" r="17" fill="#6fd3c4" opacity=".09"/></g>`}
 // Optional: put a painted background (e.g. 680x380 px) at /mine-bg.png and set BG_IMAGE="/mine-bg.png". Sprites draw on top.
 const BG_IMAGE="";
 const rnd=seed=>{let x=seed*9301+49297;return ()=>{x=(x*9301+49297)%233280;return x/233280}};
@@ -2084,47 +2199,84 @@ const PAL=[
  {sky:"#150f1e",wall:["#4a3a5a","#5a4a6a","#3a2a4a","#6a5a7a"],ore:"#c77dff",floor:"#5a4a6a",floor2:"#4a3a5a"},
  {sky:"#1a0f12",wall:["#4a2a30","#5a3a40","#3a1a20","#6a4a50"],ore:"#ff6b6b",floor:"#4a2a30",floor2:"#3a1a20"},
 ];
-function stones(r,x0,y0,w,h,pal,ore,seed){let g="",R=rnd(seed);
-  for(let y=y0;y<y0+h;y+=10){for(let x=x0-4;x<x0+w;x+=0){const sw=10+Math.floor(R()*14),sh=9+Math.floor(R()*3);const c=pal.wall[Math.floor(R()*pal.wall.length)];
-    g+=`<rect x="${x}" y="${y}" width="${sw-2}" height="${sh-1}" rx="2" fill="${c}"/><rect x="${x}" y="${y}" width="${sw-2}" height="2" rx="1" fill="#fff" opacity=".08"/>`;
-    if(R()<ore)g+=`<rect x="${x+3}" y="${y+3}" width="3" height="3" fill="${pal.ore}"/><rect x="${x+sw-8}" y="${y+4}" width="2" height="2" fill="${pal.ore}"/>`;
+function stones(r,x0,y0,w,h,pal,ore,seed,sh){let g="",R=rnd(seed);
+  for(let y=y0;y<y0+h;y+=9){for(let x=x0-6;x<x0+w;){
+    const sw=11+Math.floor(R()*16),sht=8+Math.floor(R()*4),c=pal.wall[Math.floor(R()*pal.wall.length)];
+    const r1=n=>Math.round(n*10)/10,j1=r1(R()*2.5),j2=r1(R()*2.5),j3=r1(R()*2);
+    g+=`<path d="M${x} ${y+j1} L${x+sw-2-j3} ${y} L${x+sw-2} ${y+sht-j2} L${x+j3} ${y+sht}z" fill="${c}"/>`;
+    g+=`<path d="M${x} ${y+j1} L${x+sw-2-j3} ${y} L${x+sw-4} ${y+1.6} L${x+1} ${y+2.2+j1}z" fill="#fff" opacity=".07"/>`;
+    g+=`<path d="M${x+j3} ${y+sht} L${x+sw-2} ${y+sht-j2} L${x+sw-3} ${y+sht-.4} L${x+j3+1} ${y+sht+.6}z" fill="#000" opacity=".28"/>`;
+    if(R()<.4)g+=`<rect x="${r1(x+3+R()*sw*.4)}" y="${r1(y+3+R()*3)}" width="${r1(1+R()*4)}" height="1" fill="#000" opacity=".25"/>`;
+    if(R()<ore){const ox=r1(x+3+R()*(sw-9)),oy=r1(y+2+R()*(sht-6));
+      g+=`<path d="M${ox} ${oy+2} l2 -2.4 l2.6 .8 l.6 2.6 l-2.4 1.6 l-2.2 -1z" fill="${pal.ore}"/>`;
+      g+=`<path d="M${ox+1} ${oy+1.6} l1.6 -1.4 l1 .5 l-1.8 1.6z" fill="#fff" opacity=".45"/>`}
     x+=sw}}
+  if(sh)g+=`<rect x="${x0}" y="${y0}" width="${w}" height="${h}" fill="#000" opacity="${sh}"/>`;
   return g}
-function beam(x,y,w,h){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#5a3f26"/><rect x="${x}" y="${y}" width="${w}" height="${Math.min(3,h)}" fill="#8a6a4a"/><rect x="${x}" y="${y}" width="${Math.min(2,w)}" height="${h}" fill="#3a2716" opacity=".7"/>`}
-function drawFace(){const el=$("scene").querySelector("#rockface");if(!el)return;const L=LAYERS[S.depth],pal=PAL[S.depth]||PAL[0],floor=158,hp=Math.max(0,S.rockHp/L.hp);
-  const sz=12+hp*10,x=184,y=floor-sz;let g=`<g class="face"><path d="M${x} ${floor} l${sz*.3} -${sz*.9} l${sz*.35} ${sz*.25} l${sz*.25} -${sz*.75} l${sz*.4} ${sz*.5} l${sz*.35} -${sz*.2} l${sz*.25} ${sz*1.1} z" fill="${pal.wall[2]}"/><path d="M${x+sz*.3} ${floor-sz*.9} l${sz*.35} ${sz*.25} l${sz*.25} -${sz*.75} l${sz*.4} ${sz*.5} l-${sz*.2} ${sz*.3} l-${sz*.6} -${sz*.1} z" fill="${pal.wall[3]}"/><path d="M${x+4} ${floor-2} q${sz*.4} -${sz*.9} ${sz*1.2} -${sz*.6}" fill="none" stroke="#fff" stroke-opacity=".12" stroke-width="2"/>`;
-  for(let i=0;i<3;i++)g+=`<rect x="${x+8+i*sz*.45}" y="${floor-sz*.4-(i%2)*sz*.3}" width="3" height="3" fill="${pal.ore}"/>`;
-  const cracks=Math.floor((1-hp)*5);for(let i=0;i<cracks;i++)g+=`<path d="M${x+8+i*sz*.3} ${floor-sz*.2} l${3-i%3*2} -${sz*.25} l${i%2?4:-3} -${sz*.2}" fill="none" stroke="#0f0c0a" stroke-width="1.5"/>`;
+function beam(x,y,w,h){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#5a3f26"/><rect x="${x}" y="${y}" width="${w}" height="${Math.min(3,h)}" fill="#8a6a4a"/><rect x="${x}" y="${y}" width="${Math.min(2,w)}" height="${h}" fill="#2c1d10" opacity=".8"/><rect x="${x+w-1.5}" y="${y}" width="1.5" height="${h}" fill="#000" opacity=".35"/>`}
+function drawFace(){const el=$("scene").querySelector("#rockface");if(!el)return;
+  const L=LAYERS[S.depth],pal=PAL[S.depth]||PAL[0],floor=158,hp=Math.max(0,S.rockHp/L.hp);
+  const sz=13+hp*10,x=184;
+  let g=`<g class="face"><ellipse cx="${x+sz*.9}" cy="${floor+1}" rx="${sz*1.1}" ry="3.4" fill="#000" opacity=".5"/>
+  <path d="M${x} ${floor} l${sz*.28} -${sz*.95} l${sz*.38} ${sz*.28} l${sz*.24} -${sz*.8} l${sz*.42} ${sz*.55} l${sz*.34} -${sz*.22} l${sz*.26} ${sz*1.14}z" fill="${pal.wall[2]}"/>
+  <path d="M${x+sz*.28} ${floor-sz*.95} l${sz*.38} ${sz*.28} l${sz*.24} -${sz*.8} l${sz*.42} ${sz*.55} l-${sz*.22} ${sz*.32} l-${sz*.62} -${sz*.12}z" fill="${pal.wall[3]}"/>
+  <path d="M${x+sz*.9} ${floor-sz*.5} l${sz*.5} ${sz*.5} l-${sz*.1} ${sz*.5} l-${sz*.5} 0z" fill="#000" opacity=".3"/>
+  <path d="M${x+3} ${floor-3} q${sz*.4} -${sz*.9} ${sz*1.2} -${sz*.6}" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="1.6"/>`;
+  for(let i=0;i<4;i++){const gx=x+6+i*sz*.4,gy=floor-sz*.35-(i%2)*sz*.34;
+    g+=`<path d="M${gx} ${gy+2} l1.8 -2.2 l2.4 .7 l.5 2.4 l-2.2 1.5 l-2 -.9z" fill="${pal.ore}"/><path d="M${gx+.8} ${gy+1.5} l1.4 -1.2 l.9 .4 l-1.6 1.5z" fill="#fff" opacity=".5"/>`}
+  const cracks=Math.floor((1-hp)*5);
+  for(let i=0;i<cracks;i++)g+=`<path d="M${x+8+i*sz*.3} ${floor-sz*.2} l${3-i%3*2} -${sz*.25} l${i%2?4:-3} -${sz*.2}" fill="none" stroke="#0f0c0a" stroke-width="1.5"/>`;
   el.innerHTML=g+"</g>"}
+function sceneOverlay(pal,floor){
+  let g=`<rect x="168" y="52" width="3" height="20" fill="#3a3a40"/>
+  <g class="lamp"><rect x="163" y="72" width="12" height="13" fill="#f3b24a"/><rect x="166" y="75" width="6" height="7" fill="#fff4c2"/>
+  <ellipse cx="169" cy="80" rx="88" ry="78" fill="url(#cone)"/></g>
+  <rect x="318" y="${floor-40}" width="4" height="40" fill="#5a3f26"/>
+  <g class="lamp2"><rect x="312" y="${floor-47}" width="15" height="9" fill="#f3b24a"/><rect x="315" y="${floor-45}" width="9" height="5" fill="#fff4c2"/>
+  <circle cx="320" cy="${floor-42}" r="46" fill="#ffcf7a" opacity=".09"/></g>`;
+  for(let i=0;i<12;i++)g+=`<circle class="mote" style="animation-delay:${-i*1.3}s" cx="${26+i*26}" cy="${64+(i*19)%74}" r="1.1" fill="#ffcf7a" opacity=".5"/>`;
+  for(let i=0;i<5;i++)g+=`<rect class="grit" style="animation-delay:${-i*.8}s" x="${60+i*54}" y="${52+i*7}" width="1" height="3" fill="#c9c4bb" opacity=".4"/>`;
+  g+=`<rect x="0" y="0" width="340" height="190" fill="url(#vig)"/>`;
+  return g}
 function drawScene(){
   const pal=PAL[S.depth]||PAL[0],floor=158,gemc=LAYERS[S.depth].gem*6+.05;
-  let g=`<defs><radialGradient id="vig" cx="50%" cy="55%" r="65%"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="1"/></radialGradient></defs><rect width="340" height="190" fill="${pal.sky}"/>`;
+  let g=`<defs>
+  <radialGradient id="cone" cx="50%" cy="18%" r="72%"><stop offset="0" stop-color="#ffcf7a" stop-opacity=".48"/><stop offset=".45" stop-color="#ffb01f" stop-opacity=".15"/><stop offset="1" stop-color="#ffb01f" stop-opacity="0"/></radialGradient>
+  <radialGradient id="vig" cx="46%" cy="52%" r="62%"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset=".62" stop-color="#000" stop-opacity=".34"/><stop offset="1" stop-color="#000" stop-opacity=".96"/></radialGradient>
+  <linearGradient id="haze" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${pal.sky}" stop-opacity=".85"/><stop offset="1" stop-color="${pal.sky}" stop-opacity="0"/></linearGradient>
+  <radialGradient id="pool" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffcf7a" stop-opacity=".32"/><stop offset="1" stop-color="#ffcf7a" stop-opacity="0"/></radialGradient>
+  <linearGradient id="deep" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".2"/><stop offset="1" stop-color="#000" stop-opacity=".92"/></linearGradient>
+  </defs><rect width="340" height="190" fill="${pal.sky}"/>`;
   if(BG_IMAGE)g+=`<image href="${BG_IMAGE}" width="340" height="190" preserveAspectRatio="xMidYMax slice"/>`;
   else{
-    g+=`<rect x="0" y="0" width="340" height="14" fill="#0f0c0a"/>`;
-    g+=stones(0,0,8,340,44,pal,gemc,S.depth+3);
-    g+=`<rect x="0" y="52" width="340" height="${floor-52}" fill="${pal.wall[2]}" opacity=".55"/>`;
-    g+=stones(0,0,52,110,floor-52,pal,gemc,S.depth+7);
-    g+=stones(0,230,52,110,floor-52,pal,gemc,S.depth+11);
-    g+=`<rect x="110" y="52" width="120" height="${floor-52}" fill="#0b0908"/>`+stones(0,110,52,120,30,pal,gemc,S.depth+5);
-    g+=`<rect x="122" y="80" width="96" height="${floor-80}" fill="#070605"/>`;
-    g+=beam(114,60,8,floor-60)+beam(218,60,8,floor-60)+beam(110,54,120,8);
-    g+=beam(30,70,6,floor-70)+beam(300,70,6,floor-70)+beam(24,66,20,5)+beam(294,66,20,5);
-    g+=`<g class="wheel"><circle cx="270" cy="34" r="16" fill="none" stroke="#5a3f26" stroke-width="4"/><circle cx="270" cy="34" r="3" fill="#8a6a4a"/><path d="M270 18v32M254 34h32M259 23l22 22M281 23l-22 22" stroke="#8a6a4a" stroke-width="2"/></g>`;
-    g+=beam(252,48,36,5)+beam(256,52,5,floor-52)+beam(283,52,5,floor-52);
-    g+=`<rect x="269" y="50" width="2" height="60" fill="#c9c4bb" opacity=".6"/><rect x="264" y="108" width="12" height="10" fill="#4c4c52"/>`;
-    g+=`<rect x="0" y="${floor}" width="340" height="32" fill="${pal.floor}"/><rect x="0" y="${floor}" width="340" height="32" fill="#000" opacity=".3"/><rect x="0" y="${floor}" width="340" height="2" fill="#fff" opacity=".10"/>`;
-    let R=rnd(S.depth+21);for(let i=0;i<70;i++)g+=`<rect x="${Math.floor(R()*340)}" y="${floor+3+Math.floor(R()*33)}" width="${1+Math.floor(R()*3)}" height="1" fill="${pal.floor2}"/>`;
+    g+=`<rect x="0" y="8" width="340" height="${floor-8}" fill="${pal.wall[2]}"/>`;
+    g+=stones(0,0,8,118,floor-8,pal,gemc,S.depth+7,.08);
+    g+=stones(0,224,8,116,floor-8,pal,gemc,S.depth+11,.08);
+    g+=`<rect x="0" y="0" width="340" height="12" fill="#0a0806"/>`;
+    g+=stones(0,108,8,126,34,pal,gemc,S.depth+5,.18);
+    g+=`<path d="M118 46 L222 46 L214 ${floor} L126 ${floor}z" fill="#0b0908"/>`;
+    g+=`<path d="M126 62 L214 62 L208 ${floor} L132 ${floor}z" fill="#070605"/>`;
+    g+=`<ellipse cx="170" cy="112" rx="30" ry="34" fill="#000"/>`;
+    g+=`<path d="M118 46 L222 46 L214 ${floor} L126 ${floor}z" fill="url(#deep)"/>`;
+    for(let i=0;i<3;i++){const t=i*.3,x1=122+t*14,x2=218-t*14,yt=52+t*16;
+      g+=`<g opacity="${Math.max(.12,.55-t*1.4)}">`+beam(x1,yt,5,floor-yt)+beam(x2-5,yt,5,floor-yt)+beam(x1,yt-5,x2-x1,5)+`</g>`}
+    g+=beam(112,50,9,floor-50)+beam(219,50,9,floor-50)+beam(106,42,128,9);
+    g+=`<path d="M112 50 l9 0 l6 8 l-9 0z" fill="#3a2716"/><path d="M228 50 l-9 0 l-6 8 l9 0z" fill="#3a2716"/>`;
+    g+=beam(28,64,7,floor-64)+beam(300,64,7,floor-64)+beam(22,58,22,6)+beam(294,58,22,6);
+    g+=`<g class="wheel"><circle cx="270" cy="34" r="15" fill="none" stroke="#5a3f26" stroke-width="4"/><circle cx="270" cy="34" r="3" fill="#8a6a4a"/><path d="M270 19v30M255 34h30M260 24l20 20M280 24l-20 20" stroke="#8a6a4a" stroke-width="1.8"/></g>`;
+    g+=beam(252,48,36,5)+`<rect x="269" y="50" width="2" height="58" fill="#c9c4bb" opacity=".55"/>`;
+    g+=`<rect x="263" y="106" width="14" height="11" fill="#4c4c52"/><rect x="263" y="106" width="14" height="2.5" fill="#72727a"/>`;
+    g+=`<rect x="0" y="${floor}" width="340" height="32" fill="${pal.floor}"/><rect x="0" y="${floor}" width="340" height="32" fill="#000" opacity=".42"/>`;
+    g+=`<ellipse cx="168" cy="${floor+9}" rx="96" ry="17" fill="url(#pool)"/><rect x="0" y="${floor}" width="340" height="1.5" fill="#fff" opacity=".13"/>`;
+    let R=rnd(S.depth+21);
+    for(let i=0;i<90;i++)g+=`<rect x="${Math.floor(R()*340)}" y="${floor+3+Math.floor(R()*32)}" width="${1+Math.floor(R()*3)}" height="1" fill="${pal.floor2}" opacity=".8"/>`;
+    for(let i=0;i<9;i++){const bx=Math.floor(R()*330),by=floor+4+Math.floor(R()*24),s=Math.round((2+R()*3)*10)/10;
+      g+=`<path d="M${bx} ${by+s} l${s*.5} -${s} l${s} .3 l${s*.4} ${s*.8}z" fill="${pal.wall[2]}"/>`}
     g+=`<g id="rockface"></g>`;
-    g+=`<rect x="196" y="${floor+26}" width="144" height="2" fill="#3a3a40"/><rect x="196" y="${floor+32}" width="144" height="2" fill="#3a3a40"/>`;
-    for(let x=200;x<340;x+=12)g+=`<rect x="${x}" y="${floor+24}" width="4" height="12" fill="#5a3f26"/>`;
-    g+=`<rect x="168" y="60" width="3" height="18" fill="#3a3a40"/><g class="lamp"><rect x="164" y="78" width="11" height="12" fill="#f3b24a"/><rect x="167" y="81" width="5" height="6" fill="#fff4c2"/><circle cx="169" cy="84" r="70" fill="#f3b24a" opacity=".07"/><circle cx="169" cy="84" r="34" fill="#f3b24a" opacity=".07"/></g>`;
-    g+=`<rect x="0" y="52" width="340" height="${floor-52}" fill="url(#vig)" opacity=".8"/><rect x="0" y="0" width="340" height="${floor}" fill="#000" opacity=".22"/>`;
-    g+=`<rect x="262" y="${floor-16}" width="18" height="16" fill="#5a3f26"/><rect x="262" y="${floor-16}" width="18" height="3" fill="#8a6a4a"/><rect x="265" y="${floor-13}" width="12" height="1" fill="#3a2716"/><rect x="282" y="${floor-10}" width="12" height="10" fill="#5a3f26"/><rect x="282" y="${floor-10}" width="12" height="2" fill="#8a6a4a"/>`;
-    g+=`<rect x="318" y="${floor-40}" width="4" height="40" fill="#5a3f26"/><g class="lamp"><rect x="313" y="${floor-46}" width="14" height="8" fill="#f3b24a"/><rect x="316" y="${floor-44}" width="8" height="4" fill="#fff4c2"/><circle cx="320" cy="${floor-42}" r="40" fill="#f3b24a" opacity=".06"/></g>`;
-    for(let i=0;i<7;i++)g+=`<path d="M${30+i*46} 52 q${i%2?6:-6} 14 ${i%2?-2:3} 26" fill="none" stroke="#3a2a1a" stroke-width="2"/>`;
-    g+=`<rect x="240" y="${floor-6}" width="14" height="3" fill="#7a5a3a" transform="rotate(-20 247 ${floor-4})"/><rect x="250" y="${floor-9}" width="5" height="6" fill="#9aa0a6" transform="rotate(-20 247 ${floor-4})"/><rect x="236" y="${floor-4}" width="12" height="4" fill="#4c4c52"/>`;
-    for(let i=0;i<10;i++)g+=`<circle class="mote" style="animation-delay:${-i*1.3}s" cx="${40+i*30}" cy="${70+(i*17)%60}" r="1.2" fill="#f3b24a" opacity=".5"/>`;
+    g+=`<rect x="196" y="${floor+25}" width="144" height="2" fill="#3a3a40"/><rect x="196" y="${floor+31}" width="144" height="2" fill="#3a3a40"/><rect x="196" y="${floor+25}" width="144" height="1" fill="#8d8d94" opacity=".5"/>`;
+    for(let x=200;x<340;x+=12)g+=`<rect x="${x}" y="${floor+23}" width="4" height="12" fill="#5a3f26"/>`;
+    g+=`<rect x="262" y="${floor-16}" width="18" height="16" fill="#5a3f26"/><rect x="262" y="${floor-16}" width="18" height="3" fill="#8a6a4a"/><rect x="262" y="${floor-16}" width="2" height="16" fill="#fff" opacity=".1"/><rect x="265" y="${floor-13}" width="12" height="1" fill="#3a2716"/><rect x="282" y="${floor-10}" width="12" height="10" fill="#5a3f26"/><rect x="282" y="${floor-10}" width="12" height="2" fill="#8a6a4a"/>`;
+    g+=`<g transform="rotate(-20 247 ${floor-4})"><rect x="240" y="${floor-6}" width="14" height="3" fill="#7a5a3a"/><rect x="250" y="${floor-9}" width="5" height="6" fill="#9aa0a6"/></g>`;
   }
   const dig=Math.min(S.crew[0],3),shirts=["#3aa0c8","#c0553c","#4f9e7a"];
   // left of the tunnel: diggers
@@ -2143,7 +2295,7 @@ function drawScene(){
   if(S.crew[6]){g+=`<g transform="translate(88,${floor-28}) scale(.45)">${wyrm(0,0)}</g>`+miner(122,floor-32,"crewman","#2ee6d6","#1a1614",null)+label(118,floor+12,"×"+S.crew[6])}
   // rails, bottom right
   if(S.crew[1]){g+=`<g class="cartroll">${cart(206,floor+12)}</g>`+label(196,floor+22,"×"+S.crew[1])}
-  $("scene").innerHTML=g;drawFace();
+  g+=sceneOverlay(pal,floor);$("scene").innerHTML=g;drawFace();
 }
 document.addEventListener("gesturestart",e=>e.preventDefault(),{passive:false});
 let loginNag=Date.now()+5*60*1000;
