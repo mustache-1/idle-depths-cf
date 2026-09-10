@@ -74,6 +74,84 @@ export default {
 
     if (p === "/api/load") return json(await env.SAVES.get(`save:${s.id}`, { type: "json" }) || null);
 
+    // ---- crew (up to 4 players, shared xp pool, join by short code) ----
+    const crewIdFor = async id => env.SAVES.get(`crewof:${id}`);
+    const loadCrew = async id => id ? env.SAVES.get(`crew:${id}`, { type: "json" }) : null;
+    const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const newCode = () => Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
+
+    if (p === "/api/crew") {
+      const cid = await crewIdFor(s.id);
+      const crew = await loadCrew(cid);
+      return json(crew || null);
+    }
+
+    if (p === "/api/crew/create") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      if (await crewIdFor(s.id)) return json({ error: "You're already in a crew." }, 400);
+      const body = await request.json().catch(() => ({}));
+      const name = (typeof body.name === "string" && body.name.trim().slice(0, 24)) || `${s.name}'s crew`;
+      let id; for (let i = 0; i < 5; i++) { id = newCode(); if (!(await env.SAVES.get(`crew:${id}`))) break; }
+      const crew = { id, name, owner: s.id, members: [{ id: s.id, name: s.name }], xp: 0, pick: 0, shift: 0, created: Date.now() };
+      await env.SAVES.put(`crew:${id}`, JSON.stringify(crew));
+      await env.SAVES.put(`crewof:${s.id}`, id);
+      return json(crew);
+    }
+
+    if (p === "/api/crew/join") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      if (await crewIdFor(s.id)) return json({ error: "You're already in a crew." }, 400);
+      const body = await request.json().catch(() => ({}));
+      const code = (typeof body.code === "string" ? body.code.trim().toUpperCase() : "");
+      const crew = await loadCrew(code);
+      if (!crew) return json({ error: "No crew with that code." }, 404);
+      if (crew.members.length >= 4) return json({ error: "That crew is full." }, 400);
+      if (crew.members.some(m => m.id === s.id)) return json({ error: "You're already in that crew." }, 400);
+      crew.members.push({ id: s.id, name: s.name });
+      await env.SAVES.put(`crew:${crew.id}`, JSON.stringify(crew));
+      await env.SAVES.put(`crewof:${s.id}`, crew.id);
+      return json(crew);
+    }
+
+    if (p === "/api/crew/leave") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      const cid = await crewIdFor(s.id);
+      const crew = await loadCrew(cid);
+      await env.SAVES.delete(`crewof:${s.id}`);
+      if (!crew) return json({ ok: true });
+      crew.members = crew.members.filter(m => m.id !== s.id);
+      if (crew.members.length === 0) await env.SAVES.delete(`crew:${cid}`);
+      else { if (crew.owner === s.id) crew.owner = crew.members[0].id; await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew)); }
+      return json({ ok: true });
+    }
+
+    if (p === "/api/crew/xp") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      const cid = await crewIdFor(s.id);
+      const crew = await loadCrew(cid);
+      if (!crew) return json({ error: "Not in a crew." }, 400);
+      const body = await request.json().catch(() => ({}));
+      const amount = Math.max(0, Math.min(20000, Number(body.amount) || 0));
+      crew.xp += amount;
+      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      return json(crew);
+    }
+
+    if (p === "/api/crew/upgrade") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      const cid = await crewIdFor(s.id);
+      const crew = await loadCrew(cid);
+      if (!crew) return json({ error: "Not in a crew." }, 400);
+      const body = await request.json().catch(() => ({}));
+      const id = body.id === 1 ? 1 : 0;
+      const cost = id === 0 ? 6000 * (crew.pick + 1) : 12000 * (crew.shift + 1);
+      if (crew.xp < cost) return json({ error: "Not enough crew xp." }, 400);
+      crew.xp -= cost;
+      if (id === 0) crew.pick += 1; else crew.shift += 1;
+      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      return json(crew);
+    }
+
     if (p === "/api/save") {
       if (request.method !== "POST") return json({ error: "POST only" }, 405);
       const body = await request.json().catch(() => null);
