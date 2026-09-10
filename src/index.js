@@ -6,6 +6,20 @@ const TITLES = { "": "", coalhand: "Coalhand", ironjaw: "Ironjaw", silverback: "
 
 export default {
   async fetch(request, env) {
+    try {
+      return await handle(request, env);
+    } catch (e) {
+      return json({
+        error: String((e && e.message) || e),
+        where: new URL(request.url).pathname,
+        stack: String((e && e.stack) || "").split("\n").slice(0, 4),
+      }, 500);
+    }
+  },
+};
+
+async function handle(request, env) {
+  {
     const url = new URL(request.url);
     const p = url.pathname;
     if (!p.startsWith("/api/")) return env.ASSETS.fetch(request);
@@ -177,5 +191,5 @@ export default {
     }
 
     return json({ error: "not found" }, 404);
-  },
-};
+  }
+}
