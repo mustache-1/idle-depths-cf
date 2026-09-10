@@ -670,7 +670,7 @@
   <span class="tsep"></span>
   <button class="tab" data-tab="debt"><i class="ti ti-coins" data-fb="⚖"></i>Debt</button>
   <button class="tab" data-tab="perks"><i class="ti ti-flame" data-fb="✦"></i>Perks<b class="badge" id="pBadge"></b></button>
-  <button class="tab" data-tab="gang"><i class="ti ti-users" data-fb="👥"></i>Gang</button>
+  <button class="tab" data-tab="gang"><i class="ti ti-users" data-fb="👥"></i>Crew</button>
   <span class="tsep"></span>
   <button class="tab" data-tab="leaderboard"><i class="ti ti-crown" data-fb="♛"></i>Leaderboard</button>
   <button class="tab" data-tab="support"><i class="ti ti-help-circle" data-fb="?"></i>Support</button>
@@ -694,7 +694,7 @@
         <div class="strip">
           <div><small>⛏ Pickaxe</small><b id="pickName" style="color:var(--ink)">Bare hands</b><span class="buff" id="autoBadge" style="display:none">auto</span></div>
           <div><small>✦ Per swing</small><b id="clickVal" style="color:var(--lamp2)">$1</b></div>
-          <div><small>⚒ Crew income</small><b style="color:var(--ore)"><span id="cpsStat">$0</span> <em>/ sec</em></b></div>
+          <div><small>⚒ Worker income</small><b style="color:var(--ore)"><span id="cpsStat">$0</span> <em>/ sec</em></b></div>
           <div><small>◈ Depth multiplier</small><b id="mult" style="color:var(--gem)">×1.00</b></div>
         </div>
       </div>
@@ -721,8 +721,8 @@
         <div class="meta"><span id="progText">$0 / $500</span><span id="progPct">0% of the way</span></div>
         <div class="eta" id="etaText">Est. descend: —</div>
       </div>
-      <div class="card">
-        <h3>Gang <button data-goto="gang">Manage →</button></h3>
+      <div class="card" id="mgCard">
+        <h3>Crew <button data-goto="gang">Manage →</button></h3>
         <div class="balrow"><div><small>Level</small><b id="mgLvl" style="color:var(--lamp2)">Lv 1</b></div><div><small>Members</small><b id="mgMem">1/4</b></div></div>
         <div class="prog"><i id="mgFill"></i></div>
         <div class="meta"><span id="mgProg"></span><span id="mgPct"></span></div>
@@ -751,15 +751,15 @@
 </div>
 
 <div class="panel" id="tab-upgrades">
-  <div class="titlebar"><h2>Upgrades</h2><span>Pickaxes hit harder. Crew earn while you're away.</span></div>
+  <div class="titlebar"><h2>Upgrades</h2><span>Pickaxes hit harder. Workers earn while you're away.</span></div>
   <div class="balbar"><div><small>Your balance</small><b id="upCash">$0</b></div><div><small>Income</small><b id="upCps" style="color:var(--ore)">$0/sec</b></div><div><small>Per swing</small><b id="upClick" style="color:var(--lamp2)">$1</b></div></div>
   <div class="cols">
     <section><h3>Pickaxes</h3><div id="picks"></div></section>
-    <section><h3>Crew &amp; machines</h3><div id="crew"></div>
+    <section><h3>Workers &amp; machines</h3><div id="crew"></div>
       <h3 style="margin-top:18px">Overseer's extras</h3>
       <div class="row"><div><div class="name">Auto-swinger<em id="autoState"></em></div><div class="desc">$10M, any time. Pick a shift — 3, 6, 9 or 12 hours — and a hired hand swings for you, awake or asleep. Shorter shifts swing faster.</div><div class="desc" id="autoDesc"></div></div><button class="buy" id="autoBtn">Start shift</button></div>
       <h3 style="margin-top:18px">Bunkhouse</h3>
-      <div class="row"><div><div class="name" id="bunkName">Straw pallet<em id="bunkCap">8h offline</em></div><div class="desc" id="bunkDesc">A better bed means the crew keeps working longer while you're gone.</div></div><button class="buy" id="bunkBtn">$50.0K</button></div>
+      <div class="row"><div><div class="name" id="bunkName">Straw pallet<em id="bunkCap">8h offline</em></div><div class="desc" id="bunkDesc">A better bed means your workers keep working longer while you're gone.</div></div><button class="buy" id="bunkBtn">$50.0K</button></div>
     </section>
   </div>
   <div class="card sealcard">
@@ -782,7 +782,7 @@
     <div class="card" style="padding:18px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><b style="font-size:16px">Contracts</b><small class="note" id="cRefresh"></small></div>
       <div id="cList"></div>
-      <p class="note" style="margin:12px 0">Mining and crew income count while you're away. Completed rewards wait for you.</p>
+      <p class="note" style="margin:12px 0">Mining and worker income count while you're away. Completed rewards wait for you.</p>
       <button class="big" id="cAll">Collect all rewards →</button>
       <p class="note" style="margin-top:10px">New contracts every 6 hours at 00:00, 06:00, 12:00 and 18:00 UTC. Paying the debt keeps your contracts.</p>
     </div>
@@ -819,13 +819,17 @@
   <div class="cols" id="perkList"></div>
 </div>
 <div class="panel" id="tab-gang">
-  <div class="titlebar"><h2>Gang</h2><span>Team up with up to 3 friends. Everyone's swings fill a shared XP bar that unlocks crew-wide upgrades.</span></div>
-  <div class="mine">
+  <div class="titlebar"><h2>Crew</h2><span>Team up with up to 3 friends by Discord. Everyone's swings fill a shared XP bar that unlocks crew-wide upgrades.</span></div>
+  <div class="card" id="ptyGate" style="padding:18px;margin-bottom:16px"></div>
+  <div class="mine" id="ptyBody" style="display:none">
     <div>
       <div class="card" style="padding:18px">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
-          <div><b style="font-size:16px">The Deep Crew</b><span class="lvl" id="gangLvl" style="margin-left:8px"></span></div>
-          <button class="buy" id="gangInvite">Invite a friend</button>
+          <div><b style="font-size:16px" id="ptyName">Crew</b><span class="lvl" id="gangLvl" style="margin-left:8px"></span></div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span class="note" style="margin:0">Code <b id="ptyCode" style="color:var(--lamp2);letter-spacing:.05em"></b></span>
+            <button class="btn" id="ptyLeave">Leave</button>
+          </div>
         </div>
         <div class="prog"><i id="gangFill"></i></div>
         <div class="meta"><span id="gangProg"></span><span id="gangPct"></span></div>
@@ -841,6 +845,7 @@
         <div class="row"><div><div class="name">Shared picks<em id="gUp0Lvl"></em></div><div class="desc">+10% swing power for the whole crew, per level.</div></div><button class="buy" id="gUp0Btn"></button></div>
         <div class="row"><div><div class="name">Longer shifts<em id="gUp1Lvl"></em></div><div class="desc">Auto-swinger shifts run 25% longer, per level.</div></div><button class="buy" id="gUp1Btn"></button></div>
       </div>
+
     </div>
   </div>
 </div>
@@ -1011,10 +1016,10 @@
 <div class="tour" id="tour"><div class="hole" id="hole"></div><div class="tip" id="tip"><div class="tiphead"><span class="tipic" id="tipIc">✦</span><div><small id="tipStep"></small><b id="tipTitle"></b></div></div><p id="tipText"></p><div class="tipdots" id="tipDots"></div><div class="btns"><button class="btn" id="tipSkip" style="margin-right:auto">Skip tour</button><button class="btn" id="tipBack">← Back</button><button class="btn p" id="tipNext">Next →</button></div></div></div>
 <div class="modal" id="ask" style="z-index:70"><div class="dlg" style="max-width:420px"><h3 id="askTitle" style="font-size:18px;font-weight:600;margin-bottom:8px"></h3><p class="note" id="askText" style="font-size:14px;color:var(--ink)"></p><div class="btns"><button class="btn" id="askNo">Cancel</button><button class="btn p" id="askYes">Confirm</button></div></div></div>
 <div class="modal" id="away" style="z-index:65"><div class="dlg" style="max-width:480px">
-  <header><h3>Your crew kept digging.</h3><button class="x" id="awayClose" aria-label="Close">×</button></header>
+  <header><h3>Your workers kept digging.</h3><button class="x" id="awayClose" aria-label="Close">×</button></header>
   <p class="note" style="font-size:14px;color:var(--ink);margin-bottom:14px">Good to have you back. Here's what happened while you were away.</p>
   <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:14px"><div><small class="note">Time away</small><b id="awTime" style="display:block;font-size:16px"></b></div><div style="text-align:right"><small class="note">Time credited</small><b id="awCred" style="display:block;font-size:16px"></b></div></div>
-  <div class="rec" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px"><div style="text-align:center"><small>⚒ Crew income</small><b id="awCash"></b></div><div style="text-align:center"><small>✎ Contracts</small><b id="awCon"></b></div><div style="text-align:center"><small>📖 Story</small><b id="awStory"></b></div></div>
+  <div class="rec" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px"><div style="text-align:center"><small>⚒ Worker income</small><b id="awCash"></b></div><div style="text-align:center"><small>✎ Contracts</small><b id="awCon"></b></div><div style="text-align:center"><small>📖 Story</small><b id="awStory"></b></div></div>
   <p class="note" id="awNote" style="font-size:13px">Your earnings are already in your mine.</p>
   <div class="btns"><button class="btn p" id="awayBack" style="width:100%;height:46px">Back to the mine →</button></div>
 </div></div>
@@ -1066,7 +1071,7 @@ const REBIRTH_BASE=5e7;const OFFLINE_EFF=0.5;
 const TERMS=[
   {id:"none",name:"Standard terms",desc:"The usual arrangement. No tricks.",fx:[]},
   {id:"double",name:"Double or nothing",desc:"Ashcombe fronts you better tools. Everything earns ×2 — but the next debt is ×3.",fx:["×2 all earnings","debt ×3","+2 oil"]},
-  {id:"quiet",name:"The quiet shift",desc:"No Wyrm, no warden's wheel. Just the work. Crew income +50%.",fx:["crew +50%","no Wyrm","table closed"]},
+  {id:"quiet",name:"The quiet shift",desc:"No Wyrm, no warden's wheel. Just the work. Worker income +50%.",fx:["worker +50%","no Wyrm","table closed"]},
   {id:"blood",name:"Blood money",desc:"Ashcombe wants gems, not rubble. Gems pay ×10, but your pick hits half as hard.",fx:["gems ×10","pick ×0.5"]},
 ];
 const termNow=()=>TERMS.find(t=>t.id===(S.terms||"none"))||TERMS[0];
@@ -1080,7 +1085,7 @@ const RANK_UNLOCKS=[
 ];
 const BET_MAX_PCT=.10,BET_MIN=10,BET_COOLDOWN=4000;
 
-const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,gang:{xp:0,members:["You"],pick:0,shift:0},last:Date.now()});
+const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,last:Date.now()});
 let S={...fresh(),oil:0,lifetime:0,profile:{name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a"}};
 const SHIRTS=[{c:"#f1e6d2"},{c:"#3aa0c8"},{c:"#c0553c"},{c:"#4f9e7a"},{c:"#b07acb"},{c:"#d1a34a"},{c:"#e0567a"},{c:"#2b2b2b",need:"gems25",label:"Gem hunter"},{c:"#ffd27a",need:"debt",label:"Paid the debt"},{c:"#5ec9b6",need:"glimmer",label:"Reached The Glimmer"},{c:"#e6b422",need:"debt5",label:"Paid the debt 5 times"}];
 const HATS=[{c:"#f3b24a"},{c:"#e8e8e8"},{c:"#c0553c"},{c:"#3aa0c8"},{c:"#4f9e7a"},{c:"#1a1614",need:"wyrm",label:"Slew the Wyrm"},{c:"#c48cff",need:"throne",label:"Reached the Hollow Throne"},{c:"#8fdc6a",need:"days7",label:"Played 7 days"}];
@@ -1095,7 +1100,7 @@ const ACH=[
   {id:"swing5k",name:"Calluses",desc:"Swing the pick 5,000 times.",ok:()=>S.swings>=5000,r:.6},
   {id:"streak30",name:"Rhythm",desc:"Reach a 30-swing streak.",ok:()=>(S.bestStreak||0)>=30,r:.3},
   {id:"streak100",name:"Machine",desc:"Reach a 100-swing streak.",ok:()=>(S.bestStreak||0)>=100,r:.8},
-  {id:"crew10",name:"Gang boss",desc:"Have 10 crew or machines at once.",ok:()=>CREW.reduce((a,c,i)=>a+S.crew[i],0)>=10,r:.4},
+  {id:"crew10",name:"Gang boss",desc:"Have 10 workers or machines at once.",ok:()=>CREW.reduce((a,c,i)=>a+S.crew[i],0)>=10,r:.4},
   {id:"crew50",name:"Half the mine works for you",desc:"Have 50 crew or machines at once.",ok:()=>CREW.reduce((a,c,i)=>a+S.crew[i],0)>=50,r:1},
   {id:"mile40",name:"Forty strong",desc:"Get any crew type to 40.",ok:()=>S.crew.some(n=>n>=40),r:1},
   {id:"mile100",name:"The hundred",desc:"Get any crew type to 100.",ok:()=>S.crew.some(n=>n>=100),r:5},
@@ -1139,11 +1144,11 @@ const BUNKS=[{name:"Straw pallet",cap:8,cost:0},{name:"Wooden bunk",cap:12,cost:
 const bunkCap=()=>(BUNKS[S.bunk||0].cap+perkLv("shift")*4)*3600;
 const PERKS=[
   {id:"steel",name:"Sharper steel",desc:"Every swing hits harder.",max:5,cost:l=>1+l,fx:l=>`+${l*10}% swing power`},
-  {id:"labor",name:"Cheap labor",desc:"Crew and machines cost less to hire.",max:5,cost:l=>1+l,fx:l=>`−${l*6}% hire cost`},
+  {id:"labor",name:"Cheap labor",desc:"Workers and machines cost less to hire.",max:5,cost:l=>1+l,fx:l=>`−${l*6}% hire cost`},
   {id:"favor",name:"Overseer's favor",desc:"Demands and trophies pay out more.",max:4,cost:l=>1+l,fx:l=>`+${l*25}% quest and trophy rewards`},
   {id:"lucky",name:"Lucky strike",desc:"Gems turn up more often.",max:4,cost:l=>2+l,fx:l=>`+${l*25}% gem chance`},
   {id:"bait",name:"Wyrm bait",desc:"The Deep Wyrm surfaces more often.",max:3,cost:l=>3+l*2,fx:l=>`×${(1+l*.5).toFixed(1)} Wyrm spawns`},
-  {id:"shift",name:"Long shift",desc:"Crew keeps working longer while you're away.",max:3,cost:l=>2+l,fx:l=>`+${l*4}h offline cap`},
+  {id:"shift",name:"Long shift",desc:"Workers keep working longer while you're away.",max:3,cost:l=>2+l,fx:l=>`+${l*4}h offline cap`},
   {id:"pockets",name:"Deep pockets",desc:"Stake more at the warden's wheel.",max:2,cost:l=>3+l*2,fx:l=>`stake up to ${25+l*10}% of cash`},
   {id:"headstart",name:"Head start",desc:"After paying the debt, begin the next run deeper down.",max:3,cost:l=>4+l*3,fx:l=>`start at ${LAYERS[l].name}`},
 ];
@@ -1160,9 +1165,9 @@ const nextMile=n=>MILES.find(m=>n<m);
 const crewTotal=i=>CREW[i].rate*(S.crew[i]||0)*crewMult(S.crew[i]||0)*depthMult()*buffMult()*(termNow().id==="quiet"?1.5:1);
 const buffOn=()=>Date.now()<(S.buffUntil||0);
 const buffMult=()=>buffOn()?2:1;
-const gangPickMult=()=>1+((S.gang&&S.gang.pick)||0)*.1;
-const gangShiftMult=()=>1+((S.gang&&S.gang.shift)||0)*.25;
-const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1)*(termNow().id==="blood"?.5:1)*gangPickMult();
+const partyPickMult=()=>1+((PARTY&&PARTY.pick)||0)*.1;
+const partyShiftMult=()=>1+((PARTY&&PARTY.shift)||0)*.25;
+const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1)*(termNow().id==="blood"?.5:1)*partyPickMult();
 const cps=()=>CREW.reduce((a,c,i)=>a+c.rate*(S.crew[i]||0)*crewMult(S.crew[i]||0),0)*depthMult()*buffMult()*(termNow().id==="quiet"?1.5:1);
 const crewCost=i=>Math.floor(CREW[i].base*Math.pow(1.2,S.crew[i])*(1-perkLv("labor")*.06));
 const oilOnSeal=()=>Math.floor(Math.sqrt(S.cash/debtCost()*10))+(termNow().id==="double"?2:0);
@@ -1203,12 +1208,12 @@ async function load(){
       $("awTime").textContent=eta2(real*1000);$("awCred").textContent=eta2(away*1000)+(real>away+60?" (bunk cap)":"");
       $("awCash").textContent=fmt(got)+(autoSw?` (${autoSw.toLocaleString()} auto-swings)`:"");$("awCon").textContent=conAfter>conBefore?`${conAfter-conBefore} ready`:conAfter?`${conAfter} ready`:"—";
       $("awStory").textContent=S.story&&S.story.active?"clues added":"—";
-      $("awNote").textContent=real>away+60?`Your earnings are already in your mine. The crew stopped after ${bunkCap()/3600}h — upgrade your bunk to stretch that.`:"Your earnings are already in your mine.";
+      $("awNote").textContent=real>away+60?`Your earnings are already in your mine. Your workers stopped after ${bunkCap()/3600}h — upgrade your bunk to stretch that.`:"Your earnings are already in your mine.";
       $("away").classList.add("on")}
   }
   const today=new Date().toISOString().slice(0,10);if(S.lastDay!==today){S.lastDay=today;S.days=(S.days||0)+1}
   S.ach=S.ach||{};S.story=S.story||{active:null,prog:{},done:{},pick:{},keeps:[]};S.story.keeps=S.story.keeps||[];S.profile.shirt=S.profile.shirt||"#f1e6d2";S.profile.hat=S.profile.hat||"#f3b24a";
-  renderAccount();buildUI();drawScene();render();loadBoard();
+  renderAccount();buildUI();drawScene();render();loadBoard();loadParty();
   if(USER)save();
   if(!S.seen&&!USER&&S.lifetime===0){$("splashScene").innerHTML=$("scene").innerHTML;$("splash").style.display="";$("splashGo").onclick=()=>{$("splash").style.display="none";tourStart()}}
   else if(!S.seen)setTimeout(tourStart,600);
@@ -1465,49 +1470,75 @@ function openShift(){if(autoOn()){toast(`The auto-swinger is on shift — ${eta2
   if(!autoReady()){toast(`Hiring an auto-swinger costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`);return}
   const tier=SHIFTS.length-1;
   $("shiftList").innerHTML=SHIFTS.map((x,i)=>{const locked=i>tier;return `<button class="shift ${locked?'lock':''}" data-shift="${x.h}" ${locked?'disabled':''}><b>${x.h}h</b><small>${x.rate}/sec · ~${fmt(clickPower()*x.rate*x.h*3600)}</small></button>`}).join("");
-  document.querySelectorAll("[data-shift]:not([disabled])").forEach(b=>b.onclick=()=>{if(S.cash<AUTO_COST){toast("Not enough cash.");return}const x=SHIFTS.find(z=>z.h==b.dataset.shift);S.cash-=AUTO_COST;S.autoRate=x.rate;S.autoBought=Date.now();S.autoUntil=Date.now()+x.h*3600*1000*gangShiftMult();S.shiftsUsed=(S.shiftsUsed||0)+1;$("shiftModal").classList.remove("on");toast(`Hired an auto-swinger for a ${x.h}-hour shift (${fmt(AUTO_COST)}). It keeps swinging even if you close the game.`);confetti(20);render();save()});
+  document.querySelectorAll("[data-shift]:not([disabled])").forEach(b=>b.onclick=()=>{if(S.cash<AUTO_COST){toast("Not enough cash.");return}const x=SHIFTS.find(z=>z.h==b.dataset.shift);S.cash-=AUTO_COST;S.autoRate=x.rate;S.autoBought=Date.now();S.autoUntil=Date.now()+x.h*3600*1000*partyShiftMult();S.shiftsUsed=(S.shiftsUsed||0)+1;$("shiftModal").classList.remove("on");toast(`Hired an auto-swinger for a ${x.h}-hour shift (${fmt(AUTO_COST)}). It keeps swinging even if you close the game.`);confetti(20);render();save()});
   $("shiftModal").classList.add("on")}
 $("rationPill").onclick=openShift;$("autoBtn").onclick=openShift;$("shiftClose").onclick=()=>$("shiftModal").classList.remove("on");
 
-// ---- gang (invite up to 3 friends, pool xp, buy crew-wide upgrades) ----
-const GANG_NAMES=["Brannock","Mabel","Sooty Joe","Widow Hale","Pockets","Big Tam"];
-function gangGainXp(){S.gang=S.gang||{xp:0,members:["You"],pick:0,shift:0};S.gang.xp=(S.gang.xp||0)+5}
-const gangLevel=()=>Math.floor(((S.gang&&S.gang.xp)||0)/4000)+1;
-const gangUpCost=id=>id===0?6000*(((S.gang&&S.gang.pick)||0)+1):12000*(((S.gang&&S.gang.shift)||0)+1);
-function gangInvite(){S.gang=S.gang||{xp:0,members:["You"],pick:0,shift:0};
-  if(S.gang.members.length>=4){toast("Your gang is full — 4 miners max.");return}
-  const pool=GANG_NAMES.filter(n=>!S.gang.members.includes(n));
-  const name=pool[Math.floor(Math.random()*pool.length)]||("Friend "+S.gang.members.length);
-  S.gang.members.push(name);toast(`${name} joined the gang.`);confetti(16);render();save()}
-function buyGangUp(id){const cost=gangUpCost(id);
-  if((S.gang.xp||0)<cost){toast("Not enough gang xp yet.");return}
-  S.gang.xp-=cost;if(id===0)S.gang.pick=(S.gang.pick||0)+1;else S.gang.shift=(S.gang.shift||0)+1;
-  toast(id===0?"Shared picks upgraded — everyone swings harder.":"Longer shifts upgraded — auto-swinger lasts longer.");confetti(16);render();save()}
-$("gangInvite").onclick=gangInvite;$("gUp0Btn").onclick=()=>buyGangUp(0);$("gUp1Btn").onclick=()=>buyGangUp(1);
-function renderGang(){S.gang=S.gang||{xp:0,members:["You"],pick:0,shift:0};
-  const lvl=gangLevel(),base=(lvl-1)*4000,cap=lvl*4000,xp=S.gang.xp||0,pct=Math.min(100,(xp-base)/(cap-base)*100);
-  $("gangLvl").textContent="Lv "+lvl;
-  $("gangFill").style.width=pct+"%";
-  $("gangProg").textContent=Math.floor(xp)+" / "+cap+" xp";$("gangPct").textContent=Math.floor(pct)+"%";
-  const mem=S.gang.members;
-  $("gangRoster").innerHTML=mem.map((n,i)=>`<div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:50%;background:rgba(255,176,31,.15);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--lamp2)">${n.slice(0,2).toUpperCase()}</div><div><div style="font-size:13px;font-weight:500">${n}</div><div style="font-size:11px;color:var(--dim)">${i===0?"Leader":"Crew"}</div></div></div>`).join("")
+// ---- crew (real multiplayer: create/join by code, xp synced to the server) ----
+let PARTY=null,partyXpBuf=0,partyBusy=false;
+async function loadParty(){if(!USER){PARTY=null;renderParty();return}
+  try{PARTY=await fetch("/api/crew").then(r=>r.json())}catch(e){PARTY=null}
+  renderParty()}
+async function partyCreate(){if(!USER||partyBusy)return;partyBusy=true;
+  try{const r=await fetch("/api/crew/create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:displayName()+"'s crew"})});
+    const d=await r.json();if(d.error)toast(d.error);else{PARTY=d;toast("Crew created. Share your code to invite friends.");confetti(16)}
+  }catch(e){toast("Couldn't create a crew right now.")}
+  partyBusy=false;render()}
+async function partyJoin(){if(!USER||partyBusy)return;
+  const code=(prompt("Enter a 5-letter crew code:")||"").trim();if(!code)return;partyBusy=true;
+  try{const r=await fetch("/api/crew/join",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({code})});
+    const d=await r.json();if(d.error)toast(d.error);else{PARTY=d;toast("Joined the crew.");confetti(16)}
+  }catch(e){toast("Couldn't join that crew.")}
+  partyBusy=false;render()}
+async function partyLeave(){if(!PARTY||partyBusy)return;
+  if(!await ask("Leave the crew?","You'll lose the crew's shared upgrades until you rejoin or start a new one.","Leave crew"))return;
+  partyBusy=true;try{await fetch("/api/crew/leave",{method:"POST"})}catch(e){}
+  PARTY=null;partyBusy=false;toast("You left the crew.");render()}
+async function partyUpgrade(id){if(!PARTY||partyBusy)return;partyBusy=true;
+  try{const r=await fetch("/api/crew/upgrade",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id})});
+    const d=await r.json();if(d.error)toast(d.error);else{PARTY=d;toast(id===0?"Shared picks upgraded — everyone swings harder.":"Longer shifts upgraded — auto-swinger lasts longer.");confetti(16)}
+  }catch(e){toast("Couldn't buy that right now.")}
+  partyBusy=false;render()}
+function partyGainXp(){if(PARTY)partyXpBuf+=5}
+setInterval(async()=>{if(!PARTY||partyXpBuf<=0)return;const amt=partyXpBuf;partyXpBuf=0;
+  try{const r=await fetch("/api/crew/xp",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({amount:amt})});
+    const d=await r.json();if(!d.error){PARTY=d;render()}
+  }catch(e){partyXpBuf+=amt}},15000);
+$("ptyLeave").onclick=partyLeave;$("gUp0Btn").onclick=()=>partyUpgrade(0);$("gUp1Btn").onclick=()=>partyUpgrade(1);
+function renderParty(){
+  const gate=$("ptyGate"),body=$("ptyBody"),mg=$("mgCard");
+  if(!USER){mg.style.display="none";gate.style.display="";body.style.display="none";
+    gate.innerHTML=`<p class="note" style="margin:0 0 10px">Sign in with Discord to team up with friends.</p><a href="/api/login" class="btn p" style="display:inline-flex;align-items:center;text-decoration:none;background:#5865F2;border-color:#5865F2;color:#fff">Sign in with Discord</a>`;
+    return}
+  mg.style.display="";
+  if(!PARTY){gate.style.display="";body.style.display="none";
+    gate.innerHTML=`<p class="note" style="margin:0 0 10px">You're not in a crew yet. Create one and share the code, or join a friend's.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="buy" id="ptyCreate">Create a crew</button><button class="btn" id="ptyJoinBtn">Join with a code</button></div>`;
+    $("ptyCreate").onclick=partyCreate;$("ptyJoinBtn").onclick=partyJoin;
+    $("mgLvl").textContent="—";$("mgMem").textContent="0/4";$("mgFill").style.width="0%";$("mgProg").textContent="Not in a crew";$("mgPct").textContent="";
+    return}
+  gate.style.display="none";body.style.display="";
+  const lvl=Math.floor(PARTY.xp/4000)+1,base=(lvl-1)*4000,cap=lvl*4000,pct=Math.min(100,(PARTY.xp-base)/(cap-base)*100);
+  $("ptyName").textContent=PARTY.name;$("ptyCode").textContent=PARTY.id;
+  $("gangLvl").textContent="Lv "+lvl;$("gangFill").style.width=pct+"%";
+  $("gangProg").textContent=Math.floor(PARTY.xp)+" / "+cap+" xp";$("gangPct").textContent=Math.floor(pct)+"%";
+  const mem=PARTY.members;
+  $("gangRoster").innerHTML=mem.map(m=>`<div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:50%;background:rgba(255,176,31,.15);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--lamp2)">${esc(m.name.slice(0,2).toUpperCase())}</div><div><div style="font-size:13px;font-weight:500">${esc(m.name)}</div><div style="font-size:11px;color:var(--dim)">${m.id===PARTY.owner?"Leader":"Crew"}</div></div></div>`).join("")
     +Array.from({length:4-mem.length}).map(()=>`<div style="border:1px dashed var(--line2);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px;opacity:.7"><div style="width:34px;height:34px;border-radius:50%;border:1px dashed var(--line2);display:flex;align-items:center;justify-content:center;color:var(--mute)">+</div><div style="font-size:12px;color:var(--mute)">Open slot</div></div>`).join("");
-  $("gUp0Lvl").textContent=S.gang.pick?"Lv "+S.gang.pick:"";$("gUp1Lvl").textContent=S.gang.shift?"Lv "+S.gang.shift:"";
-  $("gUp0Btn").textContent=Math.round(gangUpCost(0)).toLocaleString()+" xp";$("gUp1Btn").textContent=Math.round(gangUpCost(1)).toLocaleString()+" xp";
-  $("gUp0Btn").disabled=xp<gangUpCost(0);$("gUp1Btn").disabled=xp<gangUpCost(1);
-  $("gangInvite").disabled=mem.length>=4;$("gangInvite").textContent=mem.length>=4?"Gang full":"Invite a friend";
+  $("gUp0Lvl").textContent=PARTY.pick?"Lv "+PARTY.pick:"";$("gUp1Lvl").textContent=PARTY.shift?"Lv "+PARTY.shift:"";
+  $("gUp0Btn").textContent=Math.round(6000*(PARTY.pick+1)).toLocaleString()+" xp";$("gUp1Btn").textContent=Math.round(12000*(PARTY.shift+1)).toLocaleString()+" xp";
+  $("gUp0Btn").disabled=PARTY.xp<6000*(PARTY.pick+1);$("gUp1Btn").disabled=PARTY.xp<12000*(PARTY.shift+1);
   $("mgLvl").textContent="Lv "+lvl;$("mgMem").textContent=mem.length+"/4";
-  $("mgFill").style.width=pct+"%";$("mgProg").textContent=Math.floor(xp)+" / "+cap;$("mgPct").textContent=Math.floor(pct)+"%"}
+  $("mgFill").style.width=pct+"%";$("mgProg").textContent=Math.floor(PARTY.xp)+" / "+cap;$("mgPct").textContent=Math.floor(pct)+"%"}
 // ---- tutorial ----
 const TOUR=[
   {tab:"mine",el:null,ic:"⚖",t:"You owe Lord Ashcombe",p:"You couldn't pay, so the lord's men threw you into his mine to work it off. He wants $50M. Every swing chips at the rock — and the debt. Dig deep enough and you might find something worth more than freedom."},
   {tab:"mine",el:"#rock",ic:"⛏",t:"This is your pit",p:"Tap the scene to swing. Each swing earns cash and cracks the rock face; break it for a bonus. Tap fast to build a streak worth up to +50%. Now and then the Deep Wyrm surfaces here — kill it in 30 seconds for a golden pick that doubles everything for 5 minutes."},
   {tab:"mine",el:".stats",ic:"$",t:"Cash, income, oil",p:"Cash is what you spend. Per second is what your crew earns without you. Lantern oil is your permanent bonus from paying the debt — and the currency for perks."},
-  {tab:"mine",el:".side .card:nth-child(2)",ic:"⚒",t:"Equipment",p:"Better pickaxes hit harder. Crew and machines earn every second, even while you're away — at half pace, for up to 8 hours (longer with a better bunk)."},
+  {tab:"mine",el:".side .card:nth-child(3)",ic:"⚒",t:"Equipment",p:"Better pickaxes hit harder. Workers and machines earn every second, even while you're away — at half pace, for up to 8 hours (longer with a better bunk)."},
   {tab:"mine",el:".side .card:first-child",ic:"↓",t:"Descend",p:"Save up to break into the next layer. Each layer pays more, changes the ore, and unlocks a story. Seven layers down is the Hollow Throne; what's beneath it needs a paid debt to reach."},
   {tab:"mine",el:".quest",ic:"📖",t:"Your story",p:"Your active story sits here. Pick one in Quests and ordinary mining uncovers its four clues while you dig — offline progress counts too. Contracts still run in the background; they'll pop up on their own when one is finished."},
   {tab:"mine",el:"#rationPill",ic:"⛏",t:"Auto-swinger",p:"For $10M, a hired hand works the pick for you — any time, no daily limit. Choose a 3, 6, 9 or 12 hour shift. It keeps swinging even when the game is closed. When this glows gold, tap it."},
-  {tab:"upgrades",el:"#tab-upgrades .cols",ic:"⚒",t:"Upgrades",p:"The full shop: every pickaxe, every crew type, and your bunk. Crew get 20% pricier with each hire. The bunk stretches offline earnings from 8 hours up to 48. Every 20 of the same crew doubles their power — 20, 40, 60, 80, 100 — so stacking one type pays off."},
+  {tab:"upgrades",el:"#tab-upgrades .cols",ic:"⚒",t:"Upgrades",p:"The full shop: every pickaxe, every worker type, and your bunk. Workers get 20% pricier with each hire. The bunk stretches offline earnings from 8 hours up to 48. Every 20 of the same crew doubles their power — 20, 40, 60, 80, 100 — so stacking one type pays off."},
   {tab:"quests",el:"#sList",ic:"📖",t:"Stories",p:"Every layer has a story with a character and four clues. Pick one as your active story and ordinary mining uncovers it. Finishing earns a keepsake that shows beside your name on the leaderboard."},
   {tab:"quests",el:"#q-contracts",ic:"✎",t:"Collecting contracts",p:"This is where contract rewards are collected. One button grabs everything that's finished. New contracts land at 00:00, 06:00, 12:00 and 18:00 UTC.",pre:()=>document.querySelector("[data-q=contracts]").click(),post:()=>document.querySelector("[data-q=stories]").click()},
   {tab:"debt",el:"#tab-debt .card",ic:"⚖",t:"Pay the debt",p:"At $50M you pay Ashcombe, walk out, and go back down with lantern oil. Each payment raises the next price and unlocks new things: a Wyrm handler, the Undercroft, new stories."},
@@ -1564,7 +1595,7 @@ function render(){
   $("pickName").innerHTML=buffOn()?`Sunforged pick <span class="buff">×2 · ${Math.ceil((S.buffUntil-Date.now())/60000)}m</span>`:PICKS[S.pick].name;
   document.querySelector(".hero").classList.toggle("buffed",buffOn());if(buffOn())wasBuffed=true;
   $("oil").textContent="×"+oilMult().toFixed(1);
-  $("awayNote").textContent=`Your crew keeps working while you're away, at half pace, for up to ${bunkCap()/3600} hours. Signed-out progress only lives in this browser.`;
+  $("awayNote").textContent=`Your workers keep working while you're away, at half pace, for up to ${bunkCap()/3600} hours. Signed-out progress only lives in this browser.`;
   $("lifeStats").textContent=S.swings.toLocaleString()+" swings · "+S.gems+" gems · "+fmt(S.lifetime)+" mined";
   const L=LAYERS[S.depth];
   $("layerDesc").textContent=L.desc;
@@ -1583,14 +1614,14 @@ function render(){
   else{$("eqPickName").textContent=PICKS[S.pick].name;$("eqPickInfo").textContent="Best pickaxe";$("eqPickBtn").textContent="Maxed";$("eqPickBtn").disabled=true}
   [0,1,2].forEach(i=>{const c=CREW[i],cost=crewCost(i),n=S.crew[i]||0,nm=nextMile(n);$("eqC"+i+"n").textContent=c.name;$("eqC"+i+"l").textContent="×"+n+(crewMult(n)>1?` · ×${crewMult(n)}`:"");$("eqC"+i+"i").innerHTML="+"+fmt(c.rate*crewMult(n)*depthMult())+"/sec each"+(nm?` · ${nm-n} to ×${crewMult(n)*2}`:"")+(n?`<span class="earn">Earning ${fmt(crewTotal(i))}/sec</span>`:"");const b=$("eqC"+i+"b");b.textContent=fmt(cost);b.disabled=S.cash<cost});
   const nb=BUNKS[(S.bunk||0)+1];$("bunkName").innerHTML=BUNKS[S.bunk||0].name+`<em>${BUNKS[S.bunk||0].cap}h offline</em>`;
-  if(nb){$("bunkDesc").textContent=`Upgrade to the ${nb.name}: crew keeps working for ${nb.cap} hours while you're away.`;$("bunkBtn").textContent=fmt(nb.cost);$("bunkBtn").disabled=S.cash<nb.cost}
-  else{$("bunkDesc").textContent="The best quarters in the mine. Crew works up to 48 hours while you're gone.";$("bunkBtn").textContent="Maxed";$("bunkBtn").disabled=true}
+  if(nb){$("bunkDesc").textContent=`Upgrade to the ${nb.name}: workers keep working for ${nb.cap} hours while you're away.`;$("bunkBtn").textContent=fmt(nb.cost);$("bunkBtn").disabled=S.cash<nb.cost}
+  else{$("bunkDesc").textContent="The best quarters in the mine. Workers work up to 48 hours while you're gone.";$("bunkBtn").textContent="Maxed";$("bunkBtn").disabled=true}
   {const on=autoOn();$("autoBadge").style.display=on?"":"none";$("autoBadge").textContent="auto · "+eta2(S.autoUntil-Date.now());
    $("autoState").textContent=on?"working":"";
    if(on){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${AUTO_RATE()} swings/sec.`;$("autoBtn").textContent="On shift";$("autoBtn").disabled=true}
    else if(S.cash<AUTO_COST){$("autoDesc").textContent=`Costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`;$("autoBtn").textContent=fmt(AUTO_COST);$("autoBtn").disabled=true}
    else{$("autoDesc").textContent=`Ready. A 3-hour shift earns about ${fmt(clickPower()*3*3*3600)} at your current swing.`;$("autoBtn").textContent="Hire — "+fmt(AUTO_COST);$("autoBtn").disabled=false}}
-  renderThrone();renderPerks();renderDebt();renderGang();
+  renderThrone();renderPerks();renderDebt();renderParty();
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
   document.querySelectorAll(".eq button,button.buy[data-pick],button.buy[data-crew]").forEach(b=>b.classList.toggle("can",!b.disabled));
   $("rankName").textContent="· "+RANKSN[Math.min(7,S.depth)]+(S.oil?` · ${S.oil} oil`:"");
@@ -1895,8 +1926,8 @@ function mine(e,auto){
   const me=document.querySelector(".me .arm");if(me){me.style.transform="rotate(-55deg)";setTimeout(()=>me.style.transform="",90)}
   const now=Date.now();streak=now-lastSwing<1500?streak+1:1;lastSwing=now;if(!auto&&streak>(S.bestStreak||0))S.bestStreak=streak;
   if(!auto&&autoOn()){combo=now-lastManual<1200?combo+1:1;lastManual=now}
-  if(boss){const dmg=clickPower()*streakMult()*(auto?1:comboMult());boss.hp-=dmg;S.swings++;gangGainXp();if(!auto)pop("-"+fmt(dmg).slice(1),e,"hit");const w=document.querySelector(".wyrm");if(w){w.classList.remove("hit");void w.offsetWidth;w.classList.add("hit")}bossRender();if(boss.hp<=0)bossEnd(true);render();return}
-  const p=clickPower()*streakMult()*(auto?1:comboMult());earn(p);S.swings++;gangGainXp();S.rockHp-=p;if(!auto){pop("+"+fmt(p),e,comboMult()>1.4?"hot":"");chips()}
+  if(boss){const dmg=clickPower()*streakMult()*(auto?1:comboMult());boss.hp-=dmg;S.swings++;partyGainXp();if(!auto)pop("-"+fmt(dmg).slice(1),e,"hit");const w=document.querySelector(".wyrm");if(w){w.classList.remove("hit");void w.offsetWidth;w.classList.add("hit")}bossRender();if(boss.hp<=0)bossEnd(true);render();return}
+  const p=clickPower()*streakMult()*(auto?1:comboMult());earn(p);S.swings++;partyGainXp();S.rockHp-=p;if(!auto){pop("+"+fmt(p),e,comboMult()>1.4?"hot":"");chips()}
   const st=$("streak");st.classList.toggle("on",streak>=5||comboMult()>1);
   {const c=comboMult();
     $("streakN").innerHTML=c>1?`×${(streakMult()*c).toFixed(2)}<em>overtime ×${c.toFixed(1)}</em>`:"×"+streakMult().toFixed(2)+(streakMult()>=1.5?" MAX":"")+(autoOn()?" auto":"");
@@ -1915,7 +1946,7 @@ function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
-  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,gang:S.gang,terms:S.nextTerms||"none",nextTerms:"none"};
+  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
   toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);drawScene();render();save();
 }
@@ -1997,10 +2028,10 @@ $("descend").onclick=descend;
 $("eqPickBtn").onclick=()=>buyPick(S.pick+1);
 [0,1,2].forEach(i=>$("eqC"+i+"b").onclick=()=>buyCrew(i));
 $("sealBtn").onclick=rebirth;$("dPay").onclick=rebirth;
-$("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. The crew now works ${nb.cap}h while you're away.`);render();save()};
+$("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. Your workers now work ${nb.cap}h while you're away.`);render();save()};
 document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>switchTab(b.dataset.goto));
 $("rebirth").onclick=rebirth;
-$("reset").onclick=async()=>{if(await ask("Start over?","Everything — cash, crew, lantern oil, perks, trophies and stories — will be lost. This can't be undone.","Reset everything"))
+$("reset").onclick=async()=>{if(await ask("Start over?","Everything — cash, workers, lantern oil, perks, trophies and stories — will be lost. This can't be undone.","Reset everything"))
   {S={...fresh(),oil:0,lifetime:0,profile:S.profile};local.del();closeModal();drawScene();render();save()}};
 
 const SUNFORGED={h:"#ffd27a",e:"#f2b24c"};
