@@ -670,6 +670,7 @@
   <span class="tsep"></span>
   <button class="tab" data-tab="debt"><i class="ti ti-coins" data-fb="⚖"></i>Debt</button>
   <button class="tab" data-tab="perks"><i class="ti ti-flame" data-fb="✦"></i>Perks<b class="badge" id="pBadge"></b></button>
+  <button class="tab" data-tab="gang"><i class="ti ti-users" data-fb="👥"></i>Gang</button>
   <span class="tsep"></span>
   <button class="tab" data-tab="leaderboard"><i class="ti ti-crown" data-fb="♛"></i>Leaderboard</button>
   <button class="tab" data-tab="support"><i class="ti ti-help-circle" data-fb="?"></i>Support</button>
@@ -719,6 +720,12 @@
         <div class="prog"><i id="progFill"></i></div>
         <div class="meta"><span id="progText">$0 / $500</span><span id="progPct">0% of the way</span></div>
         <div class="eta" id="etaText">Est. descend: —</div>
+      </div>
+      <div class="card">
+        <h3>Gang <button data-goto="gang">Manage →</button></h3>
+        <div class="balrow"><div><small>Level</small><b id="mgLvl" style="color:var(--lamp2)">Lv 1</b></div><div><small>Members</small><b id="mgMem">1/4</b></div></div>
+        <div class="prog"><i id="mgFill"></i></div>
+        <div class="meta"><span id="mgProg"></span><span id="mgPct"></span></div>
       </div>
       <div class="card">
         <h3>Equipment <button data-goto="upgrades">All upgrades →</button></h3>
@@ -810,6 +817,32 @@
     <p class="note" style="max-width:520px">You earn oil by paying Lord Ashcombe's $50M debt. Each flask you hold gives +10% to everything; spending it here trades that for a targeted, permanent perk. Choose what fits how you play.</p>
   </div>
   <div class="cols" id="perkList"></div>
+</div>
+<div class="panel" id="tab-gang">
+  <div class="titlebar"><h2>Gang</h2><span>Team up with up to 3 friends. Everyone's swings fill a shared XP bar that unlocks crew-wide upgrades.</span></div>
+  <div class="mine">
+    <div>
+      <div class="card" style="padding:18px">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+          <div><b style="font-size:16px">The Deep Crew</b><span class="lvl" id="gangLvl" style="margin-left:8px"></span></div>
+          <button class="buy" id="gangInvite">Invite a friend</button>
+        </div>
+        <div class="prog"><i id="gangFill"></i></div>
+        <div class="meta"><span id="gangProg"></span><span id="gangPct"></span></div>
+      </div>
+      <div class="card" style="padding:18px;margin-top:16px">
+        <h3 style="margin:0 0 10px">Roster</h3>
+        <div id="gangRoster" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card">
+        <h3>Crew upgrades</h3>
+        <div class="row"><div><div class="name">Shared picks<em id="gUp0Lvl"></em></div><div class="desc">+10% swing power for the whole crew, per level.</div></div><button class="buy" id="gUp0Btn"></button></div>
+        <div class="row"><div><div class="name">Longer shifts<em id="gUp1Lvl"></em></div><div class="desc">Auto-swinger shifts run 25% longer, per level.</div></div><button class="buy" id="gUp1Btn"></button></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="panel" id="tab-leaderboard">
   <div class="titlebar"><h2>Leaderboard</h2><span id="boardSub">Every debtor, ranked by lifetime cash mined</span></div>
@@ -1047,7 +1080,7 @@ const RANK_UNLOCKS=[
 ];
 const BET_MAX_PCT=.10,BET_MIN=10,BET_COOLDOWN=4000;
 
-const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,last:Date.now()});
+const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,gang:{xp:0,members:["You"],pick:0,shift:0},last:Date.now()});
 let S={...fresh(),oil:0,lifetime:0,profile:{name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a"}};
 const SHIRTS=[{c:"#f1e6d2"},{c:"#3aa0c8"},{c:"#c0553c"},{c:"#4f9e7a"},{c:"#b07acb"},{c:"#d1a34a"},{c:"#e0567a"},{c:"#2b2b2b",need:"gems25",label:"Gem hunter"},{c:"#ffd27a",need:"debt",label:"Paid the debt"},{c:"#5ec9b6",need:"glimmer",label:"Reached The Glimmer"},{c:"#e6b422",need:"debt5",label:"Paid the debt 5 times"}];
 const HATS=[{c:"#f3b24a"},{c:"#e8e8e8"},{c:"#c0553c"},{c:"#3aa0c8"},{c:"#4f9e7a"},{c:"#1a1614",need:"wyrm",label:"Slew the Wyrm"},{c:"#c48cff",need:"throne",label:"Reached the Hollow Throne"},{c:"#8fdc6a",need:"days7",label:"Played 7 days"}];
@@ -1127,7 +1160,9 @@ const nextMile=n=>MILES.find(m=>n<m);
 const crewTotal=i=>CREW[i].rate*(S.crew[i]||0)*crewMult(S.crew[i]||0)*depthMult()*buffMult()*(termNow().id==="quiet"?1.5:1);
 const buffOn=()=>Date.now()<(S.buffUntil||0);
 const buffMult=()=>buffOn()?2:1;
-const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1)*(termNow().id==="blood"?.5:1);
+const gangPickMult=()=>1+((S.gang&&S.gang.pick)||0)*.1;
+const gangShiftMult=()=>1+((S.gang&&S.gang.shift)||0)*.25;
+const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1)*(termNow().id==="blood"?.5:1)*gangPickMult();
 const cps=()=>CREW.reduce((a,c,i)=>a+c.rate*(S.crew[i]||0)*crewMult(S.crew[i]||0),0)*depthMult()*buffMult()*(termNow().id==="quiet"?1.5:1);
 const crewCost=i=>Math.floor(CREW[i].base*Math.pow(1.2,S.crew[i])*(1-perkLv("labor")*.06));
 const oilOnSeal=()=>Math.floor(Math.sqrt(S.cash/debtCost()*10))+(termNow().id==="double"?2:0);
@@ -1430,9 +1465,39 @@ function openShift(){if(autoOn()){toast(`The auto-swinger is on shift — ${eta2
   if(!autoReady()){toast(`Hiring an auto-swinger costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`);return}
   const tier=SHIFTS.length-1;
   $("shiftList").innerHTML=SHIFTS.map((x,i)=>{const locked=i>tier;return `<button class="shift ${locked?'lock':''}" data-shift="${x.h}" ${locked?'disabled':''}><b>${x.h}h</b><small>${x.rate}/sec · ~${fmt(clickPower()*x.rate*x.h*3600)}</small></button>`}).join("");
-  document.querySelectorAll("[data-shift]:not([disabled])").forEach(b=>b.onclick=()=>{if(S.cash<AUTO_COST){toast("Not enough cash.");return}const x=SHIFTS.find(z=>z.h==b.dataset.shift);S.cash-=AUTO_COST;S.autoRate=x.rate;S.autoBought=Date.now();S.autoUntil=Date.now()+x.h*3600*1000;S.shiftsUsed=(S.shiftsUsed||0)+1;$("shiftModal").classList.remove("on");toast(`Hired an auto-swinger for a ${x.h}-hour shift (${fmt(AUTO_COST)}). It keeps swinging even if you close the game.`);confetti(20);render();save()});
+  document.querySelectorAll("[data-shift]:not([disabled])").forEach(b=>b.onclick=()=>{if(S.cash<AUTO_COST){toast("Not enough cash.");return}const x=SHIFTS.find(z=>z.h==b.dataset.shift);S.cash-=AUTO_COST;S.autoRate=x.rate;S.autoBought=Date.now();S.autoUntil=Date.now()+x.h*3600*1000*gangShiftMult();S.shiftsUsed=(S.shiftsUsed||0)+1;$("shiftModal").classList.remove("on");toast(`Hired an auto-swinger for a ${x.h}-hour shift (${fmt(AUTO_COST)}). It keeps swinging even if you close the game.`);confetti(20);render();save()});
   $("shiftModal").classList.add("on")}
 $("rationPill").onclick=openShift;$("autoBtn").onclick=openShift;$("shiftClose").onclick=()=>$("shiftModal").classList.remove("on");
+
+// ---- gang (invite up to 3 friends, pool xp, buy crew-wide upgrades) ----
+const GANG_NAMES=["Brannock","Mabel","Sooty Joe","Widow Hale","Pockets","Big Tam"];
+function gangGainXp(){S.gang=S.gang||{xp:0,members:["You"],pick:0,shift:0};S.gang.xp=(S.gang.xp||0)+5}
+const gangLevel=()=>Math.floor(((S.gang&&S.gang.xp)||0)/4000)+1;
+const gangUpCost=id=>id===0?6000*(((S.gang&&S.gang.pick)||0)+1):12000*(((S.gang&&S.gang.shift)||0)+1);
+function gangInvite(){S.gang=S.gang||{xp:0,members:["You"],pick:0,shift:0};
+  if(S.gang.members.length>=4){toast("Your gang is full — 4 miners max.");return}
+  const pool=GANG_NAMES.filter(n=>!S.gang.members.includes(n));
+  const name=pool[Math.floor(Math.random()*pool.length)]||("Friend "+S.gang.members.length);
+  S.gang.members.push(name);toast(`${name} joined the gang.`);confetti(16);render();save()}
+function buyGangUp(id){const cost=gangUpCost(id);
+  if((S.gang.xp||0)<cost){toast("Not enough gang xp yet.");return}
+  S.gang.xp-=cost;if(id===0)S.gang.pick=(S.gang.pick||0)+1;else S.gang.shift=(S.gang.shift||0)+1;
+  toast(id===0?"Shared picks upgraded — everyone swings harder.":"Longer shifts upgraded — auto-swinger lasts longer.");confetti(16);render();save()}
+$("gangInvite").onclick=gangInvite;$("gUp0Btn").onclick=()=>buyGangUp(0);$("gUp1Btn").onclick=()=>buyGangUp(1);
+function renderGang(){S.gang=S.gang||{xp:0,members:["You"],pick:0,shift:0};
+  const lvl=gangLevel(),base=(lvl-1)*4000,cap=lvl*4000,xp=S.gang.xp||0,pct=Math.min(100,(xp-base)/(cap-base)*100);
+  $("gangLvl").textContent="Lv "+lvl;
+  $("gangFill").style.width=pct+"%";
+  $("gangProg").textContent=Math.floor(xp)+" / "+cap+" xp";$("gangPct").textContent=Math.floor(pct)+"%";
+  const mem=S.gang.members;
+  $("gangRoster").innerHTML=mem.map((n,i)=>`<div style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px"><div style="width:34px;height:34px;border-radius:50%;background:rgba(255,176,31,.15);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--lamp2)">${n.slice(0,2).toUpperCase()}</div><div><div style="font-size:13px;font-weight:500">${n}</div><div style="font-size:11px;color:var(--dim)">${i===0?"Leader":"Crew"}</div></div></div>`).join("")
+    +Array.from({length:4-mem.length}).map(()=>`<div style="border:1px dashed var(--line2);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px;opacity:.7"><div style="width:34px;height:34px;border-radius:50%;border:1px dashed var(--line2);display:flex;align-items:center;justify-content:center;color:var(--mute)">+</div><div style="font-size:12px;color:var(--mute)">Open slot</div></div>`).join("");
+  $("gUp0Lvl").textContent=S.gang.pick?"Lv "+S.gang.pick:"";$("gUp1Lvl").textContent=S.gang.shift?"Lv "+S.gang.shift:"";
+  $("gUp0Btn").textContent=Math.round(gangUpCost(0)).toLocaleString()+" xp";$("gUp1Btn").textContent=Math.round(gangUpCost(1)).toLocaleString()+" xp";
+  $("gUp0Btn").disabled=xp<gangUpCost(0);$("gUp1Btn").disabled=xp<gangUpCost(1);
+  $("gangInvite").disabled=mem.length>=4;$("gangInvite").textContent=mem.length>=4?"Gang full":"Invite a friend";
+  $("mgLvl").textContent="Lv "+lvl;$("mgMem").textContent=mem.length+"/4";
+  $("mgFill").style.width=pct+"%";$("mgProg").textContent=Math.floor(xp)+" / "+cap;$("mgPct").textContent=Math.floor(pct)+"%"}
 // ---- tutorial ----
 const TOUR=[
   {tab:"mine",el:null,ic:"⚖",t:"You owe Lord Ashcombe",p:"You couldn't pay, so the lord's men threw you into his mine to work it off. He wants $50M. Every swing chips at the rock — and the debt. Dig deep enough and you might find something worth more than freedom."},
@@ -1525,7 +1590,7 @@ function render(){
    if(on){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${AUTO_RATE()} swings/sec.`;$("autoBtn").textContent="On shift";$("autoBtn").disabled=true}
    else if(S.cash<AUTO_COST){$("autoDesc").textContent=`Costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`;$("autoBtn").textContent=fmt(AUTO_COST);$("autoBtn").disabled=true}
    else{$("autoDesc").textContent=`Ready. A 3-hour shift earns about ${fmt(clickPower()*3*3*3600)} at your current swing.`;$("autoBtn").textContent="Hire — "+fmt(AUTO_COST);$("autoBtn").disabled=false}}
-  renderThrone();renderPerks();renderDebt();
+  renderThrone();renderPerks();renderDebt();renderGang();
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
   document.querySelectorAll(".eq button,button.buy[data-pick],button.buy[data-crew]").forEach(b=>b.classList.toggle("can",!b.disabled));
   $("rankName").textContent="· "+RANKSN[Math.min(7,S.depth)]+(S.oil?` · ${S.oil} oil`:"");
@@ -1830,8 +1895,8 @@ function mine(e,auto){
   const me=document.querySelector(".me .arm");if(me){me.style.transform="rotate(-55deg)";setTimeout(()=>me.style.transform="",90)}
   const now=Date.now();streak=now-lastSwing<1500?streak+1:1;lastSwing=now;if(!auto&&streak>(S.bestStreak||0))S.bestStreak=streak;
   if(!auto&&autoOn()){combo=now-lastManual<1200?combo+1:1;lastManual=now}
-  if(boss){const dmg=clickPower()*streakMult()*(auto?1:comboMult());boss.hp-=dmg;S.swings++;if(!auto)pop("-"+fmt(dmg).slice(1),e,"hit");const w=document.querySelector(".wyrm");if(w){w.classList.remove("hit");void w.offsetWidth;w.classList.add("hit")}bossRender();if(boss.hp<=0)bossEnd(true);render();return}
-  const p=clickPower()*streakMult()*(auto?1:comboMult());earn(p);S.swings++;S.rockHp-=p;if(!auto){pop("+"+fmt(p),e,comboMult()>1.4?"hot":"");chips()}
+  if(boss){const dmg=clickPower()*streakMult()*(auto?1:comboMult());boss.hp-=dmg;S.swings++;gangGainXp();if(!auto)pop("-"+fmt(dmg).slice(1),e,"hit");const w=document.querySelector(".wyrm");if(w){w.classList.remove("hit");void w.offsetWidth;w.classList.add("hit")}bossRender();if(boss.hp<=0)bossEnd(true);render();return}
+  const p=clickPower()*streakMult()*(auto?1:comboMult());earn(p);S.swings++;gangGainXp();S.rockHp-=p;if(!auto){pop("+"+fmt(p),e,comboMult()>1.4?"hot":"");chips()}
   const st=$("streak");st.classList.toggle("on",streak>=5||comboMult()>1);
   {const c=comboMult();
     $("streakN").innerHTML=c>1?`×${(streakMult()*c).toFixed(2)}<em>overtime ×${c.toFixed(1)}</em>`:"×"+streakMult().toFixed(2)+(streakMult()>=1.5?" MAX":"")+(autoOn()?" auto":"");
@@ -1850,7 +1915,7 @@ function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
-  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
+  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,seen:true,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,gang:S.gang,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
   toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);drawScene();render();save();
 }
