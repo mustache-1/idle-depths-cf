@@ -38,8 +38,8 @@
      or the sticky top bar. The tile itself is generated in strata(). ---- */
   #strata{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
   #strata::before{content:"";position:absolute;inset:0;background:
-    radial-gradient(ellipse 58% 36% at 50% 2%,rgba(255,176,31,.18),transparent 68%),
-    linear-gradient(180deg,rgba(0,0,0,.48) 0,rgba(0,0,0,.32) 36%,rgba(0,0,0,.48) 68%,rgba(0,0,0,.78) 100%)}
+    radial-gradient(ellipse 58% 30% at 50% 0%,rgba(255,176,31,.10),transparent 70%),
+    linear-gradient(180deg,rgba(0,0,0,.66) 0,rgba(0,0,0,.58) 36%,rgba(0,0,0,.66) 68%,rgba(0,0,0,.86) 100%)}
   #strata i{position:absolute;bottom:-6px;width:2px;height:2px;
     background:var(--lamp);opacity:0;animation:drift linear infinite;will-change:transform}
   @keyframes drift{0%{transform:translateY(0);opacity:0}10%{opacity:.5}85%{opacity:.22}100%{transform:translateY(-102vh);opacity:0}}
@@ -427,7 +427,9 @@
   .note{font-size:13px;color:var(--dim)}
 
   /* board */
-  .board{max-width:620px}
+  .board{max-width:620px;background:linear-gradient(180deg,var(--panel2),var(--panel));
+    border:1px solid var(--line);border-radius:14px;padding:6px 16px 10px;
+    box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 6px 20px rgba(0,0,0,.25)}
   .board table{width:100%;border-collapse:collapse}
   .board td{padding:12px 8px;border-bottom:1px solid var(--line);font-size:15px}
   .board td:first-child{color:var(--dim);width:36px}
@@ -588,7 +590,7 @@
   .bookbody{position:relative;z-index:2;padding:6px 22px 20px}
   .lrow{display:flex;gap:14px;align-items:flex-start;padding:11px 0;border-bottom:1px solid rgba(58,44,28,.22)}
   .lrow:last-child{border-bottom:0}
-  .lrow .hand{flex:none;width:34px;font-size:12px;color:#6b5a44;padding-top:2px}
+  .lrow .lhand{flex:none;width:34px;font-size:12px;color:#6b5a44;padding-top:2px;min-height:0}
   .lrow .said{flex:1;min-width:0;font-size:14px;line-height:1.55}
   .lrow .said em{font-style:italic;color:#6b5a44}
   .lrow .said b{font-weight:400;display:block;font-size:13px;color:#6b5a44;margin-bottom:3px}
@@ -598,10 +600,10 @@
   .lrow.settled .amt::after{content:" ✓"}
   .lbar{height:6px;background:rgba(58,44,28,.18);margin:8px 0 0;position:relative;z-index:2}
   .lbar i{display:block;height:100%;background:#3a2c1c}
-  .streak{display:flex;gap:5px;margin-top:10px;position:relative;z-index:2;flex-wrap:wrap}
-  .streak i{width:13px;height:17px;background:rgba(58,44,28,.16);display:block}
-  .streak i.on{background:#3a2c1c}
-  .streak i.gold{background:#b8842c}
+  .lstreak{display:flex;gap:5px;margin-top:10px;position:relative;z-index:2;flex-wrap:wrap}
+  .lstreak i{width:13px;height:17px;background:rgba(58,44,28,.16);display:block;border-radius:0}
+  .lstreak i.on{background:#3a2c1c}
+  .lstreak i.gold{background:#b8842c}
   .bookbtn{position:relative;z-index:2;width:100%;margin-top:14px;padding:13px;font:inherit;
     font-size:15px;cursor:pointer;background:#3a2c1c;color:#e6dcc4;border:0;border-radius:2px}
   .bookbtn:disabled{background:rgba(58,44,28,.22);color:#6b5a44;cursor:default}
@@ -614,7 +616,7 @@
     border-bottom:1px solid rgba(58,44,28,.16)}
   .digmem span:last-child{font-variant-numeric:tabular-nums}
   .digmem.idle{color:#a33b2a}
-  @media(max-width:560px){.book::before{left:40px}.bookhead,.bookbody{padding-left:16px;padding-right:16px}.lrow .hand{width:26px}}
+  @media(max-width:560px){.book::before{left:40px}.bookhead,.bookbody{padding-left:16px;padding-right:16px}.lrow .lhand{width:26px}}
   .ct .asks{font-style:normal;font-size:11px;color:var(--lamp);opacity:.85;margin-left:6px}
   .ct{padding:14px 0;border-top:1px solid var(--line)}
   .ct:first-child{border-top:0;padding-top:0}
@@ -1104,7 +1106,7 @@
       <div class="bookhead"><b id="lgTitle">Ashcombe&rsquo;s book</b><small id="lgDate"></small><span class="stamp" id="lgStamp">unpaid</span></div>
       <div class="bookbody">
         <div id="lgRows"></div>
-        <div class="streak" id="lgStreak"></div>
+        <div class="lstreak" id="lgStreak"></div>
         <p class="seamnote" id="lgStreakNote"></p>
         <button class="bookbtn" id="lgClaim">Sign the page</button>
         <p class="seamnote" id="lgSeam"></p>
@@ -1949,8 +1951,8 @@ function renderLedger(){
   $("lgStamp").textContent=L.claimed?"settled":"unpaid";
   $("lgStamp").style.borderColor=$("lgStamp").style.color=L.claimed?"#4a7a3a":"#b04a3a";
   $("lgRows").innerHTML=
-    `<div class="lrow"><span class="hand">i.</span><div class="said"><b>Entered against you</b>${j.line}<br><em>${j.ink}</em></div><span class="amt debit">${fmt(j.reward)}</span></div>`+
-    `<div class="lrow ${L.claimed?'settled':''}"><span class="hand">ii.</span><div class="said"><b>${T.name}</b>${T.text(j.n)}<div class="lbar"><i style="width:${Math.min(100,p/j.n*100)}%"></i></div></div><span class="amt">${T.show?T.show(p,j.n):p+" / "+j.n}</span></div>`;
+    `<div class="lrow"><span class="lhand">i.</span><div class="said"><b>Entered against you</b>${j.line}<br><em>${j.ink}</em></div><span class="amt debit">${fmt(j.reward)}</span></div>`+
+    `<div class="lrow ${L.claimed?'settled':''}"><span class="lhand">ii.</span><div class="said"><b>${T.name}</b>${T.text(j.n)}<div class="lbar"><i style="width:${Math.min(100,p/j.n*100)}%"></i></div></div><span class="amt">${T.show?T.show(p,j.n):p+" / "+j.n}</span></div>`;
   const marks=[];
   for(let i=1;i<=Math.max(7,Math.min(30,L.streak+1));i++)
     marks.push(`<i class="${i<=L.streak?(STREAK_OIL[i]?'gold':'on'):''}"></i>`);
@@ -3246,23 +3248,21 @@ function strataArt(pal,seed){
   const W=640,CB=32;
 
   // the block wall, one step back so the planes in front read as closer
-  const B=40,N=8,S=B*N;
+  const B=26,N=10,S=B*N;
   let w="";
   for(let y=0;y<N;y++)for(let x=0;x<N;x++){
-    const c=shade(pal.wall[Math.floor(rnd()*pal.wall.length)],-30),px=x*B,py=y*B;
+    const c=shade(pal.wall[Math.floor(rnd()*pal.wall.length)],-40),px=x*B,py=y*B;
     w+=`<rect x="${px}" y="${py}" width="${B}" height="${B}" fill="${c}"/>`;
-    w+=`<rect x="${px}" y="${py}" width="${B}" height="3" fill="${shade(c,20)}"/>`;
-    w+=`<rect x="${px}" y="${py}" width="3" height="${B}" fill="${shade(c,12)}"/>`;
-    w+=`<rect x="${px}" y="${py+B-4}" width="${B}" height="4" fill="${shade(c,-26)}"/>`;
-    w+=`<rect x="${px+B-4}" y="${py}" width="4" height="${B}" fill="${shade(c,-18)}"/>`;
-    for(let k=0;k<3;k++){
-      const fx=px+6+Math.floor(rnd()*26),fy=py+6+Math.floor(rnd()*26);
-      w+=`<rect x="${fx}" y="${fy}" width="4" height="4" fill="${shade(c,rnd()<.5?-14:10)}"/>`;
+    w+=`<rect x="${px}" y="${py}" width="${B}" height="2" fill="${shade(c,9)}"/>`;
+    w+=`<rect x="${px}" y="${py+B-2}" width="${B}" height="2" fill="${shade(c,-12)}"/>`;
+    w+=`<rect x="${px+B-2}" y="${py}" width="2" height="${B}" fill="${shade(c,-9)}"/>`;
+    for(let k=0;k<2;k++){
+      const fx=px+5+Math.floor(rnd()*15),fy=py+5+Math.floor(rnd()*15);
+      w+=`<rect x="${fx}" y="${fy}" width="3" height="3" fill="${shade(c,rnd()<.5?-7:5)}"/>`;
     }
-    if(rnd()<.13){
-      const ox=px+10+Math.floor(rnd()*16),oy=py+10+Math.floor(rnd()*16);
-      w+=`<rect x="${ox}" y="${oy}" width="7" height="7" fill="${pal.ore}"/>`;
-      w+=`<rect x="${ox+1}" y="${oy+1}" width="3" height="3" fill="${shade(pal.ore,34)}"/>`;
+    if(rnd()<.06){
+      const ox=px+8+Math.floor(rnd()*10),oy=py+8+Math.floor(rnd()*10);
+      w+=`<rect x="${ox}" y="${oy}" width="5" height="5" fill="${shade(pal.ore,-34)}"/>`;
     }
   }
   const wall=uri(`<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}">${w}</svg>`);
