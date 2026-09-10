@@ -235,28 +235,74 @@
   .links button:hover{background:rgba(255,255,255,.05)}
   .links button:hover i{color:var(--lamp)}
   .links button:focus-visible{outline:none;box-shadow:inset 0 0 0 2px var(--lamp)}
+  .lhead{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);padding:6px 10px 8px}
+  .links button[data-k] i{color:var(--ink)}
+  .links button[data-k="bunk"] i{background:rgba(255,176,31,.14);color:var(--lamp2)}
+  .links button[data-k="bet"] i{background:rgba(169,112,255,.15);color:var(--gem)}
+  .links button[data-k="board"] i{background:rgba(46,230,214,.13);color:var(--ore)}
+  .links button[data-k="rules"] i{background:rgba(61,155,255,.14);color:var(--blue)}
+  .links button[data-k]:hover i{filter:brightness(1.25)}
+  .coffee{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink);
+    padding:11px 13px;border-radius:12px;border:1px solid rgba(255,176,31,.35);
+    background:linear-gradient(180deg,rgba(255,176,31,.13),rgba(255,176,31,.05));transition:background .12s,box-shadow .15s}
+  .coffee i{font-style:normal;width:30px;height:30px;flex:none;border-radius:9px;background:rgba(255,176,31,.18);
+    display:inline-flex;align-items:center;justify-content:center;font-size:16px;color:var(--lamp2)}
+  .coffee b{display:block;font-size:13.5px;font-weight:600;line-height:1.3;color:var(--lamp2)}
+  .coffee small{display:block;color:var(--dim);font-size:11.5px;line-height:1.35}
+  .coffee:hover{background:rgba(255,176,31,.2);box-shadow:0 0 16px rgba(255,176,31,.18)}
+  .fcoffee{max-width:340px;margin:14px 0}
   .pit .titlebar,.pit .strip,.pit .quest{flex:none}
   .eqcard{display:flex;flex-direction:column;min-height:0}
   .eqlist{min-height:0;overflow-y:auto;scrollbar-width:thin}
 
   @media(min-width:1100px){
-    #tab-mine{width:min(1520px,calc(100vw - 40px));margin-left:calc(520px - min(760px,calc(50vw - 20px)));padding:16px 0 18px}
-    .pit{display:grid;grid-template-columns:260px minmax(0,1fr) 304px;gap:16px;align-items:stretch;
-      height:calc(100vh - 146px);min-height:540px}
-    .pit .side,.pit .stage{height:100%}
+    .top .wrap{height:54px}
+    .tabs .wrap{height:42px}
+    .tab{height:42px;font-size:13px;padding:0 12px}
+    .stat{padding:0 14px}
+    .stat b{font-size:15px}
+    .stat small{font-size:11px}
+    #tab-mine{width:min(1460px,calc(100vw - 32px));margin-left:calc(520px - min(730px,calc(50vw - 16px)));padding:12px 0 12px}
+    .pit{display:grid;grid-template-columns:236px minmax(0,1fr) 286px;gap:13px;align-items:stretch;
+      height:calc(100vh - 108px);min-height:0}
+    .pit .side,.pit .stage{height:100%;min-height:0}
+    .pit .side{overflow-y:auto;scrollbar-width:thin}
+    .pit .side .card{padding:11px 13px}
     .pit .hero{flex:1;min-height:0;display:flex;flex-direction:column}
     .pit .rock{flex:1;min-height:0;aspect-ratio:auto}
-    .pit .links{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin}
-    .pit .eqcard{flex:1}
-    .pit .strip div{padding:11px 14px}
-    .pit .strip b{font-size:16px}
-  }
-  @media(min-width:1100px) and (max-height:820px){
-    .pit .titlebar .note{display:none}
-    .pit .side .card{padding:12px 14px}
-    .pit .rank b{font-size:21px}
-    .pit .big{height:40px;font-size:14px}
+    .pit .links{flex:none}
+    .pit .coffee{margin-top:auto;flex:none}
+    .pit .eqcard{flex:1;min-height:0}
+    .pit .titlebar h2{font-size:20px}
+    .pit .titlebar span{font-size:13px}
+    .pit .rank b{font-size:20px}
+    .pit .big{height:38px;font-size:13px}
+    .pit .prog{margin:9px 0 6px}
+    .pit .eta{margin-top:6px}
+    .pit .strip div{padding:8px 12px}
+    .pit .strip b{font-size:14px}
+    .pit .strip small{font-size:11px}
+    .side h3{font-size:14px}
+    .eq{padding:9px 0}
+    .eq b{font-size:13px}
+    .eq small{font-size:11.5px}
+    .eq button{height:31px;min-width:66px;font-size:12.5px}
     .links button{padding:6px 9px}
+    .links button small{font-size:11px}
+    .coffee{padding:9px 11px}
+  }
+  @media(min-width:1100px) and (max-height:860px){
+    .pit .titlebar .note{display:none}
+    .pit .titlebar h2{font-size:18px}
+    .pit .side .card{padding:9px 12px}
+    .pit .rank b{font-size:18px}
+    .pit .big{height:34px;font-size:12.5px}
+    .pit .strip div{padding:6px 11px}
+    .pit .strip b{font-size:13px}
+    .links button{padding:5px 9px}
+    .lhead{padding:3px 10px 5px}
+    .coffee{padding:7px 11px}
+    .coffee small{display:none}
   }
 
   /* upgrades tab */
@@ -751,11 +797,13 @@
         <div class="meta"><span id="mgProg"></span><span id="mgPct"></span></div>
       </div>
       <nav class="card links">
-        <button id="openMiner2"><i class="ti ti-bed" data-fb="&#128716;"></i><span><b>Bunkhouse</b><small>Miner, record, trophies</small></span></button>
-        <button id="openTable"><i class="ti ti-cards" data-fb="&#127183;"></i><span><b>The warden's table</b><small>Wheel, slots &amp; blackjack</small></span></button>
-        <button data-goto="leaderboard"><i class="ti ti-crown" data-fb="&#128081;"></i><span><b>Leaderboard</b><small>Who's dug furthest</small></span></button>
-        <button id="openTour"><i class="ti ti-compass" data-fb="&#128214;"></i><span><b>How it works</b><small>Replay the tutorial</small></span></button>
+        <h3 class="lhead">The camp</h3>
+        <button id="openMiner2" data-k="bunk"><i class="ti ti-bed" data-fb="&#128716;"></i><span><b>Bunkhouse</b><small>Your miner, record &amp; trophies</small></span></button>
+        <button id="openTable" data-k="bet"><i class="ti ti-cards" data-fb="&#127183;"></i><span><b>Gamble</b><small>Wheel, slots &amp; blackjack</small></span></button>
+        <button data-goto="leaderboard" data-k="board"><i class="ti ti-crown" data-fb="&#128081;"></i><span><b>Leaderboard</b><small>Who's dug the furthest</small></span></button>
+        <button id="openTour" data-k="rules"><i class="ti ti-compass" data-fb="&#128214;"></i><span><b>Rules</b><small>How the mine works</small></span></button>
       </nav>
+      <a class="coffee" href="https://www.buymeacoffee.com/" target="_blank" rel="noopener"><i class="ti ti-coffee" data-fb="&#9749;"></i><span><b>Buy me a coffee</b><small>Keeps the lanterns lit</small></span></a>
     </aside>
 
     <main class="stage">
@@ -787,9 +835,7 @@
         <div class="balrow"><div><small>Balance</small><b id="eqCash">$0</b></div><div><small>Income</small><b class="inc" id="eqCps">$0/sec</b></div></div>
         <div class="eqlist">
           <div class="eq"><div><b id="eqPickName">Wooden pick</b><small id="eqPickInfo"></small></div><button id="eqPickBtn">$60</button></div>
-          <div class="eq"><div><b><span id="eqC0n">Digger</span><em id="eqC0l">&times;0</em></b><small id="eqC0i"></small></div><button id="eqC0b">$25</button></div>
-          <div class="eq"><div><b><span id="eqC1n">Ore cart</span><em id="eqC1l">&times;0</em></b><small id="eqC1i"></small></div><button id="eqC1b">$250</button></div>
-          <div class="eq"><div><b><span id="eqC2n">Drill rig</span><em id="eqC2l">&times;0</em></b><small id="eqC2i"></small></div><button id="eqC2b">$2K</button></div>
+          <div id="eqCrew"></div>
         </div>
       </div>
       <div class="card" id="throneCard" style="display:none;border-color:rgba(196,140,255,.4)">
@@ -977,6 +1023,7 @@
 </div>
 <footer>
   <span id="lifeStats"></span><span id="awayNote"></span>
+  <a class="coffee fcoffee" href="https://www.buymeacoffee.com/" target="_blank" rel="noopener"><i class="ti ti-coffee" data-fb="&#9749;"></i><span><b>Buy me a coffee</b><small>Keeps the lanterns lit and the server running</small></span></a>
   <nav class="flinks"><a href="#" data-help="terms">Terms</a><a href="#" data-help="privacy">Privacy</a><span class="credit" style="width:auto;margin-left:auto">© 2026 Avila · Idle Depths</span></nav>
 </footer>
 </div>
@@ -1101,6 +1148,8 @@ const PICKS=[
   {name:"Bare hands",power:1,cost:0},{name:"Wooden pick",power:2,cost:80},{name:"Stone pick",power:4,cost:600},
   {name:"Iron pick",power:9,cost:4500},{name:"Steel pick",power:20,cost:35000},{name:"Tempered pick",power:45,cost:250000},
   {name:"Crystal pick",power:100,cost:2e6},{name:"Abyssal pick",power:220,cost:15e6},
+  {name:"Wyrmbone pick",power:520,cost:1.1e8},{name:"Voidglass pick",power:1250,cost:9e8},
+  {name:"Throne-forged pick",power:3000,cost:7e9},{name:"The Lender's pick",power:7400,cost:6e10},
 ];
 const CREW=[
   {name:"Digger",desc:"A miner with a shovel and no complaints.",base:30,rate:0.028},
@@ -1110,6 +1159,10 @@ const CREW=[
   {name:"Deep bore",desc:"Nobody is sure where it stops.",base:400000,rate:17},
   {name:"Crystal harvester",desc:"Cuts the glowing seams by lamplight.",base:4e6,rate:100},
   {name:"Wyrm handler",desc:"Keeps a leashed wyrmling that digs where men won't.",base:3e7,rate:560,rank:1},
+  {name:"Echo choir",desc:"They sing at the rock until it agrees to move.",base:2.4e8,rate:3200,rank:1},
+  {name:"Gravewurm rig",desc:"Fed on tailings. Chews a shaft a night.",base:2e9,rate:19000,rank:2},
+  {name:"Ashfall furnace",desc:"Smelts on site. Nothing goes back up unsold.",base:1.8e10,rate:115000,rank:2},
+  {name:"The Lender's engine",desc:"It arrived crated, unsigned, and already running.",base:1.5e11,rate:720000,rank:3},
 ];
 const LAYERS=[
   {name:"The Cutting",desc:"Loose earth and broken carts. Every debtor Lord Ashcombe throws down here starts in the Cutting.",hp:10,cost:800,gem:.006},
@@ -1606,7 +1659,7 @@ const TOUR=[
   {tab:"perks",el:"#perkList",ic:"✦",t:"Perks",p:"Spend lantern oil on permanent advantages: sharper steel, cheaper crew, more Wyrms, bigger stakes, a head start after paying. Oil spent here stops giving its +10%, so choose what fits how you play."},
   {tab:"leaderboard",el:"#tab-leaderboard .board",ic:"♛",t:"Leaderboard",p:"The weekly board resets every Monday — last week's top three are named and earn a title. There's an all-time board too. Avatar colors and keepsakes show, so people can see what you've earned."},
   {tab:"mine",el:"#account",ic:"🛏",t:"The Bunkhouse",p:"Your corner: change your shirt and helmet, set a display name and title, see your record, and collect 25+ trophies. Trophies pay cash and unlock rare colors."},
-  {tab:"mine",el:".around",ic:"🃏",t:"Around the mine",p:"The warden's table (wheel, slots and blackjack — 25% max stake, the house always keeps a little), the Bunkhouse, this tour, and the board. The Support tab has the rules and how to reach me. Good luck down there."},
+  {tab:"mine",el:".links",ic:"🃏",t:"The camp",p:"Everything outside the rock face lives here: the Bunkhouse, the warden's table for a gamble (wheel, slots and blackjack — 25% max stake, the house always keeps a little), the leaderboard, and these rules. Good luck down there."},
 ];
 let tourI=0;
 function tourShow(){const prev=TOUR[tourI-1];if(prev&&prev.post)prev.post();const st=TOUR[tourI];if(!st){tourEnd();return}
@@ -1672,7 +1725,7 @@ function render(){
   const np=PICKS[S.pick+1];
   if(np){$("eqPickName").textContent=np.name;$("eqPickInfo").textContent="+"+fmt((np.power-PICKS[S.pick].power)*depthMult())+"/swing";$("eqPickBtn").textContent=fmt(np.cost);$("eqPickBtn").disabled=S.cash<np.cost}
   else{$("eqPickName").textContent=PICKS[S.pick].name;$("eqPickInfo").textContent="Best pickaxe";$("eqPickBtn").textContent="Maxed";$("eqPickBtn").disabled=true}
-  [0,1,2].forEach(i=>{const c=CREW[i],cost=crewCost(i),n=S.crew[i]||0,nm=nextMile(n);$("eqC"+i+"n").textContent=c.name;$("eqC"+i+"l").textContent="×"+n+(crewMult(n)>1?` · ×${crewMult(n)}`:"");$("eqC"+i+"i").innerHTML="+"+fmt(c.rate*crewMult(n)*depthMult())+"/sec each"+(nm?` · ${nm-n} to ×${crewMult(n)*2}`:"")+(n?`<span class="earn">Earning ${fmt(crewTotal(i))}/sec</span>`:"");const b=$("eqC"+i+"b");b.textContent=fmt(cost);b.disabled=S.cash<cost});
+  eqCrewRender();
   const nb=BUNKS[(S.bunk||0)+1];$("bunkName").innerHTML=BUNKS[S.bunk||0].name+`<em>${BUNKS[S.bunk||0].cap}h offline</em>`;
   if(nb){$("bunkDesc").textContent=`Upgrade to the ${nb.name}: workers keep working for ${nb.cap} hours while you're away.`;$("bunkBtn").textContent=fmt(nb.cost);$("bunkBtn").disabled=S.cash<nb.cost}
   else{$("bunkDesc").textContent="The best quarters in the mine. Workers work up to 48 hours while you're gone.";$("bunkBtn").textContent="Maxed";$("bunkBtn").disabled=true}
@@ -2001,6 +2054,28 @@ function mine(e,auto){
   render();
 }
 function buyPick(i){if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cost;S.pick=i;drawScene();render();save();toast(`You picked up the ${PICKS[i].name}.`)}}
+let eqSig="";
+function eqCrewRender(){
+  const vis=[];let tail=0;
+  for(let i=0;i<CREW.length;i++){
+    if(CREW[i].rank&&(S.debts||0)<CREW[i].rank)continue;
+    if((S.crew[i]||0)>0||S.cash>=crewCost(i)*.2){vis.push(i);tail=0}
+    else if(tail<2){vis.push(i);tail++}
+  }
+  const host=$("eqCrew"),sig=vis.join(",");
+  if(sig!==eqSig){
+    eqSig=sig;
+    host.innerHTML=vis.map(i=>`<div class="eq"><div><b><span id="eqC${i}n"></span><em id="eqC${i}l"></em></b><small id="eqC${i}i"></small></div><button id="eqC${i}b" data-crew="${i}"></button></div>`).join("");
+    host.querySelectorAll("[data-crew]").forEach(b=>b.onclick=()=>buyCrew(+b.dataset.crew));
+  }
+  vis.forEach(i=>{
+    const c=CREW[i],cost=crewCost(i),n=S.crew[i]||0,nm=nextMile(n);
+    $("eqC"+i+"n").textContent=c.name;
+    $("eqC"+i+"l").textContent="×"+n+(crewMult(n)>1?` · ×${crewMult(n)}`:"");
+    $("eqC"+i+"i").innerHTML="+"+fmt(c.rate*crewMult(n)*depthMult())+"/sec each"+(nm?` · ${nm-n} to ×${crewMult(n)*2}`:"")+(n?`<span class="earn">Earning ${fmt(crewTotal(i))}/sec</span>`:"");
+    const b=$("eqC"+i+"b");b.textContent=fmt(cost);b.disabled=S.cash<cost;
+  });
+}
 function buyCrew(i){const c=crewCost(i);if(S.cash>=c){S.cash-=c;S.crew[i]++;if(MILES.includes(S.crew[i])){toast(`${CREW[i].name}s hit ${S.crew[i]}: they now work at ×${crewMult(S.crew[i])} power.`);confetti(30)}drawScene();render();save()}}
 function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}if(S.cash>=L.cost&&LAYERS[S.depth+1]){S.cash-=L.cost;S.depth++;S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);confetti(40);drawScene();render();save()}}
 async function rebirth(){
@@ -2086,7 +2161,6 @@ $("rivalModal").onclick=e=>{if(e.target===$("rivalModal"))$("rivalModal").classL
 $("rock").onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();mine({})}};
 $("descend").onclick=descend;
 $("eqPickBtn").onclick=()=>buyPick(S.pick+1);
-[0,1,2].forEach(i=>$("eqC"+i+"b").onclick=()=>buyCrew(i));
 $("sealBtn").onclick=rebirth;$("dPay").onclick=rebirth;
 $("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. Your workers now work ${nb.cap}h while you're away.`);render();save()};
 document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>switchTab(b.dataset.goto));
