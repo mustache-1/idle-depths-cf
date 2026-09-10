@@ -2,6 +2,20 @@
 import { readSession, makeSession, cookieHeader, json } from "./_session.js";
 import { weekKey, weekEnds, prevWeekKey } from "./_week.js";
 
+// ---- seasons ----
+// The all-time board ranks on `lifetime`, which is written fresh from the player's save on
+// every autosave. Deleting the board:* rows therefore resets nothing — the next save puts
+// the identical score straight back. The only honest way to start the board over without
+// touching anyone's save is a baseline: when a player's era rolls over, record where their
+// lifetime stood, and rank the new season on everything mined since.
+//
+// The 1.5^depth economy makes old and new scores incomparable, which is why season 2 opens
+// here. Nothing is deleted: each player keeps their final season-1 score, and the board
+// serves it under `legacy`. To undo this, set ERA back to 1 — the old baselines are ignored
+// and every original score returns intact.
+const ERA = 2;
+const ERA_NAMES = { 1: "Season 1 · Ashcombe's ledger", 2: "Season 2 · The deep economy" };
+
 const TITLES = { "": "", coalhand: "Coalhand", ironjaw: "Ironjaw", silverback: "Gravewalker", abyssal: "Throne-touched", gemhunter: "Gem hunter", sealed: "Debt-free", lamplighter: "Lamplighter", wyrmslayer: "Wyrmslayer", cardsharp: "Card sharp", regular: "Regular", champion: "Weekly champion", beneath: "Throne-keeper" };
 
 export default {
@@ -83,8 +97,18 @@ async function handle(request, env) {
         cursor = page.list_complete ? null : page.cursor;
       } while (cursor);
       const wk = weekKey(), pk = prevWeekKey();
+      // A player who hasn't saved since the rollover still carries the old era, so their
+      // season-2 total is 0 until they next play — same rule the weekly board already uses.
+      const seasonScore = r => (r.era === ERA ? Math.max(0, r.score - (r.eraBase || 0)) : 0);
       const data = {
-        all: [...rows].sort((a, b) => b.score - a.score).slice(0, 10),
+        all: rows.map(r => ({ ...r, score: seasonScore(r) })).filter(r => r.score > 0)
+          .sort((a, b) => b.score - a.score).slice(0, 10),
+        // season 1 is kept, not deleted: a row that never saw a rollover still has its
+        // original score, and one that did has it banked in prevEraScore
+        legacy: rows.map(r => ({ ...r, score: r.prevEra ? (r.prevEraScore || 0) : (r.era ? 0 : r.score) }))
+          .filter(r => r.score > 0).sort((a, b) => b.score - a.score).slice(0, 10),
+        era: ERA, eraName: ERA_NAMES[ERA] || `Season ${ERA}`,
+        legacyName: ERA_NAMES[ERA - 1] || `Season ${ERA - 1}`,
         week: rows.map(r => ({ ...r, score: r.week === wk ? Math.max(0, r.score - (r.weekBase || 0)) : 0 })).filter(r => r.score > 0).sort((a, b) => b.score - a.score).slice(0, 10),
         champs: rows.filter(r => r.prevWeek === pk && r.prevScore > 0).sort((a, b) => b.prevScore - a.prevScore).slice(0, 3).map(r => ({ id: r.id, name: r.name })),
         weekEnds: weekEnds(),
@@ -382,11 +406,22 @@ async function handle(request, env) {
         if (week) { prevWeek = week; prevScore = Math.max(0, (prev.score || 0) - (weekBase || 0)); }
         week = wk; weekBase = score;
       }
+      // Same shape as the weekly rollover, one tier up. A row with no era at all is a
+      // season-1 player: their whole score to date becomes their season-1 result.
+      let { era, eraBase, prevEra, prevEraScore } = prev;
+      if (era !== ERA) {
+        if (prev.id) {
+          prevEra = era || 1;
+          prevEraScore = Math.max(0, (prev.score || 0) - (eraBase || 0));
+        }
+        era = ERA; eraBase = score;
+      }
       await env.SAVES.put(`save:${s.id}`, JSON.stringify(body));
       await env.SAVES.put(`board:${s.id}`, JSON.stringify({
         id: s.id, name: custom || s.name, title: TITLES[pr.title] || "", shirt: col(pr.shirt), hat: col(pr.hat),
         keeps: Math.min(20, Array.isArray(body.story && body.story.keeps) ? body.story.keeps.length : 0),
         score, depth: (body.depth || 0) + 1, oil: body.oil || 0, week, weekBase, prevWeek, prevScore,
+        era, eraBase, prevEra, prevEraScore,
       }));
       return json({ ok: true });
     }
