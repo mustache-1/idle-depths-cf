@@ -84,6 +84,22 @@
   @media(max-width:900px){.mine{grid-template-columns:minmax(0,1fr) 230px;gap:12px}}
   @media(max-width:560px){.mine{grid-template-columns:1fr}}
   .card{background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line);border-radius:14px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 6px 20px rgba(0,0,0,.25)}
+  .tapHint{position:absolute;right:6%;bottom:30%;z-index:4;pointer-events:none;
+    background:rgba(20,16,12,.92);border:1px solid rgba(255,176,31,.55);color:var(--lamp2);
+    font-size:13px;font-weight:600;padding:8px 15px;border-radius:16px 18px 17px 19px;white-space:nowrap;
+    box-shadow:0 6px 20px rgba(0,0,0,.5),0 0 24px rgba(255,176,31,.18);
+    animation:tapBob 1.6s ease-in-out infinite;transition:opacity .35s}
+  .tapHint::before,.tapHint::after{content:"";position:absolute;border-radius:50%;
+    background:rgba(20,16,12,.92);border:1px solid rgba(255,176,31,.55)}
+  .tapHint::before{left:-13px;bottom:-11px;width:10px;height:10px}
+  .tapHint::after{left:-25px;bottom:-21px;width:6px;height:6px}
+  .pkGlow{animation:pkPulse 2.4s ease-in-out infinite;transform-origin:center}
+  @keyframes pkPulse{0%,100%{opacity:.55}50%{opacity:1}}
+  @media(prefers-reduced-motion:reduce){.pkGlow{animation:none;opacity:.8}}
+  .tapHint.off{opacity:0}
+  @keyframes tapBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  @media(prefers-reduced-motion:reduce){.tapHint{animation:none}}
+  @media(max-width:560px){.tapHint{font-size:11.5px;padding:6px 11px;right:4%;bottom:34%}}
   .hero{position:relative;z-index:0;overflow:hidden;border-color:rgba(255,176,31,.35);box-shadow:0 0 0 1px rgba(255,176,31,.12),0 20px 60px rgba(0,0,0,.55),0 0 80px rgba(255,176,31,.08)}
   .rock{display:block;width:100%;aspect-ratio:340/190;background:#0f0c0a;border:0;padding:0;cursor:pointer;position:relative;image-rendering:pixelated}
   .rock svg{width:100%;height:100%;display:block;pointer-events:none}
@@ -881,6 +897,7 @@
           <div class="bossbar" id="bossbar"><b id="bossName">Deep Wyrm</b><div class="bar"><i id="bossHp"></i></div><small id="bossTimer">30s</small></div>
           <div class="streak" id="streak"><small>Streak</small><b id="streakN">&times;1.00</b><i><span id="streakBar"></span></i></div>
           <div class="hp"><i id="hp"></i></div>
+          <div class="tapHint" id="tapHint" aria-hidden="true"><span id="tapHintText">Click anywhere to mine</span></div>
         </button>
         <div class="strip">
           <div><small>Pickaxe</small><b id="pickName" style="color:var(--ink)">Bare hands</b><span class="buff" id="autoBadge" style="display:none">auto</span></div>
@@ -1226,6 +1243,11 @@ const PICKS=[
   {name:"Crystal pick",power:100,cost:2e6},{name:"Abyssal pick",power:220,cost:15e6},
   {name:"Wyrmbone pick",power:520,cost:1.1e8},{name:"Voidglass pick",power:1250,cost:9e8},
   {name:"Throne-forged pick",power:3000,cost:7e9},{name:"The Lender's pick",power:7400,cost:6e10},
+  // rank = debts paid before it can be bought at all
+  {name:"Ashcombe's own",power:19000,cost:5e11,rank:1},
+  {name:"Gravebound pick",power:52000,cost:4.5e12,rank:2},
+  {name:"The Deep Crown",power:150000,cost:4e13,rank:3},
+  {name:"Lightbreaker",power:440000,cost:3.5e14,rank:4},
 ];
 const CREW=[
   {name:"Digger",desc:"A miner with a shovel and no complaints.",base:30,rate:0.028},
@@ -1239,6 +1261,9 @@ const CREW=[
   {name:"Gravewurm rig",desc:"Fed on tailings. Chews a shaft a night.",base:2e9,rate:19000,rank:2},
   {name:"Ashfall furnace",desc:"Smelts on site. Nothing goes back up unsold.",base:1.8e10,rate:115000,rank:2},
   {name:"The Lender's engine",desc:"It arrived crated, unsigned, and already running.",base:1.5e11,rate:720000,rank:3},
+  {name:"Tunnel choir",desc:"Three shifts that never pass each other in the dark.",base:1.3e12,rate:4.4e6,rank:3},
+  {name:"Ashcombe's surveyors",desc:"They map seams the lord already sold twice.",base:1.1e13,rate:2.8e7,rank:4},
+  {name:"The Deep Engine",desc:"Older than the mine. It was here first.",base:9e13,rate:1.8e8,rank:5},
 ];
 const LAYERS=[
   {name:"The Cutting",desc:"Loose earth and broken carts. Every debtor Lord Ashcombe throws down here starts in the Cutting.",hp:10,cost:800,gem:.006},
@@ -1262,6 +1287,7 @@ const TERMS=[
   {id:"blood",name:"Blood money",desc:"Ashcombe wants gems, not rubble. Gems pay ×10, but your pick hits half as hard.",fx:["gems ×10","pick ×0.5"]},
 ];
 const termNow=()=>TERMS.find(t=>t.id===(S.terms||"none"))||TERMS[0];
+const descendCost=()=>Math.floor((LAYERS[S.depth].cost||0)*(1-perkLv("shortcut")*.10));
 const debtCost=()=>REBIRTH_BASE*Math.pow(1.5,S.debts||0)*(termNow().id==="double"?3:1);
 const RANK_UNLOCKS=[
   {rank:1,title:"Ashcombe's terms",desc:"Choose the terms of your next run before you go back down."},
@@ -1338,26 +1364,35 @@ const PERKS=[
   {id:"shift",name:"Long shift",desc:"Workers keep working longer while you're away.",max:3,cost:l=>2+l,fx:l=>`+${l*4}h offline cap`},
   {id:"pockets",name:"Deep pockets",desc:"Stake more at the warden's wheel.",max:2,cost:l=>3+l*2,fx:l=>`stake up to ${25+l*10}% of cash`},
   {id:"headstart",name:"Head start",desc:"After paying the debt, begin the next run deeper down.",max:3,cost:l=>4+l*3,fx:l=>`start at ${LAYERS[l].name}`},
+  {id:"veins",name:"Richer veins",desc:"Everything your crew hauls up is worth more.",max:5,cost:l=>2+l,fx:l=>`+${l*8}% worker income`},
+  {id:"rhythm",name:"Miner's rhythm",desc:"Your streak climbs faster and reaches further.",max:4,cost:l=>2+l,fx:l=>`streak caps at +${50+l*15}%`},
+  {id:"foreman",name:"Foreman's whip",desc:"The hired hand swings quicker on every shift.",max:4,cost:l=>3+l*2,fx:l=>`×${(1+l*.35).toFixed(2)} auto-swing speed`},
+  {id:"union",name:"Union card",desc:"Crews hit their doubling milestones sooner.",max:3,cost:l=>3+l*2,fx:l=>`milestones ${l*15}% sooner`},
+  {id:"slayer",name:"Wyrm-slayer",desc:"You cut deeper, and the Wyrm gives you longer to do it.",max:3,cost:l=>3+l*2,fx:l=>`+${l*40}% Wyrm damage, +${l*8}s`},
+  {id:"press",name:"Oil press",desc:"Wring more lantern oil out of every debt you settle.",max:3,cost:l=>4+l*2,fx:l=>`+${l*35}% oil on payment`},
+  {id:"shortcut",name:"Known shortcut",desc:"Breaking into the next layer costs less.",max:4,cost:l=>2+l,fx:l=>`−${l*10}% descend cost`},
+  {id:"tell",name:"Warden's tell",desc:"You read the table. The house keeps a little less.",max:3,cost:l=>4+l*2,fx:l=>`+${l*4}% table return`},
 ];
 const perkLv=id=>(S.perks&&S.perks[id])||0;
 const throneMult=()=>S.throne?1.25:1;
 const EXC_GOAL=1e8,EXC_TITHE=.15;
 const EXC_TEXT=[[0,"Something is buried under the throne. Every coin the crew earns down here, 15% goes into the dig."],[.25,"The crew has cleared the rubble. The seat isn't stone. It's older than the mine."],[.5,"There are names carved beneath the seat. One of them is Ashcombe."],[.75,"The floor beneath the throne is hollow. Something answers when the picks strike."],[1,"The throne is empty, and it always was. The lord was never the one you owed. What's beneath pays better than he ever did."]];
 const SHIFTS=[{h:3,rate:3},{h:6,rate:2},{h:9,rate:1.5},{h:12,rate:1}];  // paid, available any time; longer shifts swing slower
-const AUTO_RATE=()=>(S.autoRate||3);
+const AUTO_RATE=()=>(S.autoRate||3)*(1+perkLv("foreman")*.35);
 const autoOn=()=>Date.now()<(S.autoUntil||0);
 const MILES=[20,40,60,80,100];
-const crewMult=n=>Math.pow(2,MILES.filter(m=>n>=m).length);  // ×2 at 20, 40, 60, 80, 100 → up to ×32
-const nextMile=n=>MILES.find(m=>n<m);
+const mileAt=m=>Math.max(5,Math.round(m*(1-perkLv("union")*.15)));  // Union card pulls every milestone in
+const crewMult=n=>Math.pow(2,MILES.filter(m=>n>=mileAt(m)).length);   // ×2 at each → up to ×32
+const nextMile=n=>{const m=MILES.map(mileAt).find(x=>n<x);return m};
 const crewTotal=i=>CREW[i].rate*(S.crew[i]||0)*crewMult(S.crew[i]||0)*depthMult()*buffMult()*(termNow().id==="quiet"?1.5:1);
 const buffOn=()=>Date.now()<(S.buffUntil||0);
 const buffMult=()=>buffOn()?2:1;
 const partyPickMult=()=>1+((PARTY&&PARTY.pick)||0)*.1;
 const partyShiftMult=()=>1+((PARTY&&PARTY.shift)||0)*.25;
 const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1)*(termNow().id==="blood"?.5:1)*partyPickMult();
-const cps=()=>CREW.reduce((a,c,i)=>a+c.rate*(S.crew[i]||0)*crewMult(S.crew[i]||0),0)*depthMult()*buffMult()*(termNow().id==="quiet"?1.5:1);
+const cps=()=>CREW.reduce((a,c,i)=>a+c.rate*(S.crew[i]||0)*crewMult(S.crew[i]||0),0)*depthMult()*buffMult()*(1+perkLv("veins")*.08)*(termNow().id==="quiet"?1.5:1);
 const crewCost=i=>Math.floor(CREW[i].base*Math.pow(1.2,S.crew[i])*(1-perkLv("labor")*.06));
-const oilOnSeal=()=>Math.floor(Math.sqrt(S.cash/debtCost()*10))+(termNow().id==="double"?2:0);
+const oilOnSeal=()=>Math.floor(Math.sqrt(S.cash/debtCost()*10)*(1+perkLv("press")*.35))+(termNow().id==="double"?2:0);
 let earn=function(n){S.cash+=n;S.lifetime+=n};
 
 let USER=null;
@@ -1855,11 +1890,16 @@ function render(){
   $("depthNow").textContent="Depth "+(S.depth+1);
   if(!next){$("depthNext").textContent="Bottom";dBtn.disabled=true;dBtn.textContent="Bottom reached";$("progFill").style.width="100%";$("progText").textContent="No map goes further";$("progPct").textContent="";$("etaText").textContent="Keep digging for the board"}
   else if(L.rank&&(S.debts||0)<L.rank){$("depthNext").textContent=next.name;dBtn.disabled=true;dBtn.textContent=`Pay the debt ×${L.rank} to descend`;$("progFill").style.width="0%";$("progText").textContent="Sealed";$("progPct").textContent="";$("etaText").textContent=`Opens at debt rank ${L.rank}`}
-  else{$("depthNext").textContent=next.name;dBtn.disabled=S.cash<L.cost;dBtn.textContent=S.cash<L.cost?"Need "+fmt(L.cost-S.cash)+" more":"Descend ↑";
-    const pct=Math.min(100,S.cash/L.cost*100);$("progFill").style.width=pct+"%";$("progText").textContent=fmt(S.cash)+" / "+fmt(L.cost);$("progPct").textContent=Math.floor(pct)+"% of the way";$("etaText").textContent="Est. descend: "+eta(L.cost)}
+  else{const dc=descendCost();$("depthNext").textContent=next.name;dBtn.disabled=S.cash<dc;dBtn.textContent=S.cash<dc?"Need "+fmt(dc-S.cash)+" more":"Descend ↑";
+    const pct=Math.min(100,S.cash/dc*100);$("progFill").style.width=pct+"%";$("progText").textContent=fmt(S.cash)+" / "+fmt(dc);$("progPct").textContent=Math.floor(pct)+"% of the way";$("etaText").textContent="Est. descend: "+eta(dc)}
   const np=PICKS[S.pick+1];
-  if(np){$("eqPickName").textContent=np.name;$("eqPickInfo").textContent="+"+fmt((np.power-PICKS[S.pick].power)*depthMult())+"/swing";$("eqPickBtn").textContent=fmt(np.cost);$("eqPickBtn").disabled=S.cash<np.cost}
+  if(np){const plk=np.rank&&(S.debts||0)<np.rank;
+    $("eqPickName").textContent=np.name;
+    $("eqPickInfo").textContent=plk?`Pay the debt ${np.rank} time${np.rank>1?"s":""} to lift it`:"+"+fmt((np.power-PICKS[S.pick].power)*depthMult())+"/swing";
+    $("eqPickBtn").textContent=plk?"Debt ×"+np.rank:fmt(np.cost);
+    $("eqPickBtn").disabled=plk||S.cash<np.cost}
   else{$("eqPickName").textContent=PICKS[S.pick].name;$("eqPickInfo").textContent="Best pickaxe";$("eqPickBtn").textContent="Maxed";$("eqPickBtn").disabled=true}
+  hintRender();
   eqCrewRender();
   logRender();
   fitRails();
@@ -1895,7 +1935,9 @@ function render(){
   if($("sealBtn")){$("sealBtn").disabled=S.cash<debtCost();$("sealBtn").textContent=S.cash<debtCost()?"Need "+fmt(debtCost()-S.cash)+" more":"Pay & go back down";
   $("sealInfo").textContent=S.cash<debtCost()?`The lord wants ${fmt(debtCost())} · ${S.oil} oil held`:`+${oilOnSeal()} lantern oil if you pay now`;}
   PICKS.forEach((p,i)=>{if(!i)return;const row=$("pick"+i),b=row.querySelector("button");
+    const lk=p.rank&&(S.debts||0)<p.rank;
     if(i<=S.pick){row.classList.add("locked");b.disabled=true;b.textContent="Owned"}
+    else if(lk){row.classList.add("locked");b.disabled=true;b.textContent="Debt ×"+p.rank}
     else if(i>S.pick+1){row.classList.add("locked");b.disabled=true;b.textContent=fmt(p.cost)}
     else{row.classList.remove("locked");b.disabled=S.cash<p.cost;b.textContent=fmt(p.cost)}});
   CREW.forEach((c,i)=>{const row=$("crew"+i);row.style.display=c.rank&&(S.debts||0)<c.rank?"none":"";const b=row.querySelector("button"),cost=crewCost(i);
@@ -1917,15 +1959,16 @@ let betReady=0,bj=null;
 let streak=0,lastSwing=0,combo=0,lastManual=0,lastNudge=0,lastQNudge=Date.now()+120000,lastPNudge=Date.now()+180000;
 // ---- the Deep Wyrm (random boss) ----
 let boss=null,bossCooldown=Date.now()+3*60*1000,wasBuffed=false;
+const tellMult=()=>1+perkLv("tell")*.04;
 const BOSS_CHANCE=1/6000,BOSS_TIME=30000,BUFF_MS=5*60*1000;
-function spawnBoss(){const base=clickPower()/buffMult();const max=Math.max(base*40,base*25+cps()/buffMult()*45);boss={hp:max,max,until:Date.now()+BOSS_TIME};
+function spawnBoss(){const base=clickPower()/buffMult();const max=Math.max(base*40,base*25+cps()/buffMult()*45);boss={hp:max,max,until:Date.now()+BOSS_TIME+perkLv("slayer")*8000};
   $("bossbar").classList.add("on");toast("Something big is coming up the shaft. Hit it before it slips away!");drawScene();bossRender()}
 function bossRender(){if(!boss)return;$("bossHp").style.width=Math.max(0,boss.hp/boss.max*100)+"%";$("bossTimer").textContent=Math.max(0,Math.ceil((boss.until-Date.now())/1000))+"s"}
 function bossEnd(win){$("bossbar").classList.remove("on");boss=null;bossCooldown=Date.now()+8*60*1000;
   if(win){S.buffUntil=Date.now()+BUFF_MS;S.bosses=(S.bosses||0)+1;feedPost("wyrm",S.bosses);toast("The Deep Wyrm is slain. It drops the Sunforged pick: everything ×2 for 5 minutes!");confetti(60);const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake")}
   else toast("The Wyrm slipped back into the dark. It'll be back.");
   drawScene();render();save()}
-const streakMult=()=>1+Math.min(50,Math.floor(streak/10)*5)/100;
+const streakMult=()=>{const lv=perkLv("rhythm"),step=10-lv,cap=50+lv*15;return 1+Math.min(cap,Math.floor(streak/Math.max(4,step))*5)/100};
 const comboMult=()=>autoOn()&&Date.now()-lastManual<2000?1+Math.min(100,Math.floor(combo/5)*10)/100:1;
 const stakeMax=()=>25+perkLv("pockets")*10;
 const stake=()=>{const cash=Math.floor(S.cash);if(cash<TABLE_MIN)return 0;
@@ -2028,7 +2071,7 @@ function spin(){
   setTimeout(()=>{
     spinning=false;betReady=Date.now()+TABLE_CD;document.querySelector(".wheelwrap").classList.remove("spinning");
     $("wCenter").textContent=win.label;
-    const back=Math.floor(st*win.m);
+    const back=Math.floor(st*win.m*tellMult());
     if(back>0){S.cash+=back;S.wheelWins=(S.wheelWins||0)+1;if(win.m>=4)S.bigSpins=(S.bigSpins||0)+1;
       const p=back-st;feedWin(p,st);
       $("wRes").textContent=p>0?`${win.label} — you win ${fmt(p)}.`:`${win.label} — ${fmt(back)} back.`;
@@ -2076,7 +2119,7 @@ function slotSettle(res,st){
   else if(a.k===b.k){mult=SLOT_PAIR;label=`Two ${a.n.toLowerCase()}`;hits=[0,1]}
   else if(b.k===c.k){mult=SLOT_PAIR;label=`Two ${b.n.toLowerCase()}`;hits=[1,2]}
   else if(a.k===c.k){mult=SLOT_PAIR;label=`Two ${a.n.toLowerCase()}`;hits=[0,2]}
-  const back=Math.floor(st*mult);
+  const back=Math.floor(st*mult*tellMult());
   if(back>0){
     S.cash+=back;S.slotWins=(S.slotWins||0)+1;feedWin(back-st,st);
     hits.forEach(i=>$("r"+i).classList.add("hit"));
@@ -2139,10 +2182,10 @@ function bjSettle(){
   let back=0,msg,cls;
   if(pv>21){msg=`Bust at ${pv}. The warden keeps ${fmt(bet)}.`;cls="lose"}
   else if(pbj&&dbj){back=bet;msg="Both blackjack. Push — stake returned.";cls=""}
-  else if(pbj){back=Math.floor(bet*2.5);msg=`Blackjack! You win ${fmt(back-bet)}.`;cls="win jackpot"}
+  else if(pbj){back=Math.floor(bet*2.5*tellMult());msg=`Blackjack! You win ${fmt(back-bet)}.`;cls="win jackpot"}
   else if(dbj){msg=`The warden had blackjack. He keeps ${fmt(bet)}.`;cls="lose"}
-  else if(dv>21){back=bet*2;msg=`The warden busts at ${dv}. You win ${fmt(bet)}.`;cls="win"}
-  else if(pv>dv){back=bet*2;msg=`${pv} beats ${dv}. You win ${fmt(bet)}.`;cls="win"}
+  else if(dv>21){back=Math.floor(bet*2*tellMult());msg=`The warden busts at ${dv}. You win ${fmt(bet)}.`;cls="win"}
+  else if(pv>dv){back=Math.floor(bet*2*tellMult());msg=`${pv} beats ${dv}. You win ${fmt(bet)}.`;cls="win"}
   else if(pv<dv){msg=`${dv} beats ${pv}. The warden keeps ${fmt(bet)}.`;cls="lose"}
   else {back=bet;msg=`Push at ${pv}. Stake returned.`;cls=""}
   if(back>0)S.cash+=back;
@@ -2180,8 +2223,8 @@ function mine(e,auto){
   const me=document.querySelector(".me .arm");if(me){me.style.transform="rotate(-55deg)";setTimeout(()=>me.style.transform="",90)}
   const now=Date.now();streak=now-lastSwing<1500?streak+1:1;lastSwing=now;if(!auto&&streak>(S.bestStreak||0))S.bestStreak=streak;
   if(!auto&&autoOn()){combo=now-lastManual<1200?combo+1:1;lastManual=now}
-  if(boss){const dmg=clickPower()*streakMult()*(auto?1:comboMult());boss.hp-=dmg;S.swings++;partyGainXp();if(!auto)pop("-"+fmt(dmg).slice(1),e,"hit");const w=document.querySelector(".wyrm");if(w){w.classList.remove("hit");void w.offsetWidth;w.classList.add("hit")}bossRender();if(boss.hp<=0)bossEnd(true);render();return}
-  const p=clickPower()*streakMult()*(auto?1:comboMult());earn(p);S.swings++;partyGainXp();S.rockHp-=p;if(!auto){pop("+"+fmt(p),e,comboMult()>1.4?"hot":"");chips()}
+  if(boss){const dmg=clickPower()*streakMult()*(auto?1:comboMult())*(1+perkLv("slayer")*.4);boss.hp-=dmg;S.swings++;partyGainXp();if(!auto)pop("-"+fmt(dmg).slice(1),e,"hit");const w=document.querySelector(".wyrm");if(w){w.classList.remove("hit");void w.offsetWidth;w.classList.add("hit")}bossRender();if(boss.hp<=0)bossEnd(true);render();return}
+  const p=clickPower()*streakMult()*(auto?1:comboMult());earn(p);S.swings++;if(!auto)lastTap=Date.now();partyGainXp();S.rockHp-=p;if(!auto){pop("+"+fmt(p),e,comboMult()>1.4?"hot":"");chips()}
   const st=$("streak");st.classList.toggle("on",streak>=5||comboMult()>1);
   {const c=comboMult();
     $("streakN").innerHTML=c>1?`×${(streakMult()*c).toFixed(2)}<em>overtime ×${c.toFixed(1)}</em>`:"×"+streakMult().toFixed(2)+(streakMult()>=1.5?" MAX":"")+(autoOn()?" auto":"");
@@ -2194,7 +2237,8 @@ function mine(e,auto){
   if(S.rockHp<=0){const bonus=clickPower()*3+cps()*2;earn(bonus);S.rockHp=LAYERS[S.depth].hp;S.clears=(S.clears||0)+1;flash();const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake");toast(`Rock cleared! Bonus ${fmt(bonus)}.`)}
   render();
 }
-function buyPick(i){if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cost;S.pick=i;drawScene();render();save();toast(`You picked up the ${PICKS[i].name}.`)}}
+function buyPick(i){const pr=PICKS[i];if(pr.rank&&(S.debts||0)<pr.rank){toast(`Only miners who have paid the debt ${pr.rank} time${pr.rank>1?"s":""} may lift the ${pr.name}.`);return}
+  if(S.cash>=PICKS[i].cost&&i===S.pick+1){S.cash-=PICKS[i].cost;S.pick=i;drawScene();render();save();toast(`You picked up the ${PICKS[i].name}.`)}}
 // The scene used to get whatever was left after the title, story card and feed, so on a
 // short window (a 1366x768 laptop) it collapsed to a sliver while the feed kept its full
 // height. Priority is inverted now: the scene claims its share first, the feed absorbs
@@ -2220,6 +2264,21 @@ function fitPage(){
   hero.style.width=Math.round(rock*340/190)+"px";
   pit.style.height=Math.min(stage.scrollHeight,avail)+"px";
   railH=-1;
+}
+// Shows for a brand-new miner and fades for good once they've got the idea. It also
+// comes back if an early player stalls, since that's usually someone who hasn't
+// realised the rock is the button.
+let lastTap=0;
+function hintRender(){
+  const h=$("tapHint");if(!h)return;
+  const sw=S.swings||0;
+  const idle=Date.now()-lastTap>6000;
+  const show=sw<8||(sw<40&&idle&&!autoOn());
+  h.classList.toggle("off",!show);
+  if(show){
+    const t=matchMedia("(hover:none)").matches?"Touch anywhere to mine":"Click anywhere to mine";
+    if($("tapHintText").textContent!==t)$("tapHintText").textContent=t;
+  }
 }
 let eqSig="",railH=-1,eqPg=0;
 const EQ_PER=6;
@@ -2263,7 +2322,7 @@ function fitRails(){
 addEventListener("resize",()=>{fitPage();fitRails()});
 addEventListener("load",()=>{fitPage();fitRails()});
 function buyCrew(i){const c=crewCost(i);if(S.cash>=c){S.cash-=c;S.crew[i]++;if(MILES.includes(S.crew[i])){toast(`${CREW[i].name}s hit ${S.crew[i]}: they now work at ×${crewMult(S.crew[i])} power.`);confetti(30)}drawScene();render();save()}}
-function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}if(S.cash>=L.cost&&LAYERS[S.depth+1]){S.cash-=L.cost;S.depth++;const rec=S.depth>(S.deepest||0);S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);if(rec)feedPost("depth",S.depth+1);confetti(40);drawScene();render();save()}}
+function descend(){const L=LAYERS[S.depth];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}const dc=descendCost();if(S.cash>=dc&&LAYERS[S.depth+1]){S.cash-=dc;S.depth++;const rec=S.depth>(S.deepest||0);S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);if(rec)feedPost("depth",S.depth+1);confetti(40);drawScene();render();save()}}
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
@@ -2357,14 +2416,24 @@ $("rebirth").onclick=rebirth;
 $("reset").onclick=async()=>{if(await ask("Start over?","Everything — cash, workers, lantern oil, perks, trophies and stories — will be lost. This can't be undone.","Reset everything"))
   {S={...fresh(),oil:0,lifetime:0,profile:S.profile};local.del();closeModal();drawScene();render();save()}};
 
-const SUNFORGED={h:"#ffd27a",e:"#fff3cf",s:"#c07f14"};
-const PICK_LOOK=[null,{h:"#8a5a2b",e:"#b0834f",s:"#5a3818"},{h:"#8f8f98",e:"#b6b6bf",s:"#5d5d66"},{h:"#9aa0a6",e:"#d3d8dd",s:"#5f676e"},{h:"#8fb3d9",e:"#cfe3f7",s:"#4f7fb0"},{h:"#f0a04a",e:"#ffd6a3",s:"#a85e1c"},{h:"#6fd3c4",e:"#d8fff8",s:"#2c8a7c"},{h:"#c77dff",e:"#ecd8ff",s:"#6a3aa8"}];
+const SUNFORGED={h:"#ffd27a",e:"#fff3cf",s:"#c07f14",g:"#ffd98a"};
+const PICK_LOOK=[null,{h:"#8a5a2b",e:"#b0834f",s:"#5a3818"},{h:"#8f8f98",e:"#b6b6bf",s:"#5d5d66"},{h:"#9aa0a6",e:"#d3d8dd",s:"#5f676e"},{h:"#8fb3d9",e:"#cfe3f7",s:"#4f7fb0"},{h:"#f0a04a",e:"#ffd6a3",s:"#a85e1c"},{h:"#6fd3c4",e:"#d8fff8",s:"#2c8a7c"},{h:"#c77dff",e:"#ecd8ff",s:"#6a3aa8"},
+  // g = glow colour. Only the four deep-tier picks carry one, so the glow reads as "late game".
+  {h:"#d8dcc9",e:"#f6f8ec",s:"#8d9683",g:"#7ff0d8"},
+  {h:"#3d2b60",e:"#b79cff",s:"#1a1130",g:"#a97dff"},
+  {h:"#e8b64a",e:"#fff2c6",s:"#9a6810",g:"#ffcf5e"},
+  {h:"#7d1f2c",e:"#ff5f70",s:"#360c13",g:"#ff4257"},
+  {h:"#1f3a2b",e:"#5ee08f",s:"#0f2018",g:"#4ce08a"},
+  {h:"#8e9bb0",e:"#e8f3ff",s:"#4d5a6e",g:"#bfe9ff"},
+  {h:"#5c1f52",e:"#ff9ae8",s:"#2c0d27",g:"#ff6fd8"},
+  {h:"#f4efdf",e:"#ffffff",s:"#c9bb90",g:"#fff3b0"}];
 function shade(hex,amt){const n=parseInt(hex.slice(1),16);let r=(n>>16)&255,g=(n>>8)&255,b=n&255;
   r=Math.max(0,Math.min(255,r+amt));g=Math.max(0,Math.min(255,g+amt));b=Math.max(0,Math.min(255,b+amt));
   return "#"+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
 function pickHead(pk){if(!pk)return `<rect x="9" y="22" width="4.5" height="4" rx="1.4" fill="#d9a074"/>`;
   const e=pk.e,h=pk.h,s=pk.s||pk.e;
-  return `<g transform="translate(11,24) rotate(38)">
+  const glow=pk.g?`<g class="pkGlow" fill="${pk.g}"><ellipse cx="0" cy="-25.4" rx="22" ry="11" opacity=".10"/><ellipse cx="0" cy="-25.4" rx="15" ry="7.5" opacity=".16"/><ellipse cx="0" cy="-25.4" rx="9" ry="4.5" opacity=".22"/></g>`:"";
+  return `<g transform="translate(11,24) rotate(38)">${glow}
   <rect x="-1.2" y="-25" width="3.4" height="27" rx="1.2" fill="#5a3f26"/>
   <rect x="-1.2" y="-25" width="1.2" height="27" fill="#8a6a4a"/>
   <rect x="-1.2" y="-8" width="3.4" height="3" fill="#3a2716" opacity=".7"/>
@@ -2472,6 +2541,54 @@ function blast(x,y){return `<g transform="translate(${x},${y})">
  <path d="M26.6 -9 h2.4 v11 h-2.4z" fill="#a2a2ac"/>
  <path d="M22.6 -11.6 h11 v3 h-11z" fill="#8a929a"/><path d="M22.6 -11.6 h11 v1 h-11z" fill="#c2cad2"/>
  <path d="M19 8 q2.4 -1.6 3 1 t3 .4" fill="none" stroke="#2c2c31" stroke-width="1.6"/></g>`}
+// Wall-mounted props for the debt-rank workers. Kept to roughly 34x24 units so they sit
+// on the wall bands either side of the tunnel without crowding the floor crew.
+function echoChoir(x,y){return `<g transform="translate(${x},${y})">
+ <g class="pkGlow" fill="#7ff0d8"><ellipse cx="15" cy="12" rx="20" ry="12" opacity=".10"/><ellipse cx="15" cy="12" rx="12" ry="8" opacity=".14"/></g>
+ ${[0,11,22].map((o,i)=>`<g transform="translate(${o},0)"><path d="M2 6 q3 -5 6 0 v12 h-6z" fill="#1d2b30"/><path d="M2 6 q3 -5 6 0 v2 h-6z" fill="#2c4149"/>
+  <ellipse cx="5" cy="9.5" rx="2" ry="2.4" fill="#7ff0d8" opacity=".${5+i}"/></g>`).join("")}
+ <path d="M0 18 h34 v2 h-34z" fill="#23232a"/></g>`}
+function gravewurmRig(x,y){return `<g transform="translate(${x},${y})">
+ <g class="pkGlow" fill="#5ee08f"><ellipse cx="17" cy="12" rx="19" ry="11" opacity=".10"/></g>
+ <path d="M0 6 h26 v14 h-26z" fill="#33403a"/><path d="M0 6 h26 v2.4 h-26z" fill="#4c5f55"/>
+ <path d="M0 6 h3.6 v14 h-3.6z" fill="#425249"/><path d="M20 6 h6 v14 h-6z" fill="#232c28"/>
+ <path d="M4 10 h9 v6 h-9z" fill="#0f1a15"/><path d="M5.4 11.4 h2.4 v3.2 h-2.4z" fill="#5ee08f" opacity=".75"/>
+ <path d="M24 9 q7 -1 9 4 q-4 4 -9 1z" fill="#2b3d3d"/><rect x="30" y="11" width="1.6" height="2" fill="#eafff4"/>
+ <path d="M-2 20 h30 v3 h-30z" fill="#1b211e"/></g>`}
+function furnace(x,y){return `<g transform="translate(${x},${y})">
+ <g class="pkGlow" fill="#ff9a3c"><ellipse cx="14" cy="14" rx="18" ry="11" opacity=".12"/></g>
+ <path d="M2 6 h22 v14 h-22z" fill="#4a3a30"/><path d="M2 6 h22 v2.4 h-22z" fill="#6b5648"/>
+ <path d="M2 6 h3.4 v14 h-3.4z" fill="#5c483c"/><path d="M19 6 h5 v14 h-5z" fill="#332721"/>
+ <path d="M7 11 h10 v7 h-10z" fill="#1a0e07"/><path d="M8 12.4 h8 v5 h-8z" fill="#ff8a2b"/><path d="M9.6 13.6 h4.6 v3 h-4.6z" fill="#ffd27a"/>
+ <path d="M20 0 h5 v6 h-5z" fill="#3b2f27"/><path d="M20 0 h5 v1.4 h-5z" fill="#584639"/>
+ <g class="pkGlow" fill="#8a7a6c"><ellipse cx="22.5" cy="-3" rx="4" ry="3" opacity=".5"/><ellipse cx="24" cy="-8" rx="3" ry="2.4" opacity=".3"/></g>
+ <path d="M0 20 h26 v3 h-26z" fill="#1e1815"/></g>`}
+function lenderEngine(x,y){return `<g transform="translate(${x},${y})">
+ <g class="pkGlow" fill="#ff4257"><ellipse cx="16" cy="12" rx="20" ry="12" opacity=".11"/></g>
+ <path d="M1 5 h30 v16 h-30z" fill="#2b2226"/><path d="M1 5 h30 v2.4 h-30z" fill="#463539"/>
+ <path d="M1 5 h4 v16 h-4z" fill="#3a2c30"/><path d="M25 5 h6 v16 h-6z" fill="#1d1619"/>
+ <path d="M5.6 5 h1.6 v16 h-1.6z" fill="#5a4348"/><path d="M24 5 h1.6 v16 h-1.6z" fill="#5a4348"/>
+ <path d="M10 9 h12 v8 h-12z" fill="#140d10"/><ellipse cx="16" cy="13" rx="3.2" ry="3.2" fill="#ff4257"/><ellipse cx="16" cy="13" rx="1.2" ry="1.2" fill="#ffd8dc"/>
+ <path d="M0 21 h32 v3 h-32z" fill="#160f11"/></g>`}
+function tunnelChoir(x,y){return `<g transform="translate(${x},${y})">
+ <path d="M0 2 h32 v2.4 h-32z" fill="#5a3f26"/><path d="M0 2 h32 v.8 h-32z" fill="#8a6a4a"/>
+ ${[4,15,26].map((o,i)=>`<g class="lamp" style="animation-delay:${i*.5}s"><path d="M${o+1.4} 4.4 h1 v3 h-1z" fill="#3a2716"/>
+  <path d="M${o} 7 h3.8 v5 h-3.8z" fill="#d8dde2"/><path d="M${o+.7} 8 h2.4 v3.2 h-2.4z" fill="#fff4c2"/>
+  <ellipse cx="${o+1.9}" cy="9.6" rx="7" ry="6" fill="#ffcf7a" opacity=".13"/></g>`).join("")}</g>`}
+function surveyors(x,y){return `<g transform="translate(${x},${y})">
+ <g class="pkGlow" fill="#8fc9ff"><ellipse cx="15" cy="12" rx="17" ry="10" opacity=".10"/></g>
+ <path d="M8 10 L4 22 h1.8 L9.4 12z" fill="#4c4c55"/><path d="M14 10 L18 22 h1.8 L15.4 12z" fill="#3b3b43"/><path d="M11 10 h1.6 v12 h-1.6z" fill="#44444d"/>
+ <path d="M6 5 h12 v5.4 h-12z" fill="#5f5f6a"/><path d="M6 5 h12 v1.4 h-12z" fill="#7d7d88"/>
+ <path d="M17 6.4 h5 v2.6 h-5z" fill="#2b2b31"/><ellipse cx="22.4" cy="7.7" rx="1.5" ry="1.5" fill="#8fc9ff" opacity=".8"/>
+ <path d="M24 14 h8 v8 h-8z" fill="#5a3f26"/><path d="M24 14 h8 v1.6 h-8z" fill="#8a6a4a"/><path d="M25.4 16.6 h5 v.9 h-5z" fill="#d8cdb8"/><path d="M25.4 18.4 h3.4 v.9 h-3.4z" fill="#d8cdb8"/></g>`}
+function deepEngine(x,y){return `<g transform="translate(${x},${y})">
+ <g class="pkGlow" fill="#5ec9b6"><ellipse cx="27" cy="14" rx="30" ry="16" opacity=".10"/><ellipse cx="27" cy="14" rx="18" ry="11" opacity=".12"/></g>
+ <path d="M2 4 h50 v22 h-50z" fill="#26332f"/><path d="M2 4 h50 v3 h-50z" fill="#3d514a"/>
+ <path d="M2 4 h5 v22 h-5z" fill="#324239"/><path d="M45 4 h7 v22 h-7z" fill="#1a221f"/>
+ <path d="M9 9 h14 v12 h-14z" fill="#0d1412"/><path d="M10.6 10.6 h3 v9 h-3z" fill="#5ec9b6" opacity=".7"/><path d="M15 10.6 h3 v9 h-3z" fill="#5ec9b6" opacity=".45"/>
+ <g class="wh" style="transform-origin:33px 15px"><circle cx="33" cy="15" r="6.4" fill="#1f2b27"/><circle cx="33" cy="15" r="2.2" fill="#4a6159"/>
+  <path d="M32.2 8.2 h1.6 v13.6 h-1.6z" fill="#3d514a"/><path d="M26.2 14.2 h13.6 v1.6 h-13.6z" fill="#3d514a"/></g>
+ <path d="M0 26 h54 v3.4 h-54z" fill="#141a18"/></g>`}
 function bore(x,y){return `<g transform="translate(${x},${y})">
  <ellipse cx="20" cy="23" rx="20" ry="2.6" fill="#000" opacity=".45"/>
  <path d="M0 0 h34 v18 h-34z" fill="#4c4c55"/><path d="M0 0 h34 v2.6 h-34z" fill="#75757f"/>
@@ -2607,6 +2724,14 @@ function drawScene(){
   if(S.crew[3]){g+=blast(272,floor-18)+label(288,floor+12,"×"+S.crew[3])}
   if(S.crew[5]){g+=harvester(306,floor-20)+label(321,floor+12,"×"+S.crew[5])}
   if(S.crew[6]){g+=`<g transform="translate(88,${floor-28}) scale(.45)">${wyrm(0,0)}</g>`+miner(122,floor-32,"crewman","#2ee6d6","#1a1614",null)+label(118,floor+12,"×"+S.crew[6])}
+  // rank workers live on the wall bands either side of the tunnel (tunnel spans x~100-200)
+  if(S.crew[7])g+=echoChoir(6,22);
+  if(S.crew[11])g+=tunnelChoir(48,20);
+  if(S.crew[12])g+=surveyors(56,64);
+  if(S.crew[8])g+=gravewurmRig(210,20);
+  if(S.crew[9])g+=furnace(256,24);
+  if(S.crew[10])g+=lenderEngine(298,20);
+  if(S.crew[13])g+=deepEngine(240,66);
   // rails, bottom right
   if(S.crew[1]){g+=`<g class="cartroll">${cart(206,floor+12)}</g>`+label(196,floor+22,"×"+S.crew[1])}
   g+=sceneOverlay(pal,floor);$("scene").innerHTML=g;drawFace();
@@ -2632,3 +2757,4 @@ setInterval(()=>{const c=cps()/10;earn(c);S.crewEarned=(S.crewEarned||0)+c;
 load();
 </script>
 </body>
+</html>
