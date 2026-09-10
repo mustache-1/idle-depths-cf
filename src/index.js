@@ -80,6 +80,21 @@ async function handle(request, env) {
       return json(data);
     }
 
+    // ---- global feed (public read) ----
+    // One rolling KV key holding the last FEED_MAX entries. Read-modify-write, so
+    // two events landing in the same instant can drop one — acceptable for a feed,
+    // and it keeps this to a single KV write per milestone instead of one key each.
+    const FEED_MAX = 30;
+    const FEED_COOLDOWN = 30000;   // per-player, enforced against the feed itself (no extra KV read)
+    const readFeed = async () => {
+      const v = await env.SAVES.get("feed", { type: "json" });
+      return Array.isArray(v) ? v : [];
+    };
+
+    if (p === "/api/feed" && request.method === "GET") {
+      return json({ feed: await readFeed() });
+    }
+
     // ---- everything below needs a session ----
     const s = await readSession(request, env.SESSION_SECRET);
 
@@ -164,6 +179,27 @@ async function handle(request, env) {
       if (id === 0) crew.pick += 1; else crew.shift += 1;
       await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
       return json(crew);
+    }
+
+    // The client sends a kind and a number, never a message. The text is built
+    // here so a modified client can't post arbitrary strings into a public feed.
+    if (p === "/api/feed") {
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      const body = await request.json().catch(() => null);
+      const kind = body && body.kind;
+      const n = Math.floor(Number(body && body.n) || 0);
+      if (!["debt", "depth", "wyrm", "win"].includes(kind)) return json({ error: "bad kind" }, 400);
+      if (n < 0 || n > 1e15) return json({ error: "bad n" }, 400);
+
+      const feed = await readFeed();
+      const mine = feed.find(e => e.id === s.id);
+      if (mine && Date.now() - mine.t < FEED_COOLDOWN) return json({ ok: true, skipped: "cooldown" });
+
+      const board = (await env.SAVES.get(`board:${s.id}`, { type: "json" })) || {};
+      const name = board.name || s.name || "A miner";
+      feed.unshift({ t: Date.now(), id: s.id, name: String(name).slice(0, 24), kind, n });
+      await env.SAVES.put("feed", JSON.stringify(feed.slice(0, FEED_MAX)));
+      return json({ ok: true });
     }
 
     if (p === "/api/save") {
