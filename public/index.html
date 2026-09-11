@@ -2887,10 +2887,27 @@ function renderDig(){
     (everyone?`<p class="seamnote"><b>Every hand on it this week.</b> Clear it and the week counts double toward the crew's standing.</p>`
       :`<p class="seamnote">A week where all of you put something in counts double toward the crew's standing.</p>`);
 }
-setInterval(async()=>{if(!PARTY||partyXpBuf<=0)return;const amt=partyXpBuf;partyXpBuf=0;
-  try{const r=await fetch("/api/crew/xp",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({amount:amt})});
-    const d=await r.json();if(!d.error){PARTY=d;render()}
-  }catch(e){partyXpBuf+=amt}},15000);
+// Crew sync. This used to bail whenever there was no xp to send, and xp only builds
+// while you are swinging - so anyone sat idle (which is most of the time, and exactly
+// what you are doing while waiting for a friend to accept a code) never spoke to the
+// server at all. Joins, leaves, renames and promotions only appeared after a reload.
+// Now a quiet tick still refreshes the roster.
+setInterval(async()=>{
+  if(!PARTY)return;
+  if(partyXpBuf>0){
+    const amt=partyXpBuf;partyXpBuf=0;
+    try{const r=await fetch("/api/crew/xp",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({amount:amt})});
+      const d=await r.json();if(!d.error){PARTY=d;render()}
+    }catch(e){partyXpBuf+=amt}
+    return;
+  }
+  if(document.hidden)return;            // no point polling a tab nobody is looking at
+  try{const r=await fetch("/api/crew");const d=await r.json().catch(()=>null);
+    if(r.ok&&d&&!d.error){PARTY=d;renderParty()}
+  }catch(e){}
+},15000);
+// A leader who tabs away while someone joins should see them on the way back in.
+addEventListener("visibilitychange",()=>{if(!document.hidden&&USER&&PARTY)loadParty()});
 $("ptyLeave").onclick=partyLeave;$("gUp0Btn").onclick=()=>partyUpgrade(0);$("gUp1Btn").onclick=()=>partyUpgrade(1);
 function renderParty(){
   const gate=$("ptyGate"),body=$("ptyBody"),mg=$("mgCard");
@@ -2914,8 +2931,11 @@ function renderParty(){
   $("gangRoster").innerHTML=mem.map(m=>{
     const me=USER&&m.id===USER.id,lead=m.id===PARTY.owner;
     const seen=(PARTY.seen&&PARTY.seen[m.id])||0;
-    return `<div class="rmem"><div class="av">${esc(m.name.slice(0,2).toUpperCase())}</div>
-      <div class="who"><div>${esc(m.name)}${me?" (you)":""}</div>
+    // A member with no name would throw on .slice and take the whole render loop down
+    // with it - the roster, the mine, everything - so never trust it to be there.
+    const nm=(m.name||"").trim()||"Miner";
+    return `<div class="rmem"><div class="av">${esc(nm.slice(0,2).toUpperCase())}</div>
+      <div class="who"><div>${esc(nm)}${me?" (you)":""}</div>
       <div>${lead?"Lead":"Crew"}${seen?" · "+agoShort(seen):""}</div></div>
       ${iLead&&!me?`<div class="acts"><button data-prom="${m.id}" title="Hand the crew over">Make lead</button><button class="danger" data-kick="${m.id}">Remove</button></div>`:""}</div>`}).join("")
     +Array.from({length:4-mem.length}).map(()=>`<div style="border:1px dashed var(--line2);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px;opacity:.7"><div style="width:34px;height:34px;border-radius:50%;border:1px dashed var(--line2);display:flex;align-items:center;justify-content:center;color:var(--mute)">+</div><div style="font-size:12px;color:var(--mute)">Open slot</div></div>`).join("");
@@ -4045,6 +4065,86 @@ function wyrm(x,y){return `<g transform="translate(${x},${y})"><g class="wyrm">
   <rect x="2" y="26" width="6" height="3" fill="#5ec9b6" opacity=".6"/><rect x="20" y="18" width="6" height="3" fill="#5ec9b6" opacity=".6"/><rect x="34" y="12" width="5" height="3" fill="#5ec9b6" opacity=".6"/>
   <rect x="8" y="34" width="6" height="14" fill="#1a2424"/><rect x="28" y="34" width="6" height="14" fill="#1a2424"/><rect x="46" y="30" width="6" height="18" fill="#1a2424"/>
   <circle cx="54" cy="10" r="30" fill="#5ec9b6" opacity=".06"/></g></g>`}
+// ---- wardens ----
+// Five forms rather than twenty-nine hand-drawn ones. Each takes its colours from the
+// layer's own palette, so the Cinderwake warden and the Deadlight warden are the same
+// silhouette in genuinely different skins, and the band changes every six floors so you
+// never fight the same shape twice in a row on the way down.
+//
+// Same chunky rect vocabulary as the wyrm, same ~74x48 footprint, and the group keeps
+// class="wyrm" so the existing lurk and flinch animations and the .hit flash all apply
+// without touching the CSS or the hit handler.
+const WARDEN_FORMS=["hand","lamp","wheel","ledger","door"];
+const wardenForm=d=>WARDEN_FORMS[Math.min(WARDEN_FORMS.length-1,Math.floor((d-1)/6))];
+function warden(x,y,d){
+  const pal=PAL[d]||PAL[0];
+  const dark=pal.wall[2],mid=pal.wall[0],lite=pal.wall[3],glow=pal.ore;
+  const form=wardenForm(d);
+  let b="";
+  if(form==="hand"){
+    // a fist of the layer's own rock, pushed up through the floor
+    b=`<rect x="16" y="20" width="36" height="28" fill="${dark}"/>
+    <rect x="16" y="20" width="36" height="5" fill="${lite}"/>
+    <rect x="8" y="27" width="9" height="21" fill="${mid}"/>
+    <rect x="51" y="25" width="9" height="23" fill="${mid}"/>
+    <rect x="21" y="9" width="8" height="13" fill="${mid}"/><rect x="21" y="9" width="8" height="3" fill="${lite}"/>
+    <rect x="31" y="4" width="8" height="18" fill="${mid}"/><rect x="31" y="4" width="8" height="3" fill="${lite}"/>
+    <rect x="41" y="9" width="8" height="13" fill="${mid}"/><rect x="41" y="9" width="8" height="3" fill="${lite}"/>
+    <rect x="22" y="30" width="5" height="4" fill="${glow}"/><rect x="34" y="30" width="5" height="4" fill="${glow}"/>
+    <rect x="46" y="32" width="4" height="3" fill="${glow}" opacity=".7"/>`;
+  } else if(form==="lamp"){
+    // tall, thin, and wearing a lit lamp where a head should be
+    b=`<rect x="26" y="20" width="20" height="28" fill="${dark}"/>
+    <rect x="26" y="20" width="5" height="28" fill="${mid}"/>
+    <rect x="15" y="24" width="9" height="20" fill="${mid}"/>
+    <rect x="48" y="24" width="9" height="20" fill="${mid}"/>
+    <rect x="12" y="42" width="12" height="6" fill="${dark}"/><rect x="48" y="42" width="12" height="6" fill="${dark}"/>
+    <rect x="28" y="4" width="16" height="16" fill="${mid}"/>
+    <rect x="28" y="4" width="16" height="4" fill="${lite}"/>
+    <rect x="31" y="8" width="10" height="9" fill="${glow}"/>
+    <rect x="33" y="10" width="6" height="5" fill="#fff" opacity=".55"/>
+    <rect x="34" y="0" width="4" height="5" fill="${dark}"/>
+    <circle cx="36" cy="12" r="22" fill="${glow}" opacity=".10"/>`;
+  } else if(form==="wheel"){
+    // the winding gear, awake, turning a quarter-notch toward you
+    b=`<circle cx="36" cy="24" r="21" fill="none" stroke="${mid}" stroke-width="7"/>
+    <circle cx="36" cy="24" r="21" fill="none" stroke="${lite}" stroke-width="2" opacity=".5"/>
+    <rect x="33" y="3" width="6" height="42" fill="${mid}"/>
+    <rect x="15" y="21" width="42" height="6" fill="${mid}"/>
+    <rect x="20" y="8" width="5" height="5" fill="${dark}"/><rect x="47" y="8" width="5" height="5" fill="${dark}"/>
+    <rect x="20" y="35" width="5" height="5" fill="${dark}"/><rect x="47" y="35" width="5" height="5" fill="${dark}"/>
+    <circle cx="36" cy="24" r="8" fill="${dark}"/>
+    <rect x="32" y="21" width="3" height="5" fill="${glow}"/><rect x="38" y="21" width="3" height="5" fill="${glow}"/>
+    <rect x="4" y="44" width="64" height="4" fill="${dark}"/>`;
+  } else if(form==="ledger"){
+    // a book the size of a door, open, reading you back
+    b=`<rect x="6" y="12" width="60" height="34" fill="${dark}"/>
+    <rect x="6" y="12" width="60" height="4" fill="${lite}"/>
+    <rect x="10" y="16" width="24" height="27" fill="${mid}"/>
+    <rect x="38" y="16" width="24" height="27" fill="${mid}"/>
+    <rect x="34" y="10" width="4" height="36" fill="${dark}"/>
+    <rect x="13" y="20" width="18" height="2" fill="${dark}" opacity=".55"/>
+    <rect x="13" y="25" width="18" height="2" fill="${dark}" opacity=".55"/>
+    <rect x="41" y="20" width="18" height="2" fill="${dark}" opacity=".55"/>
+    <rect x="41" y="25" width="18" height="2" fill="${dark}" opacity=".55"/>
+    <rect x="17" y="31" width="8" height="7" fill="${glow}"/><rect x="47" y="31" width="8" height="7" fill="${glow}"/>
+    <rect x="19" y="33" width="4" height="4" fill="#000" opacity=".6"/><rect x="49" y="33" width="4" height="4" fill="#000" opacity=".6"/>
+    <circle cx="36" cy="30" r="26" fill="${glow}" opacity=".07"/>`;
+  } else {
+    // a doorframe standing in open rock, and something the far side of it
+    b=`<rect x="10" y="2" width="52" height="46" fill="${mid}"/>
+    <rect x="10" y="2" width="52" height="5" fill="${lite}"/>
+    <rect x="18" y="9" width="36" height="39" fill="#000"/>
+    <rect x="18" y="9" width="36" height="39" fill="${glow}" opacity=".13"/>
+    <rect x="10" y="2" width="6" height="46" fill="${dark}"/>
+    <rect x="56" y="2" width="6" height="46" fill="${dark}"/>
+    <rect x="26" y="20" width="6" height="8" fill="${glow}"/><rect x="40" y="20" width="6" height="8" fill="${glow}"/>
+    <rect x="27" y="22" width="3" height="5" fill="#000" opacity=".65"/><rect x="41" y="22" width="3" height="5" fill="#000" opacity=".65"/>
+    <rect x="24" y="36" width="24" height="3" fill="${glow}" opacity=".5"/>
+    <circle cx="36" cy="26" r="24" fill="${glow}" opacity=".09"/>`;
+  }
+  return `<g transform="translate(${x},${y})"><g class="wyrm">${b}</g></g>`;
+}
 function label(){return ""}  // counts live in the Equipment card, not on the scene
 function cart(x,y){return `<g transform="translate(${x},${y})">
  <ellipse cx="15" cy="19" rx="15" ry="2.4" fill="#000" opacity=".45"/>
@@ -4441,7 +4541,7 @@ function drawScene(){
   // on the wall, left: deep bore
   if(S.crew[4]){g+=bore(22,floor-96)+label(42,floor-100,"×"+S.crew[4])}
   // inside the tunnel: the wyrm, you, and the rock face
-  if(boss)g+=wyrm(112,floor-60);
+  if(boss)g+=boss.kind==="guard"?warden(112,floor-60,boss.depth):wyrm(112,floor-60);
   g+=miner(150,floor-32,"me",S.profile.shirt,S.profile.hat);
   if(buffOn())g+=`<circle cx="178" cy="${floor-20}" r="22" fill="#ffd27a" opacity=".18"/>`;
   // right of the tunnel: machines, evenly spaced
