@@ -2984,7 +2984,18 @@ document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{document.querySe
 $("lgClaim").onclick=ledgerSign;
 $("newBuildGo").onclick=async()=>{await save();hardReload()};
 $("newBuildLater").onclick=()=>{$("newBuild").classList.remove("on")};
-function switchTab(t){document.body.classList.toggle("minetab",t==="mine");document.documentElement.classList.toggle("minetab",t==="mine");if(t==="leaderboard")loadBoard();document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));if(t==="leaderboard")loadBoard();if(t==="quests"){renderLedger();renderStories()}}
+function switchTab(t){
+  const mine=t==="mine";
+  document.body.classList.toggle("minetab",mine);
+  document.documentElement.classList.toggle("minetab",mine);
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="tab-"+t));
+  // Re-measure only now the panel is actually on screen. fitPage bails while it is
+  // hidden, so without this the mine keeps whatever sizes it was left with.
+  if(mine){fitPage();fitRails()}
+  if(t==="leaderboard")loadBoard();      // was called twice, once before the panel was even shown
+  if(t==="quests"){renderLedger();renderStories()}
+}
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 function eta2(ms){const s=Math.ceil(ms/1000);return s<3600?Math.floor(s/60)+"m":Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m"}
 function eta(cost){const need=cost-S.cash;if(need<=0)return "Ready now";const r=cps();if(r<=0)return "Keep swinging";const s=need/r;if(s<60)return Math.ceil(s)+"s";if(s<3600)return Math.floor(s/60)+"m "+Math.ceil(s%60)+"s";if(s<86400)return Math.floor(s/3600)+"h "+Math.floor(s%3600/60)+"m";return Math.floor(s/86400)+"d "+Math.floor(s%86400/3600)+"h"}
@@ -3553,6 +3564,13 @@ function buyPick(i){const pr=PICKS[i];if(locked(pr)){toast(pr.deep?`The ${pr.nam
 function fitPage(){
   const pit=document.querySelector("#tab-mine .pit"),f=document.querySelector("footer");
   if(!pit||!f)return;
+  // A hidden panel measures zero in every direction. resize fires while you are sat on
+  // Upgrades or Quests - a tablet throws one just by collapsing its own URL bar - and
+  // this used to run anyway: stage.clientWidth 0 and stage.scrollHeight 0 pinned .pit to
+  // height:0px and sized the hero from nothing. Switching back showed a collapsed mine
+  // and only another resize could undo it. Measure while visible or not at all;
+  // switchTab calls this again on the way back in.
+  if(!pit.offsetParent)return;
   const stage=pit.querySelector(".stage"),hero=pit.querySelector(".hero"),
         log=pit.querySelector(".log"),strip=hero&&hero.querySelector(".strip"),
         rails=pit.querySelectorAll(".rail");
@@ -3633,7 +3651,7 @@ $("eqPrev").onclick=()=>{eqPg--;eqCrewRender()};
 $("eqNext").onclick=()=>{eqPg++;eqCrewRender()};
 function fitRails(){
   const rails=document.querySelectorAll("#tab-mine .rail");
-  if(rails.length<2)return;
+  if(rails.length<2||!rails[0].offsetParent)return;   // same reason as fitPage
   if(innerWidth<1100){if(railH!==-1){rails[1].style.height="";railH=-1}return}
   const h=Math.round(rails[0].getBoundingClientRect().height);
   if(h&&h!==railH){railH=h;rails[1].style.height=h+"px"}
