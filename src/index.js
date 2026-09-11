@@ -14,7 +14,7 @@ import { weekKey, weekEnds, prevWeekKey } from "./_week.js";
 // serves it under `legacy`. To undo this, set ERA back to 1 — the old baselines are ignored
 // and every original score returns intact.
 const ERA = 2;
-const ERA_NAMES = { 1: "Season 1 · Ashcombe's ledger", 2: "Season 2 · The deep economy" };
+const ERA_NAMES = { 1: "Beta · Ashcombe's ledger", 2: "Season 1 · The deep economy" };
 
 const TITLES = { "": "", coalhand: "Coalhand", ironjaw: "Ironjaw", silverback: "Gravewalker", abyssal: "Throne-touched", gemhunter: "Gem hunter", sealed: "Debt-free", lamplighter: "Lamplighter", wyrmslayer: "Wyrmslayer", cardsharp: "Card sharp", regular: "Regular", champion: "Weekly champion", beneath: "Throne-keeper" };
 
@@ -69,6 +69,51 @@ async function handle(request, env) {
       if (!tok.access_token) return new Response("Discord login failed. Go back and try again.", { status: 400 });
       const user = await fetch("https://discord.com/api/users/@me", { headers: { authorization: `Bearer ${tok.access_token}` } }).then(r => r.json());
       return new Response(null, { status: 302, headers: { location: url.origin, "set-cookie": cookieHeader(await makeSession(user, env.SESSION_SECRET)) } });
+    }
+
+    // ---- one-shot wipe (admin) ----
+    // Player progress lives in KV, not in the repo, so pushing to GitHub cannot reset it.
+    // This is the deploy-friendly way to do it: set a WIPE_KEY secret, POST to this route,
+    // then DELETE THE SECRET. With no WIPE_KEY set the route does not exist at all, which
+    // is the state it should be in every day except the one you use it.
+    //
+    //   curl -X POST "https://<your-domain>/api/wipe?key=<WIPE_KEY>&dry=1"   <- counts only
+    //   curl -X POST "https://<your-domain>/api/wipe?key=<WIPE_KEY>"         <- deletes
+    //
+    // ?keep=board  leaves the leaderboard rows alone, so the Beta standings survive.
+    // ?keep=crews  leaves crew: and crewof: alone, so nobody has to re-form a crew.
+    if (p === "/api/wipe") {
+      if (!env.WIPE_KEY) return json({ error: "not found" }, 404);
+      if (request.method !== "POST") return json({ error: "POST only" }, 405);
+      const given = url.searchParams.get("key") || "";
+      // constant-time-ish compare so the secret can't be probed a character at a time
+      if (given.length !== env.WIPE_KEY.length) return json({ error: "no" }, 403);
+      let diff = 0;
+      for (let i = 0; i < given.length; i++) diff |= given.charCodeAt(i) ^ env.WIPE_KEY.charCodeAt(i);
+      if (diff !== 0) return json({ error: "no" }, 403);
+
+      const keep = (url.searchParams.get("keep") || "").split(",");
+      const dry = url.searchParams.get("dry") === "1";
+      const prefixes = ["save:"];
+      if (!keep.includes("board")) prefixes.push("board:");
+      if (!keep.includes("crews")) prefixes.push("crew:", "crewof:");
+
+      const counts = {};
+      let deleted = 0;
+      for (const pre of prefixes) {
+        let cursor, n = 0;
+        for (;;) {
+          const page = await env.SAVES.list({ prefix: pre, cursor, limit: 1000 });
+          for (const k of page.keys) { n++; if (!dry) await env.SAVES.delete(k.name); }
+          if (page.list_complete) break;
+          cursor = page.cursor;
+        }
+        counts[pre] = n; deleted += n;
+      }
+      // the caches and the feed are derived, so they always go - they rebuild on their own
+      if (!dry) for (const k of ["feed", "cache:board", "cache:crews", "cache:feedseed"]) await env.SAVES.delete(k);
+
+      return json({ ok: true, dry, deleted, counts }, 200, { "cache-control": "no-store" });
     }
 
     // ---- version (public) ----
