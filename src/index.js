@@ -245,6 +245,13 @@ async function handle(request, env) {
     // ---- crew (up to 4 players, shared xp pool, join by short code) ----
     const crewIdFor = async id => env.SAVES.get(`crewof:${id}`);
     const loadCrew = async id => id ? env.SAVES.get(`crew:${id}`, { type: "json" }) : null;
+    // The roster used to store the raw Discord username while the leaderboard shows the
+    // player's chosen display name, so the same person appeared under two different names
+    // in two places. The board row already holds the name they picked - use that.
+    const shownName = async id => {
+      const b = await env.SAVES.get(`board:${id}`, { type: "json" });
+      return (b && b.name) || null;
+    };
     const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     const newCode = () => Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
 
@@ -272,7 +279,7 @@ async function handle(request, env) {
       const body = await request.json().catch(() => ({}));
       const name = (typeof body.name === "string" && body.name.trim().slice(0, 24)) || `${s.name}'s crew`;
       let id; for (let i = 0; i < 5; i++) { id = newCode(); if (!(await env.SAVES.get(`crew:${id}`))) break; }
-      const crew = { id, name, owner: s.id, members: [{ id: s.id, name: s.name }], xp: 0, pick: 0, shift: 0, created: Date.now() };
+      const crew = { id, name, owner: s.id, members: [{ id: s.id, name: (await shownName(s.id)) || s.name }], xp: 0, pick: 0, shift: 0, created: Date.now() };
       await env.SAVES.put(`crew:${id}`, JSON.stringify(crew));
       await env.SAVES.put(`crewof:${s.id}`, id);
       return json(crew);
@@ -287,7 +294,7 @@ async function handle(request, env) {
       if (!crew) return json({ error: "No crew with that code." }, 404);
       if (crew.members.length >= 4) return json({ error: "That crew is full." }, 400);
       if (crew.members.some(m => m.id === s.id)) return json({ error: "You're already in that crew." }, 400);
-      crew.members.push({ id: s.id, name: s.name });
+      crew.members.push({ id: s.id, name: (await shownName(s.id)) || s.name });
       await env.SAVES.put(`crew:${crew.id}`, JSON.stringify(crew));
       await env.SAVES.put(`crewof:${s.id}`, crew.id);
       return json(crew);
@@ -363,6 +370,10 @@ async function handle(request, env) {
       const body = await request.json().catch(() => ({}));
       const amount = Math.max(0, Math.min(20000, Number(body.amount) || 0));
       crew.xp += amount;
+      // Cheap place to keep your own roster name current if you renamed yourself: this
+      // route already loads and writes the crew, and only the member themselves calls it.
+      const me = crew.members.find(m => m.id === s.id), nm = await shownName(s.id);
+      if (me && nm && me.name !== nm) me.name = nm;
       await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
       return json(crew);
     }
