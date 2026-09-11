@@ -1279,15 +1279,7 @@
     <section><h3>Workers &amp; machines</h3>
       <div class="qty"><span>Hire</span><button class="on" data-qty="1">×1</button><button data-qty="10">×10</button><button data-qty="max">Max</button></div>
       <div id="crew"></div>
-      <h3 style="margin-top:18px">Overseer's extras</h3>
-      <div class="row"><div><div class="name">Auto-swinger<em id="autoState"></em></div><div class="desc">$10M, any time. Pick a shift — 3, 6, 9 or 12 hours — and a hired hand swings for you, awake or asleep. Shorter shifts swing faster.</div><div class="desc" id="autoDesc"></div></div><button class="buy" id="autoBtn">Start shift</button></div>
-      <h3 style="margin-top:18px">Bunkhouse</h3>
-      <div class="row"><div><div class="name" id="bunkName">Straw pallet<em id="bunkCap">8h offline</em></div><div class="desc" id="bunkDesc">A better bed means your workers keep working longer while you're gone.</div></div><button class="buy" id="bunkBtn">$50.0K</button></div>
     </section>
-  </div>
-  <div class="card sealcard">
-    <div><b>Pay the debt</b><p id="rebirthDesc"></p></div>
-    <button class="buy" id="rebirth">Pay &amp; go back down</button>
   </div>
 </div>
 
@@ -1393,7 +1385,7 @@
   <div class="titlebar"><h2>Leaderboard</h2><span id="boardSub">Every debtor, ranked by lifetime cash mined</span></div>
   <div class="board">
     <div class="seg" style="grid-template-columns:1fr 1fr;max-width:320px;margin:0 0 10px"><button class="on" data-board="all">Seasons</button><button data-board="crews">Crews</button></div>
-    <div class="qty" id="seasonPick" style="margin:0 0 12px"><span>Season</span><button class="on" data-season="all">Current</button><button data-season="legacy">Season 1</button></div>
+    <div class="qty" id="seasonPick" style="margin:0 0 12px"><span>Season</span><button class="on" data-season="all">Current</button><button data-season="legacy">Beta</button></div>
     <p class="note" id="champs" style="margin:0 0 12px"></p>
     <table><tbody id="boardRows"><tr><td colspan="3" style="color:var(--dim)">Loading…</td></tr></tbody></table>
     <p class="note" id="nudge" style="margin-top:12px;color:var(--lamp)"></p>
@@ -1772,7 +1764,7 @@ const DEEP=[
 // and four to five days at the bottom. The curve is steep early (x17 a floor) and
 // eases to about x3.3, because income accelerates faster than any flat ratio can track.
 // Re-solve rather than hand-edit these: changing crew rates changes what they should be.
-const DEEPCOST=[6.94e11,1.22e13,2.17e14,3.83e15,6.62e16,1.1e18,1.74e19,2.57e20,3.49e21,4.32e22,4.83e23,4.84e24,4.32e25,3.42e26,1.64e27,7.59e27,3.42e28,1.5e29,6.41e29,2.67e30,1.09e31,4.34e31,1.69e32,6.45e32,2.41e33,8.86e33,3.19e34,1.13e35,3.97e35,1.37e36,4.69e36,1.59e37,5.34e37,1.79e38,5.94e38,1.97e39,6.51e39,2.15e40,7.08e40,2.33e41];
+const DEEPCOST=[1.14e12,3.05e13,7.55e14,1.73e16,3.67e17,7.17e18,1.28e20,2.1e21,3.12e22,4.2e23,5.1e24,5.57e25,5.44e26,4.74e27,2.1e28,9.1e28,3.87e29,1.61e30,6.57e30,2.63e31,1.03e32,3.93e32,1.48e33,5.43e33,1.96e34,6.99e34,2.45e35,8.47e35,2.9e36,9.83e36,3.3e37,1.1e38,3.67e38,1.22e39,4.01e39,1.32e40,4.35e40,1.43e41,4.68e41,1.54e42];
 DEEP.forEach(([name,desc],i)=>{
   LAYERS.push({name,desc,deep:true,
     hp:Math.round(1.4e6*Math.pow(3,i+1)),
@@ -1934,7 +1926,19 @@ const fmt=n=>{
 // entirely by about the thirtieth debt. Scaling the oil PAYOUT with rank fixes the stall
 // on its own without that feedback — see oilOnSeal. A multiplier that compounds on a
 // currency you earn by using the multiplier has no damping term anywhere in it.
-const oilMult=()=>1+S.oil*0.1;
+// The flat +10% a flask had no ceiling, and oilOnSeal pays out more oil the more debts
+// you have already paid - so the multiplier grew with the very thing it multiplied. By
+// the 29th debt that is ~670 flasks and x68 on everything, nine times what the descend
+// costs were solved against, which is why the bottom of the mine could be reached in a
+// week. Same shape of bug as the compounding tail above, one level removed.
+//
+// Diminishing instead, matched to the old curve where most players actually live: a
+// flask is worth the same +10% at ten flasks, about half that at fifty, and a tenth of
+// it at six hundred. Veterans keep a real edge - x19 at 333 flasks - it just stops
+// outrunning the mine. Bounded spread is the point: from nothing to x19 is only about
+// two floors of head start, which is what a prestige currency should buy.
+const oilMultAt=o=>1+10*(Math.sqrt(1+o/50)-1);
+const oilMult=()=>oilMultAt(S.oil||0);
 const DEMAND_CHANCE=.45,DOCK_MS=30*60*1000,DOCK_MULT=.8;
 const docked=()=>Date.now()<(S.dockUntil||0);
 const dockMult=()=>docked()?DOCK_MULT:1;
@@ -2370,7 +2374,7 @@ function renderPerks(){
   paged("perks",PERKS,PER_PAGE.perks,"perkList",pk=>{const l=perkLv(pk.id),max=l>=pk.max,c=max?0:pk.cost(l);
     return `<div class="perk"><div><div class="name">${pk.name}</div><div class="desc">${pk.desc}</div><div class="fx">${l?pk.fx(l):"Not learned"}${!max?` → ${pk.fx(l+1)}`:""}</div><div class="pips">${Array.from({length:pk.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join("")}</div></div><button data-perk="${pk.id}" ${max||(S.oil||0)<c?"disabled":""}>${max?"Maxed":`${c} oil`}</button></div>`},renderPerks);
   document.querySelectorAll("#perkList [data-perk]").forEach(b=>b.onclick=async()=>{const pk=PERKS.find(x=>x.id===b.dataset.perk),l=perkLv(pk.id);if(l>=pk.max||(S.oil||0)<pk.cost(l))return;
-    if(!await ask(pk.name,`Spend ${pk.cost(l)} lantern oil? Oil spent no longer gives its +10% bonus. This can't be undone.`,"Spend oil"))return;
+    if(!await ask(pk.name,`Spend ${pk.cost(l)} lantern oil? Oil spent no longer counts toward your earnings multiplier. This can't be undone.`,"Spend oil"))return;
     S.oil-=pk.cost(l);S.perks=S.perks||{};S.perks[pk.id]=l+1;toast(`${pk.name}: ${pk.fx(l+1)}.`);render();save()});
 }
 function renderDebt(){const r=S.debts||0,cost=debtCost(),p=Math.min(1,S.cash/cost);
@@ -2736,7 +2740,7 @@ function openShift(){if(autoOn()){toast(`The auto-swinger is on shift — ${eta2
   $("shiftList").innerHTML=SHIFTS.map((x,i)=>{const locked=i>tier;return `<button class="shift ${locked?'lock':''}" data-shift="${x.h}" ${locked?'disabled':''}><b>${x.h}h</b><small>${x.rate}/sec · ~${fmt(clickPower()*x.rate*x.h*3600)}</small></button>`}).join("");
   document.querySelectorAll("[data-shift]:not([disabled])").forEach(b=>b.onclick=()=>{if(S.cash<AUTO_COST){toast("Not enough cash.");return}const x=SHIFTS.find(z=>z.h==b.dataset.shift);S.cash-=AUTO_COST;S.autoRate=x.rate;S.autoBought=Date.now();S.autoUntil=Date.now()+x.h*3600*1000*partyShiftMult();S.shiftsUsed=(S.shiftsUsed||0)+1;$("shiftModal").classList.remove("on");toast(`Hired an auto-swinger for a ${x.h}-hour shift (${fmt(AUTO_COST)}). It keeps swinging even if you close the game.`);confetti(20);render();save()});
   $("shiftModal").classList.add("on")}
-$("dailyPill").onclick=claimDaily;$("autoBtn").onclick=openShift;$("shiftClose").onclick=()=>$("shiftModal").classList.remove("on");
+$("dailyPill").onclick=claimDaily;if($("autoBtn"))$("autoBtn").onclick=openShift;$("shiftClose").onclick=()=>$("shiftModal").classList.remove("on");
 
 // ---- crew (real multiplayer: create/join by code, xp synced to the server) ----
 let PARTY=null,partyXpBuf=0,partyBusy=false;
@@ -2922,7 +2926,7 @@ const TIPS=[
   {id:"auto",when:()=>dailyReady()&&!autoOn(),tab:"mine",el:"#dailyPill",ic:"🏮",t:"Your free shift is ready",p:"Every 24 hours the overseer lets a hand work your pick for six hours, free — even with the game closed. The clock starts when you claim it, not at midnight, so there is no bad time to come back. You can still pay for a longer shift from the Upgrades tab any time."},
   {id:"wyrm",when:()=>(S.bosses||0)>=1,tab:"mine",el:"#rock",ic:"🐍",t:"You killed the Wyrm",p:"It surfaces at random. Cut it down inside 30 seconds and you get the Sunforged pick — everything doubles for five minutes. The Wyrm bait perk makes it show up more often."},
   {id:"candebt",when:()=>S.cash>=debtCost(),tab:"debt",el:"#tab-debt .card",ic:"⚖",t:"You can pay Ashcombe",p:"Paying resets the mine but hands you lantern oil: a permanent bonus to everything and the currency for perks. Each payment also unlocks things the first run can't reach."},
-  {id:"perks",when:()=>(S.oil||0)>=1,tab:"debt",pre:()=>showDebtSub("perks"),el:"#perkList",ic:"✦",t:"You have lantern oil",p:"Oil you hold makes everything you earn worth more, and the bonus grows faster the more flasks you sit on. Oil you spend here buys a permanent perk instead. Neither is wrong — decide whether you want a fatter multiplier or a different way to play."},
+  {id:"perks",when:()=>(S.oil||0)>=1,tab:"debt",pre:()=>showDebtSub("perks"),el:"#perkList",ic:"✦",t:"You have lantern oil",p:"Oil you hold makes everything you earn worth more, though each flask adds a little less than the one before. Oil you spend here buys a permanent perk instead. Neither is wrong — decide whether you want a fatter multiplier or a different way to play."},
   {id:"fault",when:()=>(S.bestVein||0)>=1,tab:"mine",el:"#rock",ic:"⚡",t:"That was a fault line",p:"Faults open on the face while you're watching the mine, and close after a few seconds. Strike one and it pays well; strike them back to back and the vein multiplier climbs to ×4. Let one close and the vein resets. They never open while you're away, so there is nothing to miss by leaving."},
   {id:"silver",when:()=>S.depth===4,tab:"mine",el:"#rock",ic:"✦",t:"Read the walls",p:"Silvergrave is covered in the names of miners who never came back up. They're real: the people from the stories, everyone on the leaderboard, and you. Your own name is the bright one."},
   {id:"warmdark",when:()=>!!S.throne,tab:"mine",el:".side .card:first-child",ic:"◈",t:"The floor opened",p:"The throne was empty, and now there's a way under it. The Warm Dark is the deepest layer in the mine, and whatever is down there settles up in full and on time. Ashcombe never did."},
@@ -3082,14 +3086,21 @@ function render(){
   fitRails();          // must settle the rail height first — eqCrewRender measures against it
   eqCrewRender();
   logRender();
-  const nb=BUNKS[(S.bunk||0)+1];$("bunkName").innerHTML=BUNKS[S.bunk||0].name+`<em>${BUNKS[S.bunk||0].cap}h offline</em>`;
-  if(nb){$("bunkDesc").textContent=`Upgrade to the ${nb.name}: workers keep working for ${nb.cap} hours while you're away.`;$("bunkBtn").textContent=fmt(nb.cost);$("bunkBtn").disabled=S.cash<nb.cost}
-  else{$("bunkDesc").textContent="The best quarters in the mine. Workers work up to 48 hours while you're gone.";$("bunkBtn").textContent="Maxed";$("bunkBtn").disabled=true}
+  // The bunk and auto-swinger cards were pulled off this page. The mechanics are still
+  // live - the shift keeps running, the bunk still sets the offline window - so these
+  // blocks stay guarded rather than deleted, ready for wherever the cards land next.
+  if($("bunkName")){
+    const nb=BUNKS[(S.bunk||0)+1];$("bunkName").innerHTML=BUNKS[S.bunk||0].name+`<em>${BUNKS[S.bunk||0].cap}h offline</em>`;
+    if(nb){$("bunkDesc").textContent=`Upgrade to the ${nb.name}: workers keep working for ${nb.cap} hours while you're away.`;$("bunkBtn").textContent=fmt(nb.cost);$("bunkBtn").disabled=S.cash<nb.cost}
+    else{$("bunkDesc").textContent="The best quarters in the mine. Workers work up to 48 hours while you're gone.";$("bunkBtn").textContent="Maxed";$("bunkBtn").disabled=true}
+  }
   {const on=autoOn();$("autoBadge").style.display=on?"":"none";$("autoBadge").textContent="auto · "+eta2(S.autoUntil-Date.now());
-   $("autoState").textContent=on?"working":"";
-   if(on){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${AUTO_RATE()} swings/sec.`;$("autoBtn").textContent="On shift";$("autoBtn").disabled=true}
-   else if(S.cash<AUTO_COST){$("autoDesc").textContent=`Costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`;$("autoBtn").textContent=fmt(AUTO_COST);$("autoBtn").disabled=true}
-   else{$("autoDesc").textContent=`Ready. A 3-hour shift earns about ${fmt(clickPower()*3*3*3600)} at your current swing.`;$("autoBtn").textContent="Hire — "+fmt(AUTO_COST);$("autoBtn").disabled=false}}
+   if($("autoState")){
+     $("autoState").textContent=on?"working":"";
+     if(on){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${AUTO_RATE()} swings/sec.`;$("autoBtn").textContent="On shift";$("autoBtn").disabled=true}
+     else if(S.cash<AUTO_COST){$("autoDesc").textContent=`Costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`;$("autoBtn").textContent=fmt(AUTO_COST);$("autoBtn").disabled=true}
+     else{$("autoDesc").textContent=`Ready. A 3-hour shift earns about ${fmt(clickPower()*3*3*3600)} at your current swing.`;$("autoBtn").textContent="Hire — "+fmt(AUTO_COST);$("autoBtn").disabled=false}
+   }}
   renderThrone();renderPerks();renderDebt();renderParty();
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
   document.querySelectorAll(".eq button,button.buy[data-pick],button.buy[data-crew]").forEach(b=>b.classList.toggle("can",!b.disabled));
@@ -3131,11 +3142,13 @@ function render(){
     // the milestone chip is progress, so it only means anything once you own one
     $("crewM"+i).textContent=!n?"":nm?`${nm-n} to ×${m*2}`:"×32 max";
     $("crewR"+i).innerHTML="+"+fmt(c.rate*m*depthMult())+"/sec each"+(n?` · <b style="color:var(--green);font-weight:500">earning ${fmt(crewTotal(i))}/sec</b>`:"");});
-  const o=oilOnSeal(),rb=$("rebirth");
+  const rb=$("rebirth");
+  if(!rb)return;                 // the duplicate seal card lives on the Debt tab now
+  const o=oilOnSeal();
   rb.disabled=S.cash<debtCost();
   $("rebirthDesc").textContent=S.cash<debtCost()
-    ?`Lord Ashcombe wants ${fmt(debtCost())}. Pay it and you walk out free — then go back down on your own terms with lantern oil: +10% to all earnings per flask, forever.`
-    :`Pay now for +${o} lantern oil (you have ${S.oil}). That's ×${(1+(S.oil+o)*0.1).toFixed(1)} on every future swing and worker.`;
+    ?`Lord Ashcombe wants ${fmt(debtCost())}. Pay it and you walk out free — then go back down on your own terms with lantern oil: a permanent multiplier on everything you earn.`
+    :`Pay now for +${o} lantern oil (you have ${S.oil}). That's ×${oilMultAt(S.oil+o).toFixed(1)} on every future swing and worker.`;
 }
 
 // ---- foreman's table ----
@@ -3779,7 +3792,7 @@ function renderBoard(){
   if(boardMode==="crews")return renderCrewBoard();
   const rows=$("boardRows"),list=boardMode==="legacy"?(boardData.legacy||[]):boardData.all;
   $("boardSub").textContent=boardMode==="legacy"
-    ?(boardData.legacyName||"Season 1")+" · closed, kept as it finished"
+    ?(boardData.legacyName||"Beta")+" · closed, kept as it finished"
     :(boardData.eraName||"This season")+" · ranked by cash mined this season";
   $("champs").innerHTML=boardData.champs&&boardData.champs.length?"Last week's champions: "+boardData.champs.map((c,i)=>`<b style="color:${["#ffd27a","#c9ccd1","#d08a4a"][i]}">${esc(c.name)}</b>`).join(", "):"";
   if(USER&&boardData.champs&&boardData.champs.some(c=>c.id===USER.id)&&!has("weekly")){S.ach.weekly=Date.now();toast("Weekly champion! A new title and the trophy are yours.");save()}
@@ -3789,7 +3802,7 @@ function renderBoard(){
     const rb=$("boardRetry");if(rb)rb.onclick=loadBoard;
     return}
   if(!list.length){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">${
-    boardMode==="legacy"?"Season 1 has no finishers on record."
+    boardMode==="legacy"?"The beta has no finishers on record."
     :"A new season just opened — nobody is on the board yet. Sign in and be the first."}</td></tr>`;$("nudge").textContent="";return}
   rows.innerHTML=list.map((p,i)=>`${i===3?`<tr class="cut"><td colspan="3"><span>the rest of the shift</span></td></tr>`:""}<tr data-p="${i}" class="${i<3?'p'+(i+1)+' ':''}${i===2?'lastpod ':''}${USER&&p.id===USER.id?'me':''}"><td>${i+1}</td><td><svg viewBox="0 0 34 34" width="26" height="26" style="vertical-align:middle;margin-right:8px;image-rendering:pixelated"><rect width="34" height="34" rx="6" fill="#1a1512"/>${miner(2,1,"",p.shirt||"#f1e6d2",p.hat||"#f3b24a",null)}</svg>${esc(p.name)}${p.title?` <span style="color:var(--lamp);font-size:12px">${esc(p.title)}</span>`:""}${p.keeps?` <span title="${p.keeps} keepsakes" style="color:var(--gem);font-size:12px">◆${p.keeps}</span>`:""}<em>depth ${p.depth} · ${p.oil} oil</em></td><td>${fmt(p.score)}</td></tr>`).join("");
   rows.querySelectorAll("[data-p]").forEach(tr=>tr.onclick=()=>openRival(list[+tr.dataset.p]));
@@ -3842,11 +3855,11 @@ $("drop").onclick=e=>{e.stopPropagation();dropClaim()};
 $("eqPickBtn").onclick=()=>buyPick(S.pick+1);
 if($("sealBtn"))$("sealBtn").onclick=rebirth;
 $("dPay").onclick=rebirth;
-$("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. Your workers now work ${nb.cap}h while you're away, and you have ${shelfCap()} keepsake slots.`);render();save()};
+if($("bunkBtn"))$("bunkBtn").onclick=()=>{const nb=BUNKS[(S.bunk||0)+1];if(!nb||S.cash<nb.cost)return;S.cash-=nb.cost;S.bunk=(S.bunk||0)+1;toast(`You move into the ${nb.name}. Your workers now work ${nb.cap}h while you're away, and you have ${shelfCap()} keepsake slots.`);render();save()};
 document.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>switchTab(b.dataset.goto));
 document.body.classList.toggle("minetab",$("tab-mine").classList.contains("on"));
 document.documentElement.classList.toggle("minetab",$("tab-mine").classList.contains("on"));
-$("rebirth").onclick=rebirth;
+if($("rebirth"))$("rebirth").onclick=rebirth;
 $("reset").onclick=async()=>{if(await ask("Start over?","Everything — cash, workers, lantern oil, perks, trophies and stories — will be lost. This can't be undone.","Reset everything"))
   {S={...fresh(),oil:0,lifetime:0,profile:S.profile};local.del();closeModal();drawScene();render();save()}};
 
