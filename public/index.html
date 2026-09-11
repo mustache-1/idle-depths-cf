@@ -1838,7 +1838,14 @@ const RANK_UNLOCKS=[
 const BET_MAX_PCT=.10,BET_MIN=10,BET_COOLDOWN=4000;
 
 const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,oilFound:0,dockUntil:0,shelf:[],tips:{},last:Date.now()});
-let S={...fresh(),oil:0,lifetime:0,profile:{name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a"}};
+// ---- season epoch ----
+// Wiping KV does not reset anybody on its own. /api/load returns null, and load() then
+// falls back to the copy in this browser's localStorage - so every player's mine walks
+// straight back in, and signed-out players were never reachable from the server at all.
+// The save carries the season it belongs to instead. Bump this and every save from an
+// older season is discarded on sight, in KV and in localStorage, for everyone.
+const SEASON=2;
+let S={...fresh(),season:SEASON,oil:0,lifetime:0,profile:{name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a"}};
 const SHIRTS=[{c:"#f1e6d2"},{c:"#3aa0c8"},{c:"#c0553c"},{c:"#4f9e7a"},{c:"#b07acb"},{c:"#d1a34a"},{c:"#e0567a"},{c:"#2b2b2b",need:"gems25",label:"Gem hunter"},{c:"#ffd27a",need:"debt",label:"Paid the debt"},{c:"#5ec9b6",need:"glimmer",label:"Reached The Glimmer"},{c:"#e6b422",need:"debt5",label:"Paid the debt 5 times"}];
 const HATS=[{c:"#f3b24a"},{c:"#e8e8e8"},{c:"#c0553c"},{c:"#3aa0c8"},{c:"#4f9e7a"},{c:"#1a1614",need:"wyrm",label:"Slew the Wyrm"},{c:"#c48cff",need:"throne",label:"Reached the Hollow Throne"},{c:"#8fdc6a",need:"days7",label:"Played 7 days"}];
 const ACH=[
@@ -2049,7 +2056,7 @@ let USER=null;
 const local={get:()=>{try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}},set:v=>localStorage.setItem(KEY,JSON.stringify(v)),del:()=>localStorage.removeItem(KEY)};
 let saveErr=null,saveWarned=0;
 async function save(){
-  S.last=Date.now();local.set(S);
+  S.last=Date.now();S.season=SEASON;local.set(S);
   if(!USER)return;
   try{
     const r=await fetch("/api/save",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(S)});
@@ -2111,10 +2118,15 @@ async function load(){
   try{const u=await fetch("/api/me").then(r=>r.json());USER=u&&u.id?u:null}catch(e){USER=null}
   let d=null;
   if(USER){try{d=await fetch("/api/load").then(r=>r.json())}catch(e){}}
-  const l=local.get();
+  let l=local.get();
+  // Anything from a previous season is not a save any more. Drop it on both sides before
+  // the "further along" comparison, or the older, bigger save always wins and nothing resets.
+  const current=x=>x&&(x.season||1)===SEASON;
+  if(d&&!current(d))d=null;
+  if(l&&!current(l)){l=null;local.del()}
   if(!d||(l&&l.lifetime>(d.lifetime||0)))d=l;   // keep whichever save has progressed further
   if(d){
-    S={...S,...d};S.profile={name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a",...(d.profile||{})};
+    S={...S,...d,season:SEASON};S.profile={name:"",title:"",shirt:"#f1e6d2",hat:"#f3b24a",...(d.profile||{})};
     if(S.crew.length<CREW.length)S.crew=[...S.crew,...CREW.map(()=>0)].slice(0,CREW.length);
     S.story=S.story||{active:null,prog:{},done:{},pick:{},keeps:[]};S.story.keeps=S.story.keeps||[];ensureLedger();
     S.shelf=(S.shelf||[]).filter(n=>S.story.keeps.includes(n)).slice(0,shelfCap());recalcFx();   // before offline pay is worked out
@@ -3728,7 +3740,7 @@ async function checkBuild(){
     const go=$("newBuildGo");if(go)go.focus();
   }catch(e){}
 }
-setInterval(checkBuild,25*1000);   // 25s: fast enough that a deploy reaches open tabs before a wipe
+setInterval(checkBuild,10*1000);   // 10s: a deploy reaches open tabs almost immediately
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkBuild()});
 // Coming back through the back/forward cache restores a whole stale document, so the
 // interval above never fired for it. Check the moment it is shown again.
