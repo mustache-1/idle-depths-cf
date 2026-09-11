@@ -2770,10 +2770,26 @@ $("dailyPill").onclick=claimDaily;if($("autoBtn"))$("autoBtn").onclick=openShift
 
 // ---- crew (real multiplayer: create/join by code, xp synced to the server) ----
 let PARTY=null,partyXpBuf=0,partyBusy=false;
+// Who was on the roster last time we looked, so a refresh can say what changed rather
+// than silently redrawing. Seeded on the first sync so you aren't told about the people
+// who were already there when you opened the game.
+let rosterSeen=null;
+function announceRoster(next){
+  const ids=(next&&next.members||[]).map(m=>m.id);
+  if(!rosterSeen){rosterSeen=ids;return}
+  const byId=new Map((next.members||[]).map(m=>[m.id,m]));
+  for(const id of ids) if(!rosterSeen.includes(id)&&(!USER||id!==USER.id)){
+    const m=byId.get(id),nm=((m&&m.name)||"").trim()||"Someone";
+    toast(`${nm} joined the crew.`);confetti(20);
+  }
+  for(const id of rosterSeen) if(!ids.includes(id)&&(!USER||id!==USER.id)) toast("Someone left the crew.");
+  rosterSeen=ids;
+}
 let crewBoard=null,crewBoardErr="";
 async function loadParty(){if(!USER){PARTY=null;renderParty();return}
   try{const r=await fetch("/api/crew");const d=await r.json().catch(()=>null);PARTY=(r.ok&&d&&!d.error)?d:null}
   catch(e){PARTY=null}
+  rosterSeen=(PARTY&&PARTY.members||[]).map(m=>m.id);   // baseline, don't announce these
   renderParty()}
 async function partyCreate(){if(!USER||partyBusy)return;partyBusy=true;
   try{const r=await fetch("/api/crew/create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:displayName()+"'s crew"})});
@@ -2897,15 +2913,15 @@ setInterval(async()=>{
   if(partyXpBuf>0){
     const amt=partyXpBuf;partyXpBuf=0;
     try{const r=await fetch("/api/crew/xp",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({amount:amt})});
-      const d=await r.json();if(!d.error){PARTY=d;render()}
+      const d=await r.json();if(!d.error){announceRoster(d);PARTY=d;render()}
     }catch(e){partyXpBuf+=amt}
     return;
   }
   if(document.hidden)return;            // no point polling a tab nobody is looking at
   try{const r=await fetch("/api/crew");const d=await r.json().catch(()=>null);
-    if(r.ok&&d&&!d.error){PARTY=d;renderParty()}
+    if(r.ok&&d&&!d.error){announceRoster(d);PARTY=d;renderParty()}
   }catch(e){}
-},15000);
+},3000);
 // A leader who tabs away while someone joins should see them on the way back in.
 addEventListener("visibilitychange",()=>{if(!document.hidden&&USER&&PARTY)loadParty()});
 $("ptyLeave").onclick=partyLeave;$("gUp0Btn").onclick=()=>partyUpgrade(0);$("gUp1Btn").onclick=()=>partyUpgrade(1);
