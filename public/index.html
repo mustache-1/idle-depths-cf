@@ -3728,7 +3728,7 @@ async function checkBuild(){
     const go=$("newBuildGo");if(go)go.focus();
   }catch(e){}
 }
-setInterval(checkBuild,90*1000);
+setInterval(checkBuild,25*1000);   // 25s: fast enough that a deploy reaches open tabs before a wipe
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkBuild()});
 // Coming back through the back/forward cache restores a whole stale document, so the
 // interval above never fired for it. Check the moment it is shown again.
