@@ -96,7 +96,7 @@ async function handle(request, env) {
       const dry = url.searchParams.get("dry") === "1";
       const prefixes = ["save:"];
       if (!keep.includes("board")) prefixes.push("board:");
-      if (!keep.includes("crews")) prefixes.push("crew:", "crewof:");
+      if (!keep.includes("crews")) prefixes.push("crew:", "crewmem:", "crewof:");
 
       const counts = {};
       let deleted = 0;
@@ -182,10 +182,17 @@ async function handle(request, env) {
       const rows = [];
       let cur;
       do {
+        // prefix "crew:" would also sweep up every "crewmem:" and "crewof:" key, so be
+        // explicit about which one this is listing
         const page = await env.SAVES.list({ prefix: "crew:", cursor: cur, limit: 1000 });
         for (const k of page.keys) {
+          const cid = k.name.slice(5);
           const c = await env.SAVES.get(k.name, { type: "json" });
-          if (!c || !Array.isArray(c.members) || !c.members.length) continue;
+          if (!c) continue;
+          // the roster lives in its own key now, so it has to be read alongside
+          const mem = await env.SAVES.get(`crewmem:${cid}`, { type: "json" });
+          c.members = Array.isArray(mem) ? mem : (c.members || []);
+          if (!c.members.length) continue;
           rows.push({
             id: c.id, name: c.name || "Crew", size: c.members.length,
             digs: c.digsDone || 0, full: c.fullWeeks || 0, xp: Math.floor(c.xp || 0),
@@ -244,7 +251,36 @@ async function handle(request, env) {
 
     // ---- crew (up to 4 players, shared xp pool, join by short code) ----
     const crewIdFor = async id => env.SAVES.get(`crewof:${id}`);
-    const loadCrew = async id => id ? env.SAVES.get(`crew:${id}`, { type: "json" }) : null;
+
+    // ---- why the roster has its own key ----
+    // Every route here is read-modify-write on one blob, and /api/crew/xp runs every 15s
+    // for EVERY member. KV is eventually consistent, so this happened constantly: someone
+    // joins (write: 2 members), another member's xp tick reads a stale copy (1 member),
+    // adds xp, writes the whole blob back - and the join is gone. Silently. The joiner
+    // sees themselves in the crew (their own response was fresh) while everyone else sees
+    // an empty roster, which is exactly the bug that was reported.
+    //
+    // Membership now lives in crewmem:<id> and NOTHING else writes it. xp, dig and seen
+    // churn crew:<id> as often as they like and can no longer touch who is in the crew.
+    // Last-write-wins on a counter is survivable; last-write-wins on a roster is not.
+    const loadMembers = async (id, crew) => {
+      const m = await env.SAVES.get(`crewmem:${id}`, { type: "json" });
+      // migration: older crews kept the list inside crew:<id>
+      return Array.isArray(m) ? m : ((crew && crew.members) || []);
+    };
+    const putMembers = (id, members) => env.SAVES.put(`crewmem:${id}`, JSON.stringify(members));
+    const loadCrew = async id => {
+      if (!id) return null;
+      const c = await env.SAVES.get(`crew:${id}`, { type: "json" });
+      if (!c) return null;
+      c.members = await loadMembers(id, c);
+      return c;
+    };
+    // Strips members before writing, so a counter write can never carry a stale roster.
+    const putCrew = (id, crew) => {
+      const { members, ...rest } = crew;
+      return env.SAVES.put(`crew:${id}`, JSON.stringify(rest));
+    };
     // The roster used to store the raw Discord username while the leaderboard shows the
     // player's chosen display name, so the same person appeared under two different names
     // in two places. The board row already holds the name they picked - use that.
@@ -268,7 +304,7 @@ async function handle(request, env) {
       const cid = await crewIdFor(s.id);
       const crew = await loadCrew(cid);
       if (!crew) return json(null);
-      if (touchSeen(crew)) await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      if (touchSeen(crew)) await putCrew(cid, crew);
       return json(crew);
     }
 
@@ -280,7 +316,8 @@ async function handle(request, env) {
       const name = (typeof body.name === "string" && body.name.trim().slice(0, 24)) || `${s.name}'s crew`;
       let id; for (let i = 0; i < 5; i++) { id = newCode(); if (!(await env.SAVES.get(`crew:${id}`))) break; }
       const crew = { id, name, owner: s.id, members: [{ id: s.id, name: (await shownName(s.id)) || s.name }], xp: 0, pick: 0, shift: 0, created: Date.now() };
-      await env.SAVES.put(`crew:${id}`, JSON.stringify(crew));
+      await putMembers(id, crew.members);
+      await putCrew(id, crew);
       await env.SAVES.put(`crewof:${s.id}`, id);
       return json(crew);
     }
@@ -295,8 +332,9 @@ async function handle(request, env) {
       if (crew.members.length >= 4) return json({ error: "That crew is full." }, 400);
       if (crew.members.some(m => m.id === s.id)) return json({ error: "You're already in that crew." }, 400);
       crew.members.push({ id: s.id, name: (await shownName(s.id)) || s.name });
-      await env.SAVES.put(`crew:${crew.id}`, JSON.stringify(crew));
+      await putMembers(crew.id, crew.members);        // roster only — no counters, no race
       await env.SAVES.put(`crewof:${s.id}`, crew.id);
+      await env.SAVES.delete("cache:crews");
       return json(crew);
     }
 
@@ -307,8 +345,11 @@ async function handle(request, env) {
       await env.SAVES.delete(`crewof:${s.id}`);
       if (!crew) return json({ ok: true });
       crew.members = crew.members.filter(m => m.id !== s.id);
-      if (crew.members.length === 0) await env.SAVES.delete(`crew:${cid}`);
-      else { if (crew.owner === s.id) crew.owner = crew.members[0].id; await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew)); }
+      if (crew.members.length === 0) { await env.SAVES.delete(`crew:${cid}`); await env.SAVES.delete(`crewmem:${cid}`); }
+      else {
+        if (crew.owner === s.id) { crew.owner = crew.members[0].id; await putCrew(cid, crew); }
+        await putMembers(cid, crew.members);
+      }
       return json({ ok: true });
     }
 
@@ -322,7 +363,7 @@ async function handle(request, env) {
       const name = typeof body.name === "string" ? body.name.trim().slice(0, 24) : "";
       if (!/^[A-Za-z0-9 '._-]{2,24}$/.test(name)) return json({ error: "Use 2-24 letters, numbers or spaces." }, 400);
       crew.name = name;
-      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      await putCrew(cid, crew);
       await env.SAVES.delete("cache:crews");
       return json(crew);
     }
@@ -340,7 +381,8 @@ async function handle(request, env) {
       crew.members = crew.members.filter(m => m.id !== target);
       if (crew.seen) delete crew.seen[target];
       if (crew.dig && crew.dig.by) delete crew.dig.by[target];
-      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      await putMembers(cid, crew.members);
+      await putCrew(cid, crew);
       // Only clear their pointer if it still points here — they may have rejoined elsewhere.
       if ((await env.SAVES.get(`crewof:${target}`)) === cid) await env.SAVES.delete(`crewof:${target}`);
       await env.SAVES.delete("cache:crews");
@@ -357,7 +399,7 @@ async function handle(request, env) {
       const target = String(body.id || "");
       if (!crew.members.some(m => m.id === target)) return json({ error: "They're not in this crew." }, 404);
       crew.owner = target;
-      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      await putCrew(cid, crew);
       await env.SAVES.delete("cache:crews");
       return json(crew);
     }
@@ -373,8 +415,10 @@ async function handle(request, env) {
       // Cheap place to keep your own roster name current if you renamed yourself: this
       // route already loads and writes the crew, and only the member themselves calls it.
       const me = crew.members.find(m => m.id === s.id), nm = await shownName(s.id);
-      if (me && nm && me.name !== nm) me.name = nm;
-      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      // a name change is a roster edit, so it goes to the roster key, and only when it
+      // actually changed - this must not become a write on every xp tick
+      if (me && nm && me.name !== nm) { me.name = nm; await putMembers(cid, crew.members); }
+      await putCrew(cid, crew);
       return json(crew);
     }
 
@@ -420,7 +464,7 @@ async function handle(request, env) {
         // A week where everyone contributed counts double toward the crew's standing.
         if (crew.members.every(m => (crew.dig.by[m.id] || 0) > 0)) crew.fullWeeks = (crew.fullWeeks || 0) + 1;
       }
-      if (rolled || seen || amount > 0 || hit) await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      if (rolled || seen || amount > 0 || hit) await putCrew(cid, crew);
       return json({ ...crew, justFinished: hit });
     }
 
@@ -435,7 +479,7 @@ async function handle(request, env) {
       if (crew.xp < cost) return json({ error: "Not enough crew xp." }, 400);
       crew.xp -= cost;
       if (id === 0) crew.pick += 1; else crew.shift += 1;
-      await env.SAVES.put(`crew:${cid}`, JSON.stringify(crew));
+      await putCrew(cid, crew);
       return json(crew);
     }
 
@@ -477,7 +521,15 @@ async function handle(request, env) {
       }
       // Same shape as the weekly rollover, one tier up. A row with no era at all is a
       // season-1 player: their whole score to date becomes their season-1 result.
+      // A reset save comes back with lifetime 0 while eraBase (and weekBase) still hold
+      // the player's old, far larger total. seasonScore is score - eraBase clamped at 0,
+      // so a reset player would sit invisible on the board until they had re-mined their
+      // entire previous run - which at the top of the board is never. Lifetime only ever
+      // climbs within a season, so a score BELOW the baseline can only mean the save was
+      // reset: rebaseline to where they actually are now.
       let { era, eraBase, prevEra, prevEraScore } = prev;
+      if (eraBase != null && score < eraBase) eraBase = score;
+      if (weekBase != null && score < weekBase) weekBase = score;
       if (era !== ERA) {
         if (prev.id) {
           prevEra = era || 1;
