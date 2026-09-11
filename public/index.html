@@ -566,7 +566,12 @@
   .daily small{color:var(--dim)}
   .daily .btn{margin-left:auto}
   /* tour */
-  .tour{position:fixed;inset:0;z-index:40;display:none}
+  /* pointer-events:none matters. This is a full-screen inset:0 layer, and the dark
+     surround is the hole's box-shadow rather than a background, so it LOOKS like only
+     the cutout is covered while the container was in fact eating every tap on the page.
+     The "swing 5 more" step could not be satisfied - you could not reach the rock - so
+     Next stayed disabled and the tour hung there. The tip re-enables events for itself. */
+  .tour{position:fixed;inset:0;z-index:40;display:none;pointer-events:none}
   .tour.on{display:block}
   .tour .hole{position:absolute;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.78),0 0 0 4px rgba(255,176,31,.25),0 0 30px rgba(255,176,31,.35);border:2px solid var(--lamp);transition:all .35s cubic-bezier(.4,0,.2,1);pointer-events:none;animation:holepulse 1.8s ease-in-out infinite}
   @keyframes holepulse{50%{box-shadow:0 0 0 9999px rgba(0,0,0,.78),0 0 0 8px rgba(255,176,31,.12),0 0 40px rgba(255,176,31,.5)}}
@@ -576,7 +581,7 @@
   .tipdots i{flex:1;height:3px;border-radius:2px;background:var(--line2)}
   .tipdots i.done{background:rgba(255,176,31,.45)}
   .tipdots i.on{background:var(--lamp)}
-  .tour .tip{position:absolute;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:14px;padding:18px;width:min(360px,calc(100vw - 24px));box-shadow:0 20px 50px rgba(0,0,0,.6);transition:top .35s cubic-bezier(.4,0,.2,1),left .35s cubic-bezier(.4,0,.2,1);animation:fadein .25s}
+  .tour .tip{pointer-events:auto;position:absolute;background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:14px;padding:18px;width:min(360px,calc(100vw - 24px));box-shadow:0 20px 50px rgba(0,0,0,.6);transition:top .35s cubic-bezier(.4,0,.2,1),left .35s cubic-bezier(.4,0,.2,1);animation:fadein .25s}
   .tour .tip small{color:var(--dim);font-size:12px}
   .tour .tip b{display:block;font-size:17px;margin:0}
   .tour .tip p{font-size:14px;color:var(--dim)}
@@ -1403,7 +1408,7 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer through the first nine and earn keepsakes. Mining uncovers clues.</li><li><b>Below the Warm Dark</b> — forty-one more layers, no story and no mercy. Each pays ×2.2, and the descend costs are tuned so a floor takes about an hour near the top of the deep and several days near the bottom. New crew and picks unlock every three floors.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free shift</b> — every 24 hours you can put a hand on the pick for 6 hours at 2 swings/sec, at no cost. The clock starts when you claim, so claiming late never wastes a day.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
+    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer through the first nine and earn keepsakes. Mining uncovers clues.</li><li><b>Wardens</b> stand at the mouth of every layer down to 30. Press descend and you fight instead of paying — your cash is only spent once it's down. Losing costs nothing, and a win gives ×1.25 to everything for two minutes. Each door only has to be opened once, ever.</li><li><b>Below the Warm Dark</b> — forty-one more layers, no story and no mercy. Each pays ×2.2, and the descend costs are tuned so a floor takes about an hour near the top of the deep and several days near the bottom. New crew and picks unlock every three floors.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free shift</b> — every 24 hours you can put a hand on the pick for 6 hours at 2 swings/sec, at no cost. The clock starts when you claim, so claiming late never wastes a day.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
@@ -1885,6 +1890,9 @@ const ACH=[
   {id:"vein25",name:"The seam runs clean",desc:"Strike 25 fault lines in a row.",ok:()=>(S.bestVein||0)>=25,r:1.5},
   {id:"days7",name:"Regular",desc:"Play on 7 different days.",ok:()=>(S.days||0)>=7,r:.8},
   // ---- below the Warm Dark ----
+  {id:"warden1",name:"Doorbreaker",desc:"Beat a warden at the mouth of a layer.",ok:()=>(S.guardsBeat||0)>=1,r:.8},
+  {id:"warden10",name:"Ten doors down",desc:"Beat ten wardens.",ok:()=>(S.guardsBeat||0)>=10,r:4},
+  {id:"warden29",name:"Nothing stands in the way",desc:"Beat every warden down to depth 30.",ok:()=>(S.guardsBeat||0)>=29,r:12},
   {id:"deep20",name:"Past the payroll",desc:"Reach depth 20.",ok:()=>(S.deepest||0)>=19,r:6},
   {id:"deep30",name:"The counting dark",desc:"Reach depth 30.",ok:()=>(S.deepest||0)>=29,r:10},
   {id:"deep40",name:"Deadlight",desc:"Reach depth 40.",ok:()=>(S.deepest||0)>=39,r:18},
@@ -1959,7 +1967,7 @@ const DEPTH_STEP=1.5;      // depths 1-9, the story
 const DEEP_STEP=2.2;       // below the Warm Dark, where the pay has to keep up with the wall
 const depthScale=d=>Math.pow(DEPTH_STEP,Math.min(d,8))*Math.pow(DEEP_STEP,Math.max(0,d-8));
 const depthStepAt=d=>d>8?DEEP_STEP:DEPTH_STEP;
-const depthMult=()=>depthScale(S.depth)*oilMult()*throneMult()*termEarn()*dockMult()*seamMult();
+const depthMult=()=>depthScale(S.depth)*oilMult()*throneMult()*termEarn()*dockMult()*seamMult()*wardMult();
 const BUNKS=[{name:"Straw pallet",cap:8,cost:0},{name:"Wooden bunk",cap:12,cost:200000},{name:"Private cell",cap:24,cost:5e6},{name:"Foreman's quarters",cap:48,cost:1e8}];
 const bunkCap=()=>(BUNKS[S.bunk||0].cap+perkLv("shift")*4+(FX.off||0))*3600;
 const PERKS=[
@@ -2018,6 +2026,12 @@ const nextMile=n=>{const m=MILES.map(mileAt).find(x=>n<x);return m};
 const crewTotal=i=>CREW[i].rate*(S.crew[i]||0)*crewMult(S.crew[i]||0)*depthMult()*buffMult()*(termNow().id==="quiet"?1.5:1);
 const buffOn=()=>Date.now()<(S.buffUntil||0);
 const buffMult=()=>buffOn()?2:1;
+// ---- the warden's ward ----
+// Kept separate from the Sunforged buff so the two stack rather than overwrite: this one
+// is small, short, and earned at a door, and it should never eat a x2 you already had.
+const WARD_MS=2*60*1000,WARD_MULT=1.25;
+const wardOn=()=>Date.now()<(S.wardUntil||0);
+const wardMult=()=>wardOn()?WARD_MULT:1;
 const partyPickMult=()=>1+((PARTY&&PARTY.pick)||0)*.1;
 const partyShiftMult=()=>1+((PARTY&&PARTY.shift)||0)*.25;
 const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1+(FX.swing||0))*(termNow().id==="blood"?.5:1)*partyPickMult();
@@ -2922,7 +2936,7 @@ const TOUR=[
     need:()=>S.swings>=5,needText:()=>`Swing ${Math.max(0,5-S.swings)} more`},
   {tab:"mine",el:".stats",ic:"$",t:"That's yours",p:"Cash is what you spend. Per second is what gets earned without you — right now it's nothing, because nobody works for you yet."},
   {tab:"mine",el:".side .card:nth-child(3)",ic:"⚒",t:"Stop swinging alone",p:"A digger costs $30 and never stops. Workers earn every second, awake or asleep — they're the real game. A better pick only makes your own arm hurt less."},
-  {tab:"mine",el:".links",ic:"✦",t:"The rest will find you",p:"Descending, stories, contracts, the warden's table, the shelf in your bunkhouse — none of it matters yet, and each one will introduce itself when it does. Full rules are in Help whenever you want them."},
+  {tab:"mine",el:".card.links",ic:"✦",t:"The rest will find you",p:"Descending, stories, contracts, the warden's table, the shelf in your bunkhouse — none of it matters yet, and each one will introduce itself when it does. Full rules are in Help whenever you want them."},
 ];
 // ---- contextual tips ----
 // The old tour explained sixteen systems to someone who had never swung a pick. These fire
@@ -2946,17 +2960,34 @@ const TIPS=[
 
 let tourI=0;
 let TQ=TOUR;
+// ---- phones don't get the guided tour ----
+// The steps anchor to CSS selectors like `.side .card:nth-child(3)`, which is source
+// order - and the narrow layout reorders those same cards with `order:`. So the
+// spotlight lands on whatever card happens to sit third in the markup rather than the
+// one the step is describing, and every element-anchored step points at the wrong thing.
+// Rather than maintain a second set of selectors for a layout that keeps moving, the
+// first-run tour is desktop-only, and anything a phone does still open is shown centred
+// with no spotlight at all - the one code path that cannot point somewhere wrong.
+const smallScreen=()=>innerWidth<900;
+let gateSince=0;
 function tourGate(){const st=TQ[tourI];if(!st)return;const b=$("tipNext");
-  if(!st.need){b.disabled=false;return}
-  const ok=st.need();b.disabled=!ok;
-  b.textContent=ok?(tourI===TQ.length-1?"Start mining ⛏":"Next →"):(st.needText?st.needText():"Try it first")}
+  if(!st.need){b.disabled=false;gateSince=0;return}
+  const ok=st.need();
+  // Belt and braces: if someone sits on a gated step for 20 seconds - a stuck tap target,
+  // a layout we did not anticipate - let them past rather than trapping them in the tour.
+  if(!gateSince)gateSince=Date.now();
+  const waited=Date.now()-gateSince>20000;
+  b.disabled=!ok&&!waited;
+  b.textContent=ok?(tourI===TQ.length-1?"Start mining ⛏":"Next →")
+    :waited?"Skip this step →":(st.needText?st.needText():"Try it first")}
 function tourShow(){const prev=TQ[tourI-1];if(prev&&prev.post)prev.post();const st=TQ[tourI];if(!st){tourEnd();return}
   switchTab(st.tab||"mine");if(st.pre)st.pre();
   const tip=$("tip"),h=$("hole");$("tipStep").textContent=TQ.length>1?`Step ${tourI+1} of ${TQ.length}`:"A note from the mine";$("tipIc").textContent=st.ic||"✦";$("tipTitle").textContent=st.t;$("tipText").textContent=st.p;
   $("tipDots").innerHTML=TQ.length>1?TQ.map((_,i)=>`<i class="${i===tourI?'on':i<tourI?'done':''}"></i>`).join(""):"";
   $("tipNext").textContent=TQ.length>1?(tourI===TQ.length-1?"Start mining ⛏":"Next →"):"Got it";$("tipBack").style.visibility=tourI?"":"hidden";
   $("tipSkip").style.visibility=TQ.length>1?"":"hidden";tourGate();
-  if(!st.el){h.style.width="0";h.style.height="0";h.style.left="50%";h.style.top="50%";tip.style.left="50%";tip.style.top="50%";tip.style.transform="translate(-50%,-50%)";return}
+  // No anchor, or a screen whose layout we can't trust to match the selector: centre it.
+  if(!st.el||smallScreen()){h.style.width="0";h.style.height="0";h.style.left="50%";h.style.top="50%";tip.style.left="50%";tip.style.top="50%";tip.style.transform="translate(-50%,-50%)";return}
   tip.style.transform="";const el=document.querySelector(st.el);if(!el){tourI++;tourShow();return}
   el.scrollIntoView({block:"center",behavior:"smooth"});
   setTimeout(()=>{const r=el.getBoundingClientRect();h.style.left=(r.left-8)+"px";h.style.top=(r.top-8)+"px";h.style.width=(r.width+16)+"px";h.style.height=(r.height+16)+"px";
@@ -2964,9 +2995,14 @@ function tourShow(){const prev=TQ[tourI-1];if(prev&&prev.post)prev.post();const 
     let top=below+tipH<vh?below:Math.max(12,r.top-tipH-18);if(r.height>vh*.6)top=Math.max(12,vh/2-tipH/2);
     let left=Math.min(Math.max(12,r.left),vw-tipW-12);if(vw<560)left=12;
     tip.style.top=top+"px";tip.style.left=left+"px"},380)}
-function tourStart(list){TQ=Array.isArray(list)&&list.length?list:TOUR;tourI=0;$("tour").classList.add("on");tourShow()}
+function tourStart(list){
+  const manual=Array.isArray(list)&&list.length;
+  // Auto first-run tour on a phone: mark it seen and let them play. Help > Take the tour
+  // still works everywhere, it just renders centred on small screens.
+  if(!manual&&smallScreen()&&!S.seen){S.seen=true;save();return}
+  TQ=manual?list:TOUR;tourI=0;$("tour").classList.add("on");tourShow()}
 function tourEnd(){$("tour").classList.remove("on");const st=TQ[tourI];if(st&&st.post)st.post();if(TQ===TOUR){switchTab("mine");S.seen=true}TQ=TOUR;save()}
-$("tipNext").onclick=()=>{if($("tipNext").disabled)return;tourI++;tourShow()};$("tipBack").onclick=()=>{if(tourI>0){const p=TQ[tourI];if(p&&p.post)p.post();tourI--;tourShowNoPost();}};
+$("tipNext").onclick=()=>{if($("tipNext").disabled)return;gateSince=0;tourI++;tourShow()};$("tipBack").onclick=()=>{if(tourI>0){const p=TQ[tourI];if(p&&p.post)p.post();tourI--;tourShowNoPost();}};
 function tourShowNoPost(){const keep=TQ[tourI-1];const save=keep&&keep.post;if(keep)keep.post=null;tourShow();if(keep)keep.post=save}$("tipSkip").onclick=tourEnd;$("openTour").onclick=()=>tourStart();
 function tipCheck(){
   if(!S.seen||boss||$("tour").classList.contains("on"))return;
@@ -3063,7 +3099,8 @@ function render(){
   if(S.cash>shown+shown*0.02){const c=$("cash");c.classList.remove("cash-bump");void c.offsetWidth;c.classList.add("cash-bump")}
   $("cps").textContent=fmt(cps());$("upCash").textContent=fmt(S.cash);$("eqCash").textContent=fmt(S.cash);$("upCps").textContent=fmt(cps())+"/sec";$("eqCps").textContent=fmt(cps())+"/sec";$("upClick").textContent=fmt(clickPower());
   $("clickVal").textContent=fmt(clickPower());
-  $("pickName").innerHTML=buffOn()?`Sunforged pick <span class="buff">×2 · ${Math.ceil((S.buffUntil-Date.now())/60000)}m</span>`:PICKS[S.pick].name;
+  $("pickName").innerHTML=(buffOn()?`Sunforged pick <span class="buff">×2 · ${Math.ceil((S.buffUntil-Date.now())/60000)}m</span>`:PICKS[S.pick].name)
+    +(wardOn()?` <span class="buff">ward ×${WARD_MULT} · ${Math.max(1,Math.ceil((S.wardUntil-Date.now())/1000))}s</span>`:"");
   document.querySelector(".hero").classList.toggle("buffed",buffOn());if(buffOn())wasBuffed=true;
   $("oil").textContent="×"+oilMult().toFixed(1);
   $("awayNote").textContent=`Your workers keep working while you're away, at half pace, for up to ${bunkCap()/3600} hours. Signed-out progress only lives in this browser.`;
@@ -3081,7 +3118,8 @@ function render(){
   if(!next){$("depthNext").textContent="Bottom";dBtn.disabled=true;dBtn.textContent="Bottom reached";$("progFill").style.width="100%";$("progText").textContent="No map goes further";$("progPct").textContent="";$("etaText").textContent="Keep digging for the board"}
   else if(L.rank&&(S.debts||0)<L.rank){$("depthNext").textContent=next.name;dBtn.disabled=true;dBtn.textContent=`Pay the debt ×${L.rank} to descend`;$("progFill").style.width="0%";$("progText").textContent="Sealed";$("progPct").textContent="";$("etaText").textContent=`Opens at debt rank ${L.rank}`}
   else if(next.needsThrone&&!S.throne){$("depthNext").textContent=next.name;dBtn.disabled=true;dBtn.textContent="Excavate the throne to descend";$("progFill").style.width="0%";$("progText").textContent="Solid floor";$("progPct").textContent="";$("etaText").textContent="Whatever is under the throne opens the way"}
-  else{const dc=descendCost();$("depthNext").textContent=next.name;dBtn.disabled=S.cash<dc;dBtn.textContent=S.cash<dc?"Need "+fmt(dc-S.cash)+" more":"Descend ↑";
+  else{const dc=descendCost();$("depthNext").textContent=next.name;dBtn.disabled=S.cash<dc;
+    dBtn.textContent=S.cash<dc?"Need "+fmt(dc-S.cash)+" more":guardNeeded(S.depth+1)?"Fight the warden ⚔":"Descend ↑";
     const pct=Math.min(100,S.cash/dc*100);$("progFill").style.width=pct+"%";$("progText").textContent=fmt(S.cash)+" / "+fmt(dc);$("progPct").textContent=Math.floor(pct)+"% of the way";
     // "x2.80" on its own tells you nothing about whether the descend cost is worth paying,
     // and the gem jump — the bigger half of the reward — was never shown at all.
@@ -3168,13 +3206,53 @@ let betReady=0,bj=null;
 let streak=0,lastSwing=0,combo=0,lastManual=0,lastNudge=0,lastQNudge=Date.now()+120000,lastPNudge=Date.now()+180000;
 // ---- the Deep Wyrm (random boss) ----
 let boss=null,bossCooldown=Date.now()+3*60*1000,wasBuffed=false;
+// ---- descent guardians ----
+// Something stands at the mouth of every layer down to 30. You cannot buy past it: the
+// descend button spawns it instead of taking your cash, and the cash is only spent once
+// it is down. Losing costs nothing but the time, so this is a speed bump, not a wall.
+//
+// Beaten guardians are remembered across rebirths on purpose. Re-fighting thirty doors
+// on every one of twenty debts would be a chore, not content - the fight is the first
+// time you open a door, and after that the door stays open.
+const GUARD_TO=29;                    // 0-indexed, so guardians stand at depths 2..30
+const GUARD_TIME=45000;
+const guardBeaten=d=>!!(S.guards&&S.guards[d]);
+const guardNeeded=d=>d<=GUARD_TO&&!guardBeaten(d);
+function guardName(d){return "Warden of "+LAYERS[d].name}
+function spawnGuard(d){
+  // Sized off swing power ONLY, never cps. Crew income does no damage to a boss - only
+  // swings do - so folding cps into the hit points would hand the heaviest idle players
+  // a warden they cannot scratch and lock them out of descending entirely. At x35 this
+  // is about thirty-five taps inside the timer for anyone, however they play.
+  const base=clickPower()/buffMult()/wardMult();
+  const max=base*35;
+  boss={kind:"guard",depth:d,hp:max,max,until:Date.now()+GUARD_TIME+perkLv("slayer")*8000};
+  $("bossName").textContent=guardName(d);
+  $("bossbar").classList.add("on");
+  toast(`Something is standing in the way down. Cut through it to reach ${LAYERS[d].name}.`);
+  drawScene();bossRender();render()}
 const tellMult=()=>1+perkLv("tell")*.04;
 const BOSS_CHANCE=1/6000,BOSS_TIME=30000,BUFF_MS=5*60*1000;
 function spawnBoss(){const base=clickPower()/buffMult();const max=Math.max(base*40,base*25+cps()/buffMult()*45);boss={hp:max,max,until:Date.now()+BOSS_TIME+perkLv("slayer")*8000};
   $("bossbar").classList.add("on");toast("Something big is coming up the shaft. Hit it before it slips away!");drawScene();bossRender()}
 function bossRender(){if(!boss)return;$("bossHp").style.width=Math.max(0,boss.hp/boss.max*100)+"%";$("bossTimer").textContent=Math.max(0,Math.ceil((boss.until-Date.now())/1000))+"s"}
-function bossEnd(win){$("bossbar").classList.remove("on");boss=null;bossCooldown=Date.now()+8*60*1000;
-  if(win){S.buffUntil=Date.now()+BUFF_MS;S.bosses=(S.bosses||0)+1;feedPost("wyrm",S.bosses);toast("The Deep Wyrm is slain. It drops the Sunforged pick: everything ×2 for 5 minutes!");confetti(60);const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake")}
+function bossEnd(win){
+  const wasGuard=!!(boss&&boss.kind==="guard"),gd=boss?boss.depth:0;
+  $("bossbar").classList.remove("on");boss=null;bossCooldown=Date.now()+8*60*1000;
+  $("bossName").textContent="Deep Wyrm";
+  if(wasGuard){
+    if(win){
+      S.guards=S.guards||{};S.guards[gd]=Date.now();
+      S.guardsBeat=(S.guardsBeat||0)+1;
+      // the ward extends rather than replaces, so back-to-back doors don't cut it short
+      S.wardUntil=Math.max(S.wardUntil||0,Date.now())+WARD_MS;
+      toast(`The way is open. ×${WARD_MULT} to everything for two minutes.`);confetti(40);
+      const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake");
+      descend();                      // walk them through the door they just opened
+    }
+    else toast("It holds the stair. Nothing lost — get your wind back and try again.");
+  }
+  else if(win){S.buffUntil=Date.now()+BUFF_MS;S.bosses=(S.bosses||0)+1;feedPost("wyrm",S.bosses);toast("The Deep Wyrm is slain. It drops the Sunforged pick: everything ×2 for 5 minutes!");confetti(60);const h=document.querySelector(".hero");h.classList.remove("shake");void h.offsetWidth;h.classList.add("shake")}
   else toast("The Wyrm slipped back into the dark. It'll be back.");
   drawScene();render();save()}
 const streakMult=()=>{const lv=perkLv("rhythm"),step=10-lv,cap=50+lv*15;return 1+Math.min(cap,Math.floor(streak/Math.max(4,step))*5)/100};
@@ -3702,11 +3780,14 @@ function setBuyQty(q){
 }
 function descend(){const L=LAYERS[S.depth],nx=LAYERS[S.depth+1];if(L.rank&&(S.debts||0)<L.rank){toast(`Only miners who have paid the debt ${L.rank} times may go deeper.`);return}
   if(nx&&nx.needsThrone&&!S.throne){toast("The floor here is solid. Excavate the Hollow Throne first — whatever is under it opens the way.");return}
-  const dc=descendCost();if(S.cash>=dc&&LAYERS[S.depth+1]){S.cash-=dc;S.depth++;const rec=S.depth>(S.deepest||0);S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);if(rec)feedPost("depth",S.depth+1);confetti(40);drawScene();render();save()}}
+  const dc=descendCost();
+  // The guardian comes first and the cash stays in your pocket until it is beaten.
+  if(S.cash>=dc&&LAYERS[S.depth+1]&&guardNeeded(S.depth+1)){if(!boss)spawnGuard(S.depth+1);return}
+  if(S.cash>=dc&&LAYERS[S.depth+1]){S.cash-=dc;S.depth++;const rec=S.depth>(S.deepest||0);S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp;toast(`You broke through into ${LAYERS[S.depth].name}.`);if(rec)feedPost("depth",S.depth+1);confetti(40);drawScene();render();save()}}
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
-  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,dailyNext:S.dailyNext,dailyTaken:S.dailyTaken,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,bestVein:S.bestVein,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
+  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,dailyNext:S.dailyNext,dailyTaken:S.dailyTaken,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,guards:S.guards,guardsBeat:S.guardsBeat,wardUntil:S.wardUntil,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,bestVein:S.bestVein,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
   toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);feedPost("debt",S.debts);drawScene();render();save();
 }
