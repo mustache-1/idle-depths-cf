@@ -587,7 +587,11 @@
   .tour .tip p{font-size:14px;color:var(--dim)}
   .tour .tip .btns{margin-top:12px}
   .pill.wait{background:var(--panel);color:var(--dim);box-shadow:none;animation:none;border:1px solid var(--line2);font-weight:500}
-  .pill{height:36px;padding:0 14px;border-radius:18px;border:0;background:linear-gradient(180deg,var(--lamp2),var(--lamp));color:#1a1614;font-weight:600;font-size:13px;box-shadow:0 0 16px rgba(255,176,31,.45);animation:pulse 1.6s ease-in-out infinite}
+  .pill{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:36px;padding:0 14px;border-radius:18px;border:0;background:linear-gradient(180deg,var(--lamp2),var(--lamp));color:#1a1614;font-weight:600;font-size:13px;text-decoration:none;box-shadow:0 0 16px rgba(255,176,31,.45);animation:pulse 1.6s ease-in-out infinite}
+  /* The Discord link is a standing signpost, not a reward — it should sit quiet in the
+     top bar rather than pulse for attention the way a claimable thing does. */
+  #discordPill{background:#5865F2;color:#fff;box-shadow:0 0 14px rgba(88,101,242,.35);animation:none}
+  #discordPill:hover{filter:brightness(1.12)}
   .dcshort{display:none}
   @media(max-width:560px){.dcfull{display:none}.dcshort{display:inline}}
   .helpbtn{width:36px;height:36px;border-radius:8px;border:1px solid var(--line2);background:transparent;color:var(--dim);font-weight:600}
@@ -1155,7 +1159,7 @@
     <div class="stat rate"><small>Per second</small><b id="cps">$0</b></div>
     <div class="stat"><small>Lantern oil</small><b id="oil">×1.0</b></div>
   </div>
-  <div style="display:flex;gap:8px;align-items:center"><button id="dailyPill" class="pill">🏮 Free shift</button><button class="helpbtn" id="help" aria-label="How to play">?</button><div id="account"></div></div>
+  <div style="display:flex;gap:8px;align-items:center"><a id="discordPill" class="pill" href="https://discord.gg/JeGy88BvY" target="_blank" rel="noopener">Discord</a><button class="helpbtn" id="help" aria-label="How to play">?</button><div id="account"></div></div>
 </div></div>
 
 <div class="tabs"><div class="wrap">
@@ -1414,7 +1418,7 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer through the first nine and earn keepsakes. Mining uncovers clues.</li><li><b>Wardens</b> stand at the mouth of every layer down to 30. Press descend and you fight instead of paying — your cash is only spent once it's down. Losing costs nothing, and a win gives ×1.25 to everything for two minutes. Each door only has to be opened once, ever.</li><li><b>Below the Warm Dark</b> — forty-one more layers, no story and no mercy. Each pays ×2.2, and the descend costs are tuned so a floor takes about an hour near the top of the deep and several days near the bottom. New crew and picks unlock every three floors.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free shift</b> — every 24 hours you can put a hand on the pick for 6 hours at 2 swings/sec, at no cost. The clock starts when you claim, so claiming late never wastes a day.</li><li><b>Auto-swinger</b> — hire a hand from the Upgrades tab any time: 12 hours on the pick at 4 swings a second, twice the pace of the daily shift. <b>Your first one is free</b>, once ever. After that it costs a fifth of what you currently owe Ashcombe, so the price climbs with every debt you pay. It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
+    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer through the first nine and earn keepsakes. Mining uncovers clues.</li><li><b>Wardens</b> stand at the mouth of every layer down to 30. Press descend and you fight instead of paying — your cash is only spent once it's down. Losing costs nothing, and a win gives ×1.25 to everything for two minutes. Each door only has to be opened once, ever.</li><li><b>Below the Warm Dark</b> — forty-one more layers, no story and no mercy. Each pays ×2.2, and the descend costs are tuned so a floor takes about an hour near the top of the deep and several days near the bottom. New crew and picks unlock every three floors.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Auto-swinger</b> — hire a hand from the Upgrades tab any time: 12 hours on the pick at 4 swings a second, <b>Your first one is free</b>, once ever. After that it costs a fifth of what you currently owe Ashcombe, so the price climbs with every debt you pay. It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
@@ -2002,23 +2006,7 @@ const autoOn=()=>Date.now()<(S.autoUntil||0);
 // Six hours of auto-swinging, free. The first one is a gift to everyone; after that
 // the clock runs 24h from the moment you claim, not from midnight, so there is no
 // "best" time to log in and nobody loses a day to a timezone.
-const DAILY_H=6,DAILY_RATE=2,DAILY_MS=24*3600*1000;
-const dailyReady=()=>Date.now()>=(S.dailyNext||0);
-const dailyLeft=()=>Math.max(0,(S.dailyNext||0)-Date.now());
-function claimDaily(){
-  if(autoOn()){toast(`A hand is already on the pick — ${eta2(S.autoUntil-Date.now())} left on this shift.`);return}
-  if(!dailyReady()){toast(`The next free shift is ${eta2(dailyLeft())} away. You can still hire a hand from the mine.`);return}
-  S.autoUntil=Date.now()+DAILY_H*3600*1000;
-  S.autoRate=DAILY_RATE;
-  S.autoBought=true;
-  S.shiftsUsed=(S.shiftsUsed||0)+1;
-  S.dailyNext=Date.now()+DAILY_MS;
-  S.dailyTaken=(S.dailyTaken||0)+1;
-  toast(S.dailyTaken===1
-    ?`The overseer waves a hand through. Six hours on the pick, on the house.`
-    :`Free shift claimed — ${DAILY_H} hours at ${DAILY_RATE} swings a second.`);
-  confetti(30);drawScene();render();save();
-}
+const DAILY_RATE=2;   // the pace the old free daily shift ran at; the auto-swinger is still keyed off it
 const MILES=[20,40,60,80,100];
 const mileAt=m=>Math.max(5,Math.round(m*(1-perkLv("union")*.15)));  // Union card pulls every milestone in
 const crewMult=n=>Math.pow(2,MILES.filter(m=>n>=mileAt(m)).length);   // ×2 at each → up to ×32
@@ -2773,7 +2761,7 @@ const AUTO_PCT=.20;
 const AUTO_COST=()=>{const n=S.debts||0;
   return Math.floor(REBIRTH_BASE*Math.pow(1.6,n)*Math.pow(1.05,n*n)*AUTO_PCT)};
 const AUTO_H=12;                  // hours per hire
-const AUTO_SWINGS=DAILY_RATE*2;   // twice the pace of the free shift, by definition
+const AUTO_SWINGS=DAILY_RATE*2;   // 4/sec
 // ---- the first one is on the house ----
 // $10M is a wall to anyone who has not paid a debt yet, so the shift was a thing you read
 // about rather than a thing you used. Everyone gets one full hire free, once ever, to see
@@ -2789,10 +2777,10 @@ async function hireShift(){
   const hours=AUTO_H*partyShiftMult(),len=eta2(hours*3600*1000);
   const ok=free
     ? await ask("Your free shift — one time only",
-        `FREE, ONE TIME ONLY. The overseer puts a hand on your pick for ${len} at ${AUTO_SWINGS} swings a second, twice the pace of the daily shift, and it keeps swinging even if you close the game.\n\nThis is the only free one you will ever get. Every hire after it costs a fifth of what you owe Ashcombe — ${fmt(AUTO_COST())} at your rank right now. Spend it now?`,
+        `FREE, ONE TIME ONLY. The overseer puts a hand on your pick for ${len} at ${AUTO_SWINGS} swings a second, and it keeps swinging even if you close the game.\n\nThis is the only free one you will ever get. Every hire after it costs a fifth of what you owe Ashcombe — ${fmt(AUTO_COST())} at your rank right now. Spend it now?`,
         "Use my free shift")
     : await ask("Hire an auto-swinger?",
-        `${fmt(cost)} for ${len} on the pick at ${AUTO_SWINGS} swings a second — twice the pace of the free shift. It keeps swinging even if you close the game.`,
+        `${fmt(cost)} for ${len} on the pick at ${AUTO_SWINGS} swings a second. It keeps swinging even if you close the game.`,
         "Hire — "+fmt(cost));
   if(!ok)return;
   // Both can move while the prompt sits open: the asking price climbs the moment a debt is
@@ -2808,7 +2796,7 @@ async function hireShift(){
     :`Auto-swinger hired — ${len} at ${AUTO_SWINGS} swings a second.`);
   confetti(free?36:20);render();save();
 }
-$("dailyPill").onclick=claimDaily;$("autoBtn").onclick=hireShift;
+$("autoBtn").onclick=hireShift;
 
 // ---- crew (real multiplayer: create/join by code, xp synced to the server) ----
 let PARTY=null,partyXpBuf=0,partyBusy=false;
@@ -3027,7 +3015,6 @@ const TIPS=[
   {id:"contract",when:()=>S.contracts&&S.contracts.list.some(c=>!c.claimed&&cProg(c)>=c.n),tab:"quests",el:"#q-contracts",ic:"✎",t:"A contract is finished",p:"Contracts run in the background and refresh every six hours. Collect everything that's done with one button — progress counts while you're away, too."},
   {id:"demand",when:()=>S.contracts&&S.contracts.list.some(c=>c.demand&&!c.claimed),tab:"quests",el:"#q-contracts",ic:"!",t:"The warden wants something",p:"A demand is a contract with a deadline. Meet it and the pay is far better than a normal job. Miss it and he docks everything you earn by 20% for half an hour."},
   {id:"keepsake",when:()=>((S.story&&S.story.keeps)||[]).length>=1,tab:"mine",el:"#account",ic:"🛏",t:"You earned a keepsake",p:"Take it to the Shelf in your Bunkhouse and put it out. Displayed keepsakes work for you, and both halves of the same story work far harder together. Your bunk decides how many you can display at once."},
-  {id:"auto",when:()=>dailyReady()&&!autoOn(),tab:"mine",el:"#dailyPill",ic:"🏮",t:"Your free shift is ready",p:"Every 24 hours the overseer lets a hand work your pick for six hours, free — even with the game closed. The clock starts when you claim it, not at midnight, so there is no bad time to come back. You can still pay for a longer shift from the Upgrades tab any time."},
   {id:"wyrm",when:()=>(S.bosses||0)>=1,tab:"mine",el:"#rock",ic:"🐍",t:"You killed the Wyrm",p:"It surfaces at random. Cut it down inside 30 seconds and you get the Sunforged pick — everything doubles for five minutes. The Wyrm bait perk makes it show up more often."},
   {id:"candebt",when:()=>S.cash>=debtCost(),tab:"debt",el:"#tab-debt .card",ic:"⚖",t:"You can pay Ashcombe",p:"Paying resets the mine but hands you lantern oil: a permanent bonus to everything and the currency for perks. Each payment also unlocks things the first run can't reach."},
   {id:"perks",when:()=>(S.oil||0)>=1,tab:"debt",pre:()=>showDebtSub("perks"),el:"#perkList",ic:"✦",t:"You have lantern oil",p:"Oil you hold makes everything you earn worth more, though each flask adds a little less than the one before. Oil you spend here buys a permanent perk instead. Neither is wrong — decide whether you want a fatter multiplier or a different way to play."},
@@ -3232,18 +3219,13 @@ function render(){
      else{const worth=fmt(clickPower()*1.5*AUTO_SWINGS*AUTO_H*3600*partyShiftMult());
        if(autoFree()){$("autoDesc").textContent=`Your first one is free — ${AUTO_H} hours on the pick at ${AUTO_SWINGS} swings a second, worth about ${worth} at your swing. One time only; after that it costs a fifth of what you owe.`;
          $("autoBtn").textContent="Claim free shift";$("autoBtn").disabled=false}
-       else{$("autoDesc").textContent=`${AUTO_H} hours on the pick at ${AUTO_SWINGS} swings a second, twice the free shift. About ${worth} at your swing. Costs a fifth of what you owe.`;
+       else{$("autoDesc").textContent=`${AUTO_H} hours on the pick at ${AUTO_SWINGS} swings a second. About ${worth} at your swing. Costs a fifth of what you owe.`;
          $("autoBtn").textContent=S.cash<cost?"Need "+fmt(cost-S.cash):"Hire — "+fmt(cost);$("autoBtn").disabled=S.cash<cost}}
    }}
   renderThrone();renderPerks();renderDebt();renderParty();
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
   document.querySelectorAll(".eq button,button.buy[data-pick],button.buy[data-crew]").forEach(b=>b.classList.toggle("can",!b.disabled));
   $("rankName").textContent="· "+rankName()+(S.oil?` · ${S.oil} oil`:"");
-  {const rp=$("dailyPill"),sm=innerWidth<=560;
-   // The phone top bar is tight, so short labels there.
-   if(autoOn()){rp.classList.add("wait");rp.textContent=(sm?"⛏ ":"⛏ Swinging · ")+eta2(S.autoUntil-Date.now())}
-   else if(dailyReady()){rp.classList.remove("wait");rp.textContent=sm?"🏮 Free":"🏮 Free shift ready"}
-   else{rp.classList.add("wait");rp.textContent=sm?"🏮 "+eta2(dailyLeft()):"🏮 Free shift in "+eta2(dailyLeft())}}
   {const np=PICKS[S.pick+1];let n=0;if(np&&S.cash>=np.cost)n++;CREW.forEach((c,i)=>{if(i>2&&!locked(c)&&S.cash>=crewCost(i))n++});const nb=BUNKS[(S.bunk||0)+1];if(nb&&$("bunkBtn")&&S.cash>=nb.cost)n++;if(autoReady())n++;
    const badge=$("upBadge");badge.textContent=n;badge.classList.toggle("on",n>0&&!$("tab-upgrades").classList.contains("on"));
    if(n>0&&!$("tab-upgrades").classList.contains("on")&&Date.now()-lastNudge>180000&&S.lifetime>500){lastNudge=Date.now();toast(`You can afford ${n} more upgrade${n>1?"s":""} — don't sit on your cash. Check Upgrades.`)}}
