@@ -64,6 +64,8 @@
   .stat b{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
   .stat.cash b{color:var(--green);text-shadow:0 0 14px rgba(43,239,139,.4)}
   .stat.rate b{color:var(--ore)}
+  .stat.shift{cursor:pointer}
+  .stat.shift b{color:var(--lamp2)}
   .stat:last-child b{color:var(--gem)}
   #account{display:flex;align-items:center;gap:10px}
   #account .av{width:30px;height:30px;border-radius:50%;background:#3aa0c8;color:#08283a;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
@@ -957,6 +959,25 @@
   button.buy.short{background:var(--panel2);color:var(--mute);border:1px solid var(--line2)}
   @media(max-width:900px){.crewcols{grid-template-columns:1fr}}
   @media(max-width:560px){.crewlv{grid-template-columns:1fr 1fr;gap:12px}.clbar{grid-column:1/-1;order:3}.crewhead{gap:12px}.chcode{flex:1 1 auto}}
+  /* install prompt */
+  .instcard{position:fixed;left:50%;transform:translateX(-50%) translateY(14px);bottom:20px;z-index:64;width:min(420px,calc(100vw - 24px));
+    background:var(--panel2);border:1px solid var(--line2);border-radius:14px;padding:14px 16px;
+    box-shadow:0 12px 40px rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .22s,transform .22s}
+  .instcard.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+  .instcard .x{position:absolute;top:8px;right:8px;background:none;border:0;color:var(--mute);font-size:19px;line-height:1;cursor:pointer;padding:4px 7px}
+  .instcard .x:hover{color:var(--ink)}
+  .insthead{display:flex;gap:12px;align-items:flex-start;padding-right:20px}
+  .insticon{flex:none;width:38px;height:38px;border-radius:10px;background:#1a1512;display:flex;align-items:center;justify-content:center}
+  .insthead b{display:block;font-size:14px;font-weight:600}
+  .insthead small{display:block;font-size:12px;color:var(--dim);margin-top:2px;line-height:1.45}
+  .instact{margin-top:12px;display:flex;gap:8px}
+  .instact .buy{flex:1}
+  .instact .btn{flex:1}
+  .insteps{margin-top:11px;display:grid;gap:7px}
+  .insteps div{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--dim)}
+  .insteps i{font-size:17px;color:var(--lamp2);width:20px;text-align:center}
+  .insteps b{color:var(--ink);font-weight:500}
+  @media(max-width:760px){.instcard{bottom:calc(70px + env(safe-area-inset-bottom) + 10px)}}
   .terms{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
   @media(max-width:600px){.terms{grid-template-columns:1fr}}
   .term{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s}
@@ -1128,6 +1149,9 @@
     .stat.rate{display:block;padding:0}
     .stat.rate b{font-size:11.5px;font-weight:500}
     .stat.rate b::after{content:"/sec";color:var(--dim);font-weight:400}
+    .stat.shift{display:none;padding:0 0 0 8px}
+    .stat.shift b{font-size:11.5px;font-weight:500}
+    .stat.shift b::before{content:"auto ";color:var(--dim);font-weight:400}
     .pill{padding:0 11px;font-size:12px;height:34px;border-radius:17px;max-width:none;white-space:nowrap;margin-left:0}
     .helpbtn{display:none}
     #account{gap:6px}
@@ -1274,6 +1298,7 @@
   <div class="stats">
     <div class="stat cash"><small>Cash</small><b id="cash">$0</b></div>
     <div class="stat rate"><small>Per second</small><b id="cps">$0</b></div>
+    <div class="stat shift" id="shiftStat" style="display:none"><small>Auto-swinger</small><b id="shiftLeft">&mdash;</b></div>
     <div class="stat"><small>Lantern oil</small><b id="oil">×1.0</b></div>
   </div>
   <div style="display:flex;gap:8px;align-items:center"><a id="discordPill" class="pill" href="https://discord.gg/JeGy88BvY" target="_blank" rel="noopener">Discord</a><button class="helpbtn" id="help" aria-label="How to play">?</button><div id="account"></div></div>
@@ -1729,6 +1754,14 @@
   <p class="note" style="margin-bottom:14px">Idle Depths has a shared leaderboard, so anything that swings for you &mdash; autoclickers, macros, scripts &mdash; is against the fair play rules. Nothing has been taken from you and nothing has been reported. If you want the pick moving on its own, hire an auto-swinger from the Upgrades tab: it is built for exactly that, and it counts.</p>
   <div class="btns"><button class="btn" id="afRules">Read the rules</button><button class="btn p" id="afOk">Understood</button></div>
 </div></div>
+<div class="instcard" id="instCard">
+  <button class="x" id="instNo" aria-label="Not now">&times;</button>
+  <div class="insthead">
+    <span class="insticon"><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#f2b24c"/><g transform="rotate(45 12 12)"><rect x="10.8" y="4" width="2.6" height="16" rx=".6" fill="#3a2610"/><path d="M3.5 7 Q12 2 20.5 7 L19.4 9.6 Q12 5.2 4.6 9.6 Z" fill="#1a1614"/></g></svg></span>
+    <div><b>Put the mine on your home screen</b><small id="instWhy">Opens fullscreen and keeps working with no signal.</small></div>
+  </div>
+  <div class="instact" id="instAct"></div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -2942,6 +2975,7 @@ async function hireShift(){
   confetti(free?36:20);render();save();
 }
 $("autoBtn").onclick=hireShift;
+$("shiftStat").onclick=()=>switchTab("upgrades");
 
 // ---- crew ----
 // Four miners, three ranks, one shared pool. The server is the authority on membership and
@@ -3426,6 +3460,10 @@ function render(){
     else{$("bunkDesc").textContent="The best quarters in the mine. Workers work up to 48 hours while you're gone.";$("bunkBtn").textContent="Maxed";$("bunkBtn").disabled=true}
   }
   {const on=autoOn();$("autoBadge").style.display=on?"":"none";$("autoBadge").textContent="auto · "+eta2(S.autoUntil-Date.now());
+   // The countdown is the number that decides whether someone opens the game again, so it
+   // belongs in the HUD next to the cash rather than only on the Mine tab.
+   $("shiftStat").style.display=on?"":"none";
+   if(on)$("shiftLeft").textContent=eta2(S.autoUntil-Date.now());
    if($("autoState")){
      const cost=AUTO_COST(),free=autoFree(),rate=autoSwingsFor(free);
      const worth=fmt(clickPower()*1.5*rate*AUTO_H*3600*partyShiftMult());
@@ -4953,6 +4991,87 @@ setInterval(()=>{const c=cps()/10;earn(c);S.crewEarned=(S.crewEarned||0)+c;
   if($("tour").classList.contains("on"))tourGate();
   if(wasBuffed&&!buffOn()){wasBuffed=false;toast("The Sunforged pick crumbles to ash. Back to your own tools.");drawScene();render()}if(++tick%10===0){render();tipCheck()}if(tick%150===0)save();if(tick%600===0)loadBoard()},100);
 load();
+</script>
+<script>
+// ---- add to home screen ----
+// Two entirely different mechanisms behind one card.
+//
+// Android and desktop Chromium fire beforeinstallprompt, which hands over a real installer
+// we can trigger on a tap. We stash the event and show our own card instead of the
+// browser's mini-infobar, so it looks like the game rather than like a browser nag.
+//
+// iOS has no install API and never has. Safari can only be driven by the person, so all we
+// can do there is say where the button is. There is no way to add to the home screen from
+// script on an iPhone - anything claiming otherwise is drawing an arrow at the Share icon,
+// which is exactly what this does too, just honestly.
+(()=>{
+  const ua=navigator.userAgent;
+  const installed=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+  if(installed)return;
+  const iOS=/iphone|ipad|ipod/i.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+  // On iOS every browser is WebKit underneath, but only Safari can install.
+  const iosOther=iOS&&/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+  const card=document.getElementById("instCard"),act=document.getElementById("instAct"),why=document.getElementById("instWhy");
+  let deferred=null,shown=false;
+
+  const SNOOZE="idlemine.install.snooze";
+  const snoozed=()=>{try{return Date.now()<(+localStorage.getItem(SNOOZE)||0)}catch(e){return false}};
+  const snooze=d=>{try{localStorage.setItem(SNOOZE,Date.now()+d*864e5)}catch(e){}};
+  const hide=()=>card.classList.remove("on");
+  document.getElementById("instNo").onclick=()=>{hide();snooze(7)};
+
+  function show(){
+    if(shown||snoozed())return;shown=true;
+    if(deferred){
+      act.innerHTML='<button class="buy" id="instGo">Install</button><button class="btn" id="instLater">Not now</button>';
+      document.getElementById("instGo").onclick=async()=>{
+        hide();const d=deferred;deferred=null;
+        d.prompt();
+        const r=await d.userChoice.catch(()=>null);
+        if(!r||r.outcome!=="accepted")snooze(7);
+      };
+    }else if(iosOther){
+      why.textContent="Only Safari can install to the home screen on iPhone. Open idle-depths.com there and the option appears.";
+      act.innerHTML='<button class="btn" id="instLater">Got it</button>';
+    }else{
+      why.textContent="Two taps in Safari, and it launches fullscreen like an app.";
+      act.innerHTML='<div class="insteps"><div><i class="ti ti-share-2" aria-hidden="true"></i><span>Tap <b>Share</b> at the bottom of Safari</span></div>'+
+        '<div><i class="ti ti-square-rounded-plus" aria-hidden="true"></i><span>Choose <b>Add to Home Screen</b></span></div></div>'+
+        '<div class="instact"><button class="btn" id="instLater">Got it</button></div>';
+    }
+    card.classList.add("on");
+    const later=document.getElementById("instLater");
+    if(later)later.onclick=()=>{hide();snooze(7)};
+  }
+
+  addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e});
+  addEventListener("appinstalled",()=>{hide();snooze(3650)});
+
+  // Not on arrival. Asking someone to install a game they have not played yet is how the
+  // card gets dismissed forever. Wait until they are actually swinging - whichever of a
+  // little time or a little effort comes first.
+  if(iOS||/Android/i.test(ua)){
+    let swings=0;
+    const tick=()=>{if(++swings>=60){document.removeEventListener("pointerdown",tick);show()}};
+    document.addEventListener("pointerdown",tick);
+    setTimeout(()=>{document.removeEventListener("pointerdown",tick);show()},180000);
+  }
+})();
+if("serviceWorker"in navigator){
+  addEventListener("load",()=>{
+    navigator.serviceWorker.register("/sw.js").then(reg=>{
+      // The game already prompts its own reload when /api/version changes. All this does
+      // is make sure a waiting worker steps aside so that reload lands on the new build
+      // rather than being served the old page out of cache.
+      reg.addEventListener("updatefound",()=>{
+        const w=reg.installing;
+        if(w)w.addEventListener("statechange",()=>{
+          if(w.state==="installed"&&navigator.serviceWorker.controller)w.postMessage("skip-waiting");
+        });
+      });
+    }).catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
