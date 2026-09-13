@@ -175,38 +175,6 @@ async function handle(request, env) {
       return json(data);
     }
 
-    // ---- crew board (public) ----
-    if (p === "/api/crews") {
-      const cached = await env.SAVES.get("cache:crews", { type: "json" });
-      if (cached && Date.now() - cached.at < 60000) return json(cached.data);
-      const rows = [];
-      let cur;
-      do {
-        // prefix "crew:" would also sweep up every "crewmem:" and "crewof:" key, so be
-        // explicit about which one this is listing
-        const page = await env.SAVES.list({ prefix: "crew:", cursor: cur, limit: 1000 });
-        for (const k of page.keys) {
-          const cid = k.name.slice(5);
-          const c = await env.SAVES.get(k.name, { type: "json" });
-          if (!c) continue;
-          // the roster lives in its own key now, so it has to be read alongside
-          const mem = await env.SAVES.get(`crewmem:${cid}`, { type: "json" });
-          c.members = Array.isArray(mem) ? mem : (c.members || []);
-          if (!c.members.length) continue;
-          rows.push({
-            id: c.id, name: c.name || "Crew", size: c.members.length,
-            digs: c.digsDone || 0, full: c.fullWeeks || 0, xp: Math.floor(c.xp || 0),
-            lead: (c.members.find(m => m.id === c.owner) || c.members[0]).name,
-          });
-        }
-        cur = page.list_complete ? null : page.cursor;
-      } while (cur);
-      // Digs cleared is the thing a crew earns together; xp only breaks ties.
-      const data = { crews: rows.sort((a, b) => b.digs - a.digs || b.full - a.full || b.xp - a.xp).slice(0, 15) };
-      await env.SAVES.put("cache:crews", JSON.stringify({ at: Date.now(), data }), { expirationTtl: 120 });
-      return json(data);
-    }
-
     // ---- global feed (public read) ----
     // One rolling KV key holding the last FEED_MAX entries. Read-modify-write, so
     // two events landing in the same instant can drop one — acceptable for a feed,
@@ -249,238 +217,284 @@ async function handle(request, env) {
 
     if (p === "/api/load") return json(await env.SAVES.get(`save:${s.id}`, { type: "json" }) || null);
 
-    // ---- crew (up to 4 players, shared xp pool, join by short code) ----
-    const crewIdFor = async id => env.SAVES.get(`crewof:${id}`);
-
-    // ---- why the roster has its own key ----
-    // Every route here is read-modify-write on one blob, and /api/crew/xp runs every 15s
-    // for EVERY member. KV is eventually consistent, so this happened constantly: someone
-    // joins (write: 2 members), another member's xp tick reads a stale copy (1 member),
-    // adds xp, writes the whole blob back - and the join is gone. Silently. The joiner
-    // sees themselves in the crew (their own response was fresh) while everyone else sees
-    // an empty roster, which is exactly the bug that was reported.
+    // ---- crew ----
+    // Rebuilt. The old version could strand a player: crewof:<id> pointed at a crew whose
+    // crew:<id> key was gone, so /api/crew answered null (the client showed "not in a crew")
+    // while create and join both refused with "you're already in a crew". Unreachable by
+    // hand, and there was no way out of it from inside the game.
     //
-    // Membership now lives in crewmem:<id> and NOTHING else writes it. xp, dig and seen
-    // churn crew:<id> as often as they like and can no longer touch who is in the crew.
-    // Last-write-wins on a counter is survivable; last-write-wins on a roster is not.
-    const loadMembers = async (id, crew) => {
-      const m = await env.SAVES.get(`crewmem:${id}`, { type: "json" });
-      // migration: older crews kept the list inside crew:<id>
-      return Array.isArray(m) ? m : ((crew && crew.members) || []);
-    };
+    // The rule now is that the pointer is a hint, never a fact. Nothing trusts crewof:
+    // without loading what it points at, and anything that finds it dangling deletes it and
+    // carries on. That makes every route self-healing: a player in the broken state fixes
+    // themselves the next time they open the tab.
+    //
+    // Keys:
+    //   crew:<CODE>     meta - name, ranks, xp, upgrades, dig. Churns constantly.
+    //   crewmem:<CODE>  roster - ONLY membership. Nothing else ever writes it.
+    //   crewof:<uid>    pointer to a code.
+    // The split is load-bearing: xp ticks every 15s per member, and KV is last-write-wins,
+    // so a roster living in the same blob as a counter gets a join wiped by a tick.
+    const CREW_MAX = 4;
+    const RANKS = ["hand", "foreman", "lead"];
+    const rankOf = (crew, id) => (crew.ranks && crew.ranks[id]) || (crew.owner === id ? "lead" : "hand");
+    const outranks = (crew, a, b) => RANKS.indexOf(rankOf(crew, a)) > RANKS.indexOf(rankOf(crew, b));
+
+    // Crew level is earned and never spent. `xp` is the spendable pool that upgrades draw
+    // from; `xpTotal` only ever climbs, so buying something can't cost you a rank.
+    const crewLevel = t => Math.max(1, Math.floor(Math.pow((t || 0) / 4000, 1 / 1.55)) + 1);
+    const UPGRADES = [
+      { id: "pick",  max: 5, need: 1,  cost: l => 6000 * (l + 1) },
+      { id: "haul",  max: 5, need: 3,  cost: l => 9000 * (l + 1) },
+      { id: "shift", max: 4, need: 6,  cost: l => 14000 * (l + 1) },
+      { id: "luck",  max: 4, need: 10, cost: l => 20000 * (l + 1) },
+    ];
+
     const putMembers = (id, members) => env.SAVES.put(`crewmem:${id}`, JSON.stringify(members));
-    const loadCrew = async id => {
-      if (!id) return null;
-      const c = await env.SAVES.get(`crew:${id}`, { type: "json" });
-      if (!c) return null;
-      c.members = await loadMembers(id, c);
-      return c;
-    };
-    // Strips members before writing, so a counter write can never carry a stale roster.
     const putCrew = (id, crew) => {
-      const { members, ...rest } = crew;
+      const { members, ...rest } = crew;   // a counter write must never carry a roster
       return env.SAVES.put(`crew:${id}`, JSON.stringify(rest));
     };
-    // The roster used to store the raw Discord username while the leaderboard shows the
-    // player's chosen display name, so the same person appeared under two different names
-    // in two places. The board row already holds the name they picked - use that.
+
+    // The single entry point. Returns null and clears up after itself when the pointer is
+    // dangling, when the crew is empty, or when the roster no longer lists this player.
+    const myCrew = async () => {
+      const cid = await env.SAVES.get(`crewof:${s.id}`);
+      if (!cid) return null;
+      const crew = await env.SAVES.get(`crew:${cid}`, { type: "json" });
+      if (!crew) { await env.SAVES.delete(`crewof:${s.id}`); return null; }
+      const mem = await env.SAVES.get(`crewmem:${cid}`, { type: "json" });
+      crew.members = Array.isArray(mem) ? mem : (crew.members || []);
+      if (!crew.members.length) {
+        await env.SAVES.delete(`crewof:${s.id}`);
+        await env.SAVES.delete(`crew:${cid}`);
+        await env.SAVES.delete(`crewmem:${cid}`);
+        return null;
+      }
+      // Kicked while offline, or lost to a race: the roster is the authority, not the pointer.
+      if (!crew.members.some(m => m.id === s.id)) { await env.SAVES.delete(`crewof:${s.id}`); return null; }
+      crew.cid = cid;
+      return crew;
+    };
+
+    // Leaderboard names are the ones players chose, so the roster shows the same name the
+    // rest of the game does rather than a raw Discord handle.
     const shownName = async id => {
       const b = await env.SAVES.get(`board:${id}`, { type: "json" });
       return (b && b.name) || null;
     };
-    const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // no I, O, 0 or 1 - codes get read aloud
     const newCode = () => Array.from({ length: 5 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join("");
 
-    // Touch "last seen" at most once an hour, so reading the crew page is not a KV write storm.
     const touchSeen = crew => {
       crew.seen = crew.seen || {};
-      const last = crew.seen[s.id] || 0;
-      if (Date.now() - last < 3600000) return false;
+      if (Date.now() - (crew.seen[s.id] || 0) < 3600000) return false;   // hourly, not per request
       crew.seen[s.id] = Date.now();
       return true;
     };
 
+    const shape = crew => ({
+      id: crew.cid, name: crew.name, owner: crew.owner,
+      members: (crew.members || []).map(m => ({ ...m, rank: rankOf(crew, m.id) })),
+      xp: Math.floor(crew.xp || 0), xpTotal: Math.floor(crew.xpTotal || 0),
+      lv: crewLevel(crew.xpTotal), ups: crew.ups || {},
+      seen: crew.seen || {}, dig: crew.dig || null, digsDone: crew.digsDone || 0,
+      me: rankOf(crew, s.id), max: CREW_MAX,
+    });
+
     if (p === "/api/crew") {
-      const cid = await crewIdFor(s.id);
-      const crew = await loadCrew(cid);
+      const crew = await myCrew();
       if (!crew) return json(null);
-      if (touchSeen(crew)) await putCrew(cid, crew);
-      return json(crew);
+      if (touchSeen(crew)) await putCrew(crew.cid, crew);
+      return json(shape(crew));
     }
 
-
-    if (p === "/api/crew/create") {
+    if (p.startsWith("/api/crew/")) {
       if (request.method !== "POST") return json({ error: "POST only" }, 405);
-      if (await crewIdFor(s.id)) return json({ error: "You're already in a crew." }, 400);
       const body = await request.json().catch(() => ({}));
-      const name = (typeof body.name === "string" && body.name.trim().slice(0, 24)) || `${s.name}'s crew`;
-      let id; for (let i = 0; i < 5; i++) { id = newCode(); if (!(await env.SAVES.get(`crew:${id}`))) break; }
-      const crew = { id, name, owner: s.id, members: [{ id: s.id, name: (await shownName(s.id)) || s.name }], xp: 0, pick: 0, shift: 0, created: Date.now() };
-      await putMembers(id, crew.members);
-      await putCrew(id, crew);
-      await env.SAVES.put(`crewof:${s.id}`, id);
-      return json(crew);
-    }
+      const act = p.slice(10);
 
-    if (p === "/api/crew/join") {
-      if (request.method !== "POST") return json({ error: "POST only" }, 405);
-      if (await crewIdFor(s.id)) return json({ error: "You're already in a crew." }, 400);
-      const body = await request.json().catch(() => ({}));
-      const code = (typeof body.code === "string" ? body.code.trim().toUpperCase() : "");
-      const crew = await loadCrew(code);
-      if (!crew) return json({ error: "No crew with that code." }, 404);
-      if (crew.members.length >= 4) return json({ error: "That crew is full." }, 400);
-      if (crew.members.some(m => m.id === s.id)) return json({ error: "You're already in that crew." }, 400);
-      crew.members.push({ id: s.id, name: (await shownName(s.id)) || s.name });
-      await putMembers(crew.id, crew.members);        // roster only — no counters, no race
-      await env.SAVES.put(`crewof:${s.id}`, crew.id);
-      await env.SAVES.delete("cache:crews");
-      return json(crew);
-    }
+      if (act === "create") {
+        if (await myCrew()) return json({ error: "You're already in a crew." }, 400);
+        const name = (typeof body.name === "string" && body.name.trim().slice(0, 24)) || `${s.name}'s crew`;
+        let id;
+        for (let i = 0; i < 6; i++) { id = newCode(); if (!(await env.SAVES.get(`crew:${id}`))) break; }
+        const members = [{ id: s.id, name: (await shownName(s.id)) || s.name }];
+        const crew = { id, name, owner: s.id, ranks: { [s.id]: "lead" }, xp: 0, xpTotal: 0, ups: {}, seen: {}, created: Date.now() };
+        await putMembers(id, members);
+        await putCrew(id, crew);
+        await env.SAVES.put(`crewof:${s.id}`, id);
+        return json(shape({ ...crew, cid: id, members }));
+      }
 
-    if (p === "/api/crew/leave") {
-      if (request.method !== "POST") return json({ error: "POST only" }, 405);
-      const cid = await crewIdFor(s.id);
-      const crew = await loadCrew(cid);
-      await env.SAVES.delete(`crewof:${s.id}`);
-      if (!crew) return json({ ok: true });
-      crew.members = crew.members.filter(m => m.id !== s.id);
-      if (crew.members.length === 0) { await env.SAVES.delete(`crew:${cid}`); await env.SAVES.delete(`crewmem:${cid}`); }
-      else {
-        if (crew.owner === s.id) { crew.owner = crew.members[0].id; await putCrew(cid, crew); }
+      if (act === "join") {
+        if (await myCrew()) return json({ error: "You're already in a crew." }, 400);
+        const code = (typeof body.code === "string" ? body.code.trim().toUpperCase() : "");
+        if (!/^[A-Z2-9]{5}$/.test(code)) return json({ error: "That isn't a valid code." }, 400);
+        const crew = await env.SAVES.get(`crew:${code}`, { type: "json" });
+        if (!crew) return json({ error: "No crew with that code." }, 404);
+        const mem = await env.SAVES.get(`crewmem:${code}`, { type: "json" });
+        crew.members = Array.isArray(mem) ? mem : [];
+        if (crew.members.length >= CREW_MAX) return json({ error: "That crew is full." }, 400);
+        if (!crew.members.some(m => m.id === s.id))
+          crew.members.push({ id: s.id, name: (await shownName(s.id)) || s.name });
+        await putMembers(code, crew.members);        // roster only - no counters, no race
+        await env.SAVES.put(`crewof:${s.id}`, code);
+        crew.cid = code;
+        return json(shape(crew));
+      }
+
+      // Everything past here needs the player to actually be in a crew.
+      const crew = await myCrew();
+      if (!crew) return json({ error: "You're not in a crew." }, 400);
+      const cid = crew.cid, me = rankOf(crew, s.id);
+      const target = String(body.id || "");
+      const isLead = me === "lead";
+
+      if (act === "leave") {
+        crew.members = crew.members.filter(m => m.id !== s.id);
+        if (crew.ranks) delete crew.ranks[s.id];
+        await env.SAVES.delete(`crewof:${s.id}`);
+        if (!crew.members.length) {
+          await env.SAVES.delete(`crew:${cid}`);
+          await env.SAVES.delete(`crewmem:${cid}`);
+          return json({ ok: true });
+        }
+        // The lead never leaves an empty chair: the longest-standing member inherits it.
+        if (isLead) {
+          const heir = crew.members[0];
+          crew.owner = heir.id;
+          crew.ranks = { ...(crew.ranks || {}), [heir.id]: "lead" };
+        }
         await putMembers(cid, crew.members);
+        await putCrew(cid, crew);
+        return json({ ok: true });
       }
-      return json({ ok: true });
-    }
 
-    if (p === "/api/crew/rename") {
-      if (request.method !== "POST") return json({ error: "POST only" }, 405);
-      const cid = await crewIdFor(s.id);
-      const crew = await loadCrew(cid);
-      if (!crew) return json({ error: "Not in a crew." }, 400);
-      if (crew.owner !== s.id) return json({ error: "Only the crew lead can rename the crew." }, 403);
-      const body = await request.json().catch(() => ({}));
-      const name = typeof body.name === "string" ? body.name.trim().slice(0, 24) : "";
-      if (!/^[A-Za-z0-9 '._-]{2,24}$/.test(name)) return json({ error: "Use 2-24 letters, numbers or spaces." }, 400);
-      crew.name = name;
-      await putCrew(cid, crew);
-      await env.SAVES.delete("cache:crews");
-      return json(crew);
-    }
-
-    if (p === "/api/crew/kick") {
-      if (request.method !== "POST") return json({ error: "POST only" }, 405);
-      const cid = await crewIdFor(s.id);
-      const crew = await loadCrew(cid);
-      if (!crew) return json({ error: "Not in a crew." }, 400);
-      if (crew.owner !== s.id) return json({ error: "Only the crew lead can remove members." }, 403);
-      const body = await request.json().catch(() => ({}));
-      const target = String(body.id || "");
-      if (target === s.id) return json({ error: "Hand the crew over before you leave." }, 400);
-      if (!crew.members.some(m => m.id === target)) return json({ error: "They're not in this crew." }, 404);
-      crew.members = crew.members.filter(m => m.id !== target);
-      if (crew.seen) delete crew.seen[target];
-      if (crew.dig && crew.dig.by) delete crew.dig.by[target];
-      await putMembers(cid, crew.members);
-      await putCrew(cid, crew);
-      // Only clear their pointer if it still points here — they may have rejoined elsewhere.
-      if ((await env.SAVES.get(`crewof:${target}`)) === cid) await env.SAVES.delete(`crewof:${target}`);
-      await env.SAVES.delete("cache:crews");
-      return json(crew);
-    }
-
-    if (p === "/api/crew/promote") {
-      if (request.method !== "POST") return json({ error: "POST only" }, 405);
-      const cid = await crewIdFor(s.id);
-      const crew = await loadCrew(cid);
-      if (!crew) return json({ error: "Not in a crew." }, 400);
-      if (crew.owner !== s.id) return json({ error: "Only the crew lead can hand it over." }, 403);
-      const body = await request.json().catch(() => ({}));
-      const target = String(body.id || "");
-      if (!crew.members.some(m => m.id === target)) return json({ error: "They're not in this crew." }, 404);
-      crew.owner = target;
-      await putCrew(cid, crew);
-      await env.SAVES.delete("cache:crews");
-      return json(crew);
-    }
-
-    if (p === "/api/crew/xp") {
-      if (request.method !== "POST") return json({ error: "POST only" }, 405);
-      const cid = await crewIdFor(s.id);
-      const crew = await loadCrew(cid);
-      if (!crew) return json({ error: "Not in a crew." }, 400);
-      const body = await request.json().catch(() => ({}));
-      const amount = Math.max(0, Math.min(20000, Number(body.amount) || 0));
-      crew.xp += amount;
-      // Cheap place to keep your own roster name current if you renamed yourself: this
-      // route already loads and writes the crew, and only the member themselves calls it.
-      const me = crew.members.find(m => m.id === s.id), nm = await shownName(s.id);
-      // a name change is a roster edit, so it goes to the roster key, and only when it
-      // actually changed - this must not become a write on every xp tick
-      if (me && nm && me.name !== nm) { me.name = nm; await putMembers(cid, crew.members); }
-      await putCrew(cid, crew);
-      return json(crew);
-    }
-
-    // ---- crew dig: one shared weekly target, per-member contribution ----
-    // Server-side so a member can see who actually showed up. Reset is lazy:
-    // the first request in a new ISO week rolls the board over.
-    const DIG_GOALS = [
-      { id: "haul",  name: "Clear the east gallery", verb: "hauled", need: 240000 },
-      { id: "props", name: "Set the roof props",     verb: "carried", need: 180000 },
-      { id: "flood", name: "Pump out the low seam",  verb: "drained", need: 320000 },
-      { id: "vein",  name: "Follow the deep vein",   verb: "cut",     need: 400000 },
-    ];
-    const rollDig = crew => {
-      const wk = weekKey();
-      if (crew.dig && crew.dig.week === wk) return false;
-      if (crew.dig && crew.dig.total >= crew.dig.need) crew.digsDone = (crew.digsDone || 0) + 1;
-      // Deterministic from the week + crew id, so every member sees the same job.
-      let n = 0; for (const ch of (wk + crew.id)) n = (n * 31 + ch.charCodeAt(0)) % 9973;
-      const g = DIG_GOALS[n % DIG_GOALS.length];
-      crew.dig = { week: wk, id: g.id, name: g.name, verb: g.verb,
-                   need: g.need * Math.max(1, crew.members.length), total: 0, by: {}, paid: false };
-      return true;
-    };
-
-    if (p === "/api/crew/dig") {
-      if (request.method !== "POST") return json({ error: "POST only" }, 405);
-      const cid = await crewIdFor(s.id);
-      const crew = await loadCrew(cid);
-      if (!crew) return json({ error: "Not in a crew." }, 400);
-      const body = await request.json().catch(() => ({}));
-      const amount = Math.max(0, Math.min(500000, Number(body.amount) || 0));
-      const rolled = rollDig(crew);
-      const seen = touchSeen(crew);
-      if (amount > 0) {
-        crew.dig.total += amount;
-        crew.dig.by[s.id] = (crew.dig.by[s.id] || 0) + amount;
+      if (act === "disband") {
+        if (!isLead) return json({ error: "Only the lead can disband the crew." }, 403);
+        for (const m of crew.members) {
+          if ((await env.SAVES.get(`crewof:${m.id}`)) === cid) await env.SAVES.delete(`crewof:${m.id}`);
+        }
+        await env.SAVES.delete(`crew:${cid}`);
+        await env.SAVES.delete(`crewmem:${cid}`);
+        return json({ ok: true, disbanded: true });
       }
-      const hit = crew.dig.total >= crew.dig.need && !crew.dig.paid;
-      if (hit) {
-        crew.dig.paid = true;
-        crew.xp += 4000 * crew.members.length;
-        crew.digsDone = (crew.digsDone || 0) + 1;
-        // A week where everyone contributed counts double toward the crew's standing.
-        if (crew.members.every(m => (crew.dig.by[m.id] || 0) > 0)) crew.fullWeeks = (crew.fullWeeks || 0) + 1;
-      }
-      if (rolled || seen || amount > 0 || hit) await putCrew(cid, crew);
-      return json({ ...crew, justFinished: hit });
-    }
 
-    if (p === "/api/crew/upgrade") {
-      if (request.method !== "POST") return json({ error: "POST only" }, 405);
-      const cid = await crewIdFor(s.id);
-      const crew = await loadCrew(cid);
-      if (!crew) return json({ error: "Not in a crew." }, 400);
-      const body = await request.json().catch(() => ({}));
-      const id = body.id === 1 ? 1 : 0;
-      const cost = id === 0 ? 6000 * (crew.pick + 1) : 12000 * (crew.shift + 1);
-      if (crew.xp < cost) return json({ error: "Not enough crew xp." }, 400);
-      crew.xp -= cost;
-      if (id === 0) crew.pick += 1; else crew.shift += 1;
-      await putCrew(cid, crew);
-      return json(crew);
+      if (act === "rename") {
+        if (!isLead) return json({ error: "Only the lead can rename the crew." }, 403);
+        const name = typeof body.name === "string" ? body.name.trim().slice(0, 24) : "";
+        if (!/^[A-Za-z0-9 '._-]{2,24}$/.test(name)) return json({ error: "Use 2-24 letters, numbers or spaces." }, 400);
+        crew.name = name;
+        await putCrew(cid, crew);
+        return json(shape(crew));
+      }
+
+      if (act === "kick") {
+        if (target === s.id) return json({ error: "Hand the crew over before you leave." }, 400);
+        if (!crew.members.some(m => m.id === target)) return json({ error: "They're not in this crew." }, 404);
+        // A foreman can move a hand along; only the lead can remove another foreman.
+        if (!outranks(crew, s.id, target)) return json({ error: "You can't remove someone at your own rank." }, 403);
+        if (me === "hand") return json({ error: "Only the lead or a foreman can remove someone." }, 403);
+        crew.members = crew.members.filter(m => m.id !== target);
+        if (crew.ranks) delete crew.ranks[target];
+        if (crew.seen) delete crew.seen[target];
+        if (crew.dig && crew.dig.by) delete crew.dig.by[target];
+        await putMembers(cid, crew.members);
+        await putCrew(cid, crew);
+        // Only clear their pointer if it still points here - they may have rejoined elsewhere.
+        if ((await env.SAVES.get(`crewof:${target}`)) === cid) await env.SAVES.delete(`crewof:${target}`);
+        return json(shape(crew));
+      }
+
+      if (act === "rank") {
+        if (!isLead) return json({ error: "Only the lead can change ranks." }, 403);
+        if (!crew.members.some(m => m.id === target)) return json({ error: "They're not in this crew." }, 404);
+        const want = String(body.rank || "");
+        if (!RANKS.includes(want)) return json({ error: "Unknown rank." }, 400);
+        crew.ranks = crew.ranks || {};
+        if (want === "lead") {
+          // Handing over, not cloning: there is exactly one lead at a time.
+          crew.ranks[s.id] = "foreman";
+          crew.ranks[target] = "lead";
+          crew.owner = target;
+        } else {
+          if (target === s.id) return json({ error: "Hand the crew over first." }, 400);
+          crew.ranks[target] = want;
+        }
+        await putCrew(cid, crew);
+        return json(shape(crew));
+      }
+
+      if (act === "xp") {
+        const amount = Math.max(0, Math.min(20000, Number(body.amount) || 0));
+        crew.xp = (crew.xp || 0) + amount;
+        crew.xpTotal = (crew.xpTotal || 0) + amount;
+        // Cheap place to keep your own roster name current: this route already loads and
+        // writes the crew, and only the member themselves calls it. Guarded so a name that
+        // hasn't changed never turns an xp tick into a roster write.
+        const mine = crew.members.find(m => m.id === s.id), nm = await shownName(s.id);
+        if (mine && nm && mine.name !== nm) { mine.name = nm; await putMembers(cid, crew.members); }
+        await putCrew(cid, crew);
+        return json(shape(crew));
+      }
+
+      if (act === "upgrade") {
+        const u = UPGRADES.find(x => x.id === body.id);
+        if (!u) return json({ error: "Unknown upgrade." }, 400);
+        const lv = crewLevel(crew.xpTotal);
+        if (lv < u.need) return json({ error: `Crew level ${u.need} unlocks that.` }, 400);
+        crew.ups = crew.ups || {};
+        const at = crew.ups[u.id] || 0;
+        if (at >= u.max) return json({ error: "That's fully upgraded." }, 400);
+        const cost = u.cost(at);
+        if ((crew.xp || 0) < cost) return json({ error: "Not enough crew xp." }, 400);
+        crew.xp -= cost;
+        crew.ups[u.id] = at + 1;
+        await putCrew(cid, crew);
+        return json(shape(crew));
+      }
+
+      // ---- the weekly dig ----
+      // One shared job a week, rolled deterministically from the week and the crew id so
+      // every member is looking at the same one. Reset is lazy: whoever asks first in a new
+      // ISO week rolls it over.
+      const DIG_GOALS = [
+        { id: "haul",  name: "Clear the east gallery", verb: "hauled",  need: 240000 },
+        { id: "props", name: "Set the roof props",     verb: "carried", need: 180000 },
+        { id: "flood", name: "Pump out the low seam",  verb: "drained", need: 320000 },
+        { id: "vein",  name: "Follow the deep vein",   verb: "cut",     need: 400000 },
+      ];
+      if (act === "dig") {
+        const amount = Math.max(0, Math.min(500000, Number(body.amount) || 0));
+        const wk = weekKey();
+        let rolled = false;
+        if (!crew.dig || crew.dig.week !== wk) {
+          if (crew.dig && crew.dig.total >= crew.dig.need) crew.digsDone = (crew.digsDone || 0) + 1;
+          let n = 0; for (const ch of (wk + cid)) n = (n * 31 + ch.charCodeAt(0)) % 9973;
+          const g = DIG_GOALS[n % DIG_GOALS.length];
+          crew.dig = { week: wk, id: g.id, name: g.name, verb: g.verb,
+                       need: g.need * Math.max(1, crew.members.length), total: 0, by: {}, paid: false };
+          rolled = true;
+        }
+        const seen = touchSeen(crew);
+        if (amount > 0) {
+          crew.dig.total += amount;
+          crew.dig.by[s.id] = (crew.dig.by[s.id] || 0) + amount;
+        }
+        const hit = crew.dig.total >= crew.dig.need && !crew.dig.paid;
+        if (hit) {
+          crew.dig.paid = true;
+          const pot = 4000 * crew.members.length;
+          crew.xp = (crew.xp || 0) + pot;
+          crew.xpTotal = (crew.xpTotal || 0) + pot;
+          crew.digsDone = (crew.digsDone || 0) + 1;
+          if (crew.members.every(m => (crew.dig.by[m.id] || 0) > 0)) crew.fullWeeks = (crew.fullWeeks || 0) + 1;
+        }
+        if (rolled || seen || amount > 0 || hit) await putCrew(cid, crew);
+        return json({ ...shape(crew), justFinished: hit });
+      }
+
+      return json({ error: "not found" }, 404);
     }
 
     // The client sends a kind and a number, never a message. The text is built
