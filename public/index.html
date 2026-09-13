@@ -2780,13 +2780,19 @@ const autoSwingsFor=free=>free?AUTO_FREE_SWINGS:AUTO_SWINGS;
 const autoFree=()=>!S.autoFreeUsed;
 const autoReady=()=>!autoOn()&&(autoFree()||S.cash>=AUTO_COST());
 async function hireShift(){
-  if(autoOn()){toast(`The auto-swinger is on shift — ${eta2(S.autoUntil-Date.now())} left.`);return}
-  const free=autoFree(),cost=free?0:AUTO_COST();
+  const free=autoFree();
+  // A paid hire still has to wait its turn, but the free one must not be. Every player
+  // carried into this change is mid-shift on the old daily, and gating the free claim
+  // behind autoOn() meant nobody could reach the thing that was supposed to be a gift.
+  // Claiming over a running shift replaces what is left of it, and says so first.
+  if(autoOn()&&!free){toast(`The auto-swinger is on shift — ${eta2(S.autoUntil-Date.now())} left.`);return}
+  const cost=free?0:AUTO_COST();
   if(!free&&S.cash<cost){toast(`Hiring an auto-swinger costs ${fmt(cost)}. You need ${fmt(cost-S.cash)} more.`);return}
   const hours=AUTO_H*partyShiftMult(),len=eta2(hours*3600*1000),rate=autoSwingsFor(free);
+  const over=autoOn()?`You have ${eta2(S.autoUntil-Date.now())} left on your current shift at ${(+AUTO_RATE().toFixed(1))} a second. Claiming this replaces what is left of it.\n\n`:"";
   const ok=free
     ? await ask("Your free shift — one time only",
-        `FREE, ONE TIME ONLY. The overseer puts a hand on your pick for ${len} at ${rate} swings a second — double the pace of any shift you can pay for — and it keeps swinging even if you close the game.\n\nThis is the only free one you will ever get. Every hire after it runs at ${AUTO_SWINGS} a second and costs a fifth of what you owe Ashcombe — ${fmt(AUTO_COST())} at your rank right now. Spend it now?`,
+        over+`FREE, ONE TIME ONLY. The overseer puts a hand on your pick for ${len} at ${rate} swings a second — double the pace of any shift you can pay for — and it keeps swinging even if you close the game.\n\nThis is the only free one you will ever get. Every hire after it runs at ${AUTO_SWINGS} a second and costs a fifth of what you owe Ashcombe — ${fmt(AUTO_COST())} at your rank right now. Spend it now?`,
         "Use my free shift")
     : await ask("Hire an auto-swinger?",
         `${fmt(cost)} for ${len} on the pick at ${rate} swings a second. It keeps swinging even if you close the game.`,
@@ -3220,16 +3226,18 @@ function render(){
   }
   {const on=autoOn();$("autoBadge").style.display=on?"":"none";$("autoBadge").textContent="auto · "+eta2(S.autoUntil-Date.now());
    if($("autoState")){
-     const cost=AUTO_COST(),rate=AUTO_RATE();
-     $("autoState").style.display=on?"":(autoFree()?"":"none");
+     const cost=AUTO_COST(),free=autoFree(),rate=autoSwingsFor(free);
+     const worth=fmt(clickPower()*1.5*rate*AUTO_H*3600*partyShiftMult());
+     $("autoState").style.display=(on||free)?"":"none";
      $("autoState").textContent=on?"working":"free";
-     if(on){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${(+rate.toFixed(1))} swings a second.`;
+     if(on&&free){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${(+AUTO_RATE().toFixed(1))} a second. Your free shift is still waiting: ${AUTO_H} hours at ${AUTO_FREE_SWINGS} a second, worth about ${worth}. Claiming it replaces what's left.`;
+       $("autoBtn").textContent="Claim free shift";$("autoBtn").disabled=false}
+     else if(on){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${(+AUTO_RATE().toFixed(1))} swings a second.`;
        $("autoBtn").textContent="On shift";$("autoBtn").disabled=true}
-     else{const rate=autoSwingsFor(autoFree()),worth=fmt(clickPower()*1.5*rate*AUTO_H*3600*partyShiftMult());
-       if(autoFree()){$("autoDesc").textContent=`Your first one is free — ${AUTO_H} hours on the pick at ${rate} swings a second, double any paid shift, worth about ${worth} at your swing. One time only; after that it's ${AUTO_SWINGS} a second for a fifth of what you owe.`;
-         $("autoBtn").textContent="Claim free shift";$("autoBtn").disabled=false}
-       else{$("autoDesc").textContent=`${AUTO_H} hours on the pick at ${rate} swings a second. About ${worth} at your swing. Costs a fifth of what you owe.`;
-         $("autoBtn").textContent=S.cash<cost?"Need "+fmt(cost-S.cash):"Hire — "+fmt(cost);$("autoBtn").disabled=S.cash<cost}}
+     else if(free){$("autoDesc").textContent=`Your first one is free — ${AUTO_H} hours on the pick at ${rate} swings a second, double any paid shift, worth about ${worth} at your swing. One time only; after that it's ${AUTO_SWINGS} a second for a fifth of what you owe.`;
+       $("autoBtn").textContent="Claim free shift";$("autoBtn").disabled=false}
+     else{$("autoDesc").textContent=`${AUTO_H} hours on the pick at ${rate} swings a second. About ${worth} at your swing. Costs a fifth of what you owe.`;
+       $("autoBtn").textContent=S.cash<cost?"Need "+fmt(cost-S.cash):"Hire — "+fmt(cost);$("autoBtn").disabled=S.cash<cost}
    }}
   renderThrone();renderPerks();renderDebt();renderParty();
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
