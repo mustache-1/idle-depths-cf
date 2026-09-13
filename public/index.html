@@ -840,6 +840,48 @@
   .arow .buy{min-width:170px}
   .arow .buff{box-shadow:none}
   @media(max-width:560px){.arow{grid-template-columns:1fr}.arow .buy{width:100%}}
+  /* ---- crew ---- */
+  .crewhead{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:16px 18px;margin-bottom:12px}
+  .crewhead .chname{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0;flex:1 1 260px}
+  .crewhead .chname b{font-size:19px;font-weight:600;letter-spacing:-.02em}
+  .crewhead .chname small{display:block;width:100%;font-size:12px;color:var(--dim)}
+  .chcode{display:flex;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line2);border-radius:10px;padding:7px 8px 7px 14px}
+  .chcode small{font-size:11px;color:var(--dim)}
+  .chcode b{font-size:17px;font-weight:600;color:var(--lamp2);letter-spacing:.14em;font-variant-numeric:tabular-nums}
+  .chcode .btn{height:30px;padding:0 11px;font-size:12px}
+  .chacts{display:flex;gap:8px;flex-wrap:wrap}
+  .chacts .btn{height:34px;padding:0 13px;font-size:13px}
+  .crewlv{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:22px;align-items:center;padding:14px 18px;margin-bottom:16px}
+  .clnum small{display:block;font-size:11px;color:var(--dim)}
+  .clnum b{font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}
+  .clbar .prog{margin:0 0 6px}
+  .crewcols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,380px);gap:20px;align-items:start}
+  .csec{font-size:13px;font-weight:600;color:var(--dim);margin:0 0 10px}
+  .csec em{font-style:normal;color:var(--lamp2);margin-left:6px}
+  .csec:not(:first-child){margin-top:20px}
+  .cmem{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+  .cmem.me{border-color:rgba(255,176,31,.34);background:linear-gradient(180deg,rgba(255,176,31,.05),var(--panel))}
+  .cmem.open{opacity:.55;border-style:dashed}
+  .cav{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:600;font-size:14px;color:#08283a}
+  .cav.ghost{background:var(--line2);color:var(--dim);font-size:18px}
+  .cnm{min-width:0}
+  .cnm b{font-weight:500;font-size:14px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cnm b em{font-style:normal;color:var(--dim);font-size:12px;font-weight:400}
+  .cnm small{font-size:12px;color:var(--mute)}
+  .cbadge{font-size:11px;font-weight:600;border-radius:999px;padding:3px 10px;border:1px solid var(--line2);color:var(--dim);white-space:nowrap}
+  .cbadge.r-lead{background:rgba(255,176,31,.14);border-color:rgba(255,176,31,.5);color:var(--lamp2)}
+  .cbadge.r-foreman{background:rgba(61,155,255,.12);border-color:rgba(61,155,255,.45);color:var(--blue)}
+  .cacts{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;padding-top:4px}
+  .cacts .btn{height:29px;padding:0 10px;font-size:12px}
+  .digby{display:grid;gap:8px;margin-top:12px}
+  .digby>div{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:baseline}
+  .digby small{font-size:12px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .digby b{font-size:13px;font-weight:500;color:var(--ore);font-variant-numeric:tabular-nums}
+  .digby i{grid-column:1/-1;display:block;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+  .digby i span{display:block;height:100%;background:linear-gradient(90deg,var(--ore),var(--green))}
+  button.buy.short{background:var(--panel2);color:var(--mute);border:1px solid var(--line2)}
+  @media(max-width:900px){.crewcols{grid-template-columns:1fr}}
+  @media(max-width:560px){.crewlv{grid-template-columns:1fr 1fr;gap:12px}.clbar{grid-column:1/-1;order:3}.crewhead{gap:12px}.chcode{flex:1 1 auto}}
   .terms{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
   @media(max-width:600px){.terms{grid-template-columns:1fr}}
   .term{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s}
@@ -1366,40 +1408,37 @@
   </div>
 </div>
 <div class="panel" id="tab-gang">
-  <div class="titlebar"><h2>Crew</h2><span>Team up with up to 3 friends by Discord. Everyone's swings fill a shared XP bar that unlocks crew-wide upgrades.</span></div>
+  <div class="titlebar"><h2>Crew</h2><span>Four miners, one shared pool. Every swing anyone takes feeds the same bar.</span></div>
   <div class="card" id="ptyGate" style="padding:18px;margin-bottom:16px"></div>
-  <div class="mine" id="ptyBody" style="display:none">
-    <div>
-      <div class="card" style="padding:18px">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><b style="font-size:16px" id="ptyName">Crew</b><span class="lvl" id="gangLvl"></span><button class="btn" id="ptyRename" style="display:none;height:30px;padding:0 11px;font-size:12px">Rename</button></div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <span class="note" style="margin:0">Code <b id="ptyCode" style="color:var(--lamp2);letter-spacing:.05em"></b></span>
-            <button class="btn" id="ptyLeave">Leave</button>
-          </div>
-        </div>
-        <div class="prog"><i id="gangFill"></i></div>
-        <div class="meta"><span id="gangProg"></span><span id="gangPct"></span></div>
-      </div>
-      <div class="card" style="padding:18px;margin-top:16px">
-        <h3 style="margin:0 0 10px">Roster</h3>
-        <div id="gangRoster" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"></div>
-      </div>
+  <div id="ptyBody" style="display:none">
+    <div class="card crewhead">
+      <div class="chname"><b id="ptyName">Crew</b><span class="cbadge" id="ptyMyRank"></span><small id="ptySub"></small></div>
+      <div class="chcode"><small>Invite code</small><b id="ptyCode">&mdash;</b><button class="btn" id="ptyCopy">Copy</button></div>
+      <div class="chacts" id="ptyActs"></div>
     </div>
-    <div class="side">
-      <div class="card">
-        <h3>Crew upgrades</h3>
-        <div class="row"><div><div class="name">Shared picks<em id="gUp0Lvl"></em></div><div class="desc">+10% swing power for the whole crew, per level.</div></div><button class="buy" id="gUp0Btn"></button></div>
-        <div class="row"><div><div class="name">Longer shifts<em id="gUp1Lvl"></em></div><div class="desc">Auto-swinger shifts run 25% longer, per level.</div></div><button class="buy" id="gUp1Btn"></button></div>
-      </div>
-
+    <div class="card crewlv">
+      <div class="clnum"><small>Crew level</small><b id="ptyLv">1</b></div>
+      <div class="clbar"><div class="prog"><i id="gangFill"></i></div><div class="meta"><span id="gangProg"></span><span id="gangPct"></span></div></div>
+      <div class="clnum"><small>Pool to spend</small><b id="ptyXp" style="color:var(--lamp2)">0</b></div>
+    </div>
+    <div class="crewcols">
+      <section>
+        <h3 class="csec">Roster <em id="ptyCount"></em></h3>
+        <div id="gangRoster"></div>
+        <h3 class="csec">This week&rsquo;s dig</h3>
+        <div class="card" style="padding:16px 18px"><div id="ptyDig"></div></div>
+      </section>
+      <section>
+        <h3 class="csec">Crew upgrades</h3>
+        <div id="ptyUps"></div>
+        <p class="note" id="ptyBond" style="margin-top:10px"></p>
+      </section>
     </div>
   </div>
 </div>
 <div class="panel" id="tab-leaderboard">
   <div class="titlebar"><h2>Leaderboard</h2><span id="boardSub">Every debtor, ranked by lifetime cash mined</span></div>
   <div class="board">
-    <div class="seg" style="grid-template-columns:1fr 1fr;max-width:320px;margin:0 0 10px"><button class="on" data-board="all">Seasons</button><button data-board="crews">Crews</button></div>
     <div class="qty" id="seasonPick" style="margin:0 0 12px"><span>Season</span><button class="on" data-season="all">Current</button><button data-season="legacy">Beta</button></div>
     <p class="note" id="champs" style="margin:0 0 12px"></p>
     <table><tbody id="boardRows"><tr><td colspan="3" style="color:var(--dim)">Loading…</td></tr></tbody></table>
@@ -2025,10 +2064,8 @@ const buffMult=()=>buffOn()?2:1;
 const WARD_MS=2*60*1000,WARD_MULT=1.25;
 const wardOn=()=>Date.now()<(S.wardUntil||0);
 const wardMult=()=>wardOn()?WARD_MULT:1;
-const partyPickMult=()=>1+((PARTY&&PARTY.pick)||0)*.1;
-const partyShiftMult=()=>1+((PARTY&&PARTY.shift)||0)*.25;
 const clickPower=()=>PICKS[S.pick].power*depthMult()*buffMult()*(1+perkLv("steel")*.1+(FX.swing||0))*(termNow().id==="blood"?.5:1)*partyPickMult();
-const cps=()=>CREW.reduce((a,c,i)=>a+c.rate*(S.crew[i]||0)*crewMult(S.crew[i]||0),0)*depthMult()*buffMult()*(1+perkLv("veins")*.08+(FX.crew||0))*(termNow().id==="quiet"?1.5:1);
+const cps=()=>CREW.reduce((a,c,i)=>a+c.rate*(S.crew[i]||0)*crewMult(S.crew[i]||0),0)*depthMult()*buffMult()*(1+perkLv("veins")*.08+(FX.crew||0))*(termNow().id==="quiet"?1.5:1)*partyCrewMult();
 const crewCost=i=>Math.floor(CREW[i].base*Math.pow(1.2,S.crew[i])*(1-perkLv("labor")*.06));
 // ---- buying in bulk ----
 // Costs are floored per hire, so the run is summed rather than solved, which also keeps
@@ -2827,11 +2864,36 @@ async function hireShift(){
 }
 $("autoBtn").onclick=hireShift;
 
-// ---- crew (real multiplayer: create/join by code, xp synced to the server) ----
+// ---- crew ----
+// Four miners, three ranks, one shared pool. The server is the authority on membership and
+// rank; this file never assumes it is in a crew because a pointer said so - it renders what
+// /api/crew last returned, and null means the gate.
 let PARTY=null,partyXpBuf=0,partyBusy=false;
-// Who was on the roster last time we looked, so a refresh can say what changed rather
-// than silently redrawing. Seeded on the first sync so you aren't told about the people
-// who were already there when you opened the game.
+const RANKN={lead:"Lead",foreman:"Foreman",hand:"Hand"};
+const RANKWHY={lead:"Renames the crew, sets ranks, removes anyone, disbands",foreman:"Can remove hands",hand:"Swings, digs, spends the pool"};
+const myRank=()=>(PARTY&&PARTY.me)||"hand";
+const isLead=()=>myRank()==="lead";
+
+// ---- what a crew is actually worth ----
+// Upgrades are bought from the shared pool; the bond is free and simply for turning up
+// with other people, so a full crew beats a solo one even before anything is spent.
+const partyUp=k=>(PARTY&&PARTY.ups&&PARTY.ups[k])||0;
+const partyMates=()=>Math.max(0,((PARTY&&PARTY.members||[]).length)-1);
+const partyBond=()=>1+partyMates()*.04;
+const partyPickMult=()=>(1+partyUp("pick")*.08)*partyBond();
+const partyCrewMult=()=>(1+partyUp("haul")*.08)*partyBond();
+const partyShiftMult=()=>1+partyUp("shift")*.2;
+const partyGemBonus=()=>partyUp("luck")*.1;
+// Mirrors the server's table. If you change one, change both - the server is what enforces it.
+const CREW_UPS=[
+  {id:"pick", name:"Shared picks", need:1,  max:5, cost:l=>6000*(l+1),  desc:"Every pick in the crew bites harder.",   fx:l=>`+${l*8}% swing power, everyone`},
+  {id:"haul", name:"Deeper seams", need:3,  max:5, cost:l=>9000*(l+1),  desc:"What the crews haul up is worth more.",  fx:l=>`+${l*8}% worker income, everyone`},
+  {id:"shift",name:"Long shifts",  need:6,  max:4, cost:l=>14000*(l+1), desc:"Hired hands stay on the pick longer.",   fx:l=>`+${l*20}% auto-swinger time`},
+  {id:"luck", name:"Lucky veins",  need:10, max:4, cost:l=>20000*(l+1), desc:"The rock gives up more bright spots.",   fx:l=>`+${l*10}% gem chance`},
+];
+// Matches the server's crewLevel(): level L starts at 4000*(L-1)^1.55 lifetime xp.
+const lvFloor=lv=>Math.ceil(4000*Math.pow(Math.max(0,lv-1),1.55));   // ceil, not round: round can land a hair under the server threshold and show the wrong level
+
 let rosterSeen=null;
 function announceRoster(next){
   const ids=(next&&next.members||[]).map(m=>m.id);
@@ -2844,186 +2906,232 @@ function announceRoster(next){
   for(const id of rosterSeen) if(!ids.includes(id)&&(!USER||id!==USER.id)) toast("Someone left the crew.");
   rosterSeen=ids;
 }
-let crewBoard=null,crewBoardErr="";
-async function loadParty(){if(!USER){PARTY=null;renderParty();return}
-  try{const r=await fetch("/api/crew");const d=await r.json().catch(()=>null);PARTY=(r.ok&&d&&!d.error)?d:null}
-  catch(e){PARTY=null}
-  rosterSeen=(PARTY&&PARTY.members||[]).map(m=>m.id);   // baseline, don't announce these
-  renderParty()}
-async function partyCreate(){if(!USER||partyBusy)return;partyBusy=true;
-  try{const r=await fetch("/api/crew/create",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({name:displayName()+"'s crew"})});
-    const d=await r.json();if(d.error)toast(d.error);else{PARTY=d;toast("Crew created. Share your code to invite friends.");confetti(16)}
-  }catch(e){toast("Couldn't create a crew right now.")}
-  partyBusy=false;render()}
-async function partyJoin(){if(!USER||partyBusy)return;
-  const code=await askText({
-    title:"Join a crew",
-    text:"Ask a friend for their five-letter code. You'll find yours at the top of the crew tab.",
-    placeholder:"K7QMD",ok:"Join crew",max:5,
-    // The server's alphabet drops I, O, 0 and 1 so codes can be read aloud.
-    check:v=>!v?"Enter the code they gave you."
-      :v.length<5?"Codes are five characters."
-      :!/^[A-HJ-NP-Za-hj-np-z2-9]{5}$/.test(v)?"That isn't a valid code — no I, O, 0 or 1.":"",
-  });
-  if(code===null)return;partyBusy=true;
-  try{const r=await fetch("/api/crew/join",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({code:code.toUpperCase()})});
-    const d=await r.json();if(d.error)toast(d.error);else{PARTY=d;toast("Joined the crew.");confetti(16)}
-  }catch(e){toast("Couldn't join that crew.")}
-  partyBusy=false;render()}
-async function partyLeave(){if(!PARTY||partyBusy)return;
-  if(!await ask("Leave the crew?","You'll lose the crew's shared upgrades until you rejoin or start a new one.","Leave crew"))return;
-  partyBusy=true;try{await fetch("/api/crew/leave",{method:"POST"})}catch(e){}
-  PARTY=null;partyBusy=false;toast("You left the crew.");render()}
-async function partyUpgrade(id){if(!PARTY||partyBusy)return;partyBusy=true;
-  try{const r=await fetch("/api/crew/upgrade",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({id})});
-    const d=await r.json();if(d.error)toast(d.error);else{PARTY=d;toast(id===0?"Shared picks upgraded — everyone swings harder.":"Longer shifts upgraded — auto-swinger lasts longer.");confetti(16)}
-  }catch(e){toast("Couldn't buy that right now.")}
-  partyBusy=false;render()}
-async function crewPost(path,body,okMsg){
+
+async function loadParty(){
+  if(!USER){PARTY=null;renderParty();return}
+  try{const r=await fetch("/api/crew");const d=await r.json().catch(()=>null);
+    const next=(r.ok&&d&&!d.error)?d:null;
+    if(next)announceRoster(next);else rosterSeen=null;
+    PARTY=next;
+  }catch(e){/* keep what we had rather than flashing the gate on a blip */}
+  renderParty();
+}
+
+// One funnel for every crew action, so a dropped connection or a rejected request can
+// never leave the UI showing a crew the server disagrees about.
+async function crewPost(act,body,okMsg){
   if(partyBusy)return null;partyBusy=true;
-  try{const r=await fetch(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body||{})});
-    const d=await r.json();
-    if(d.error){toast(d.error);return null}
-    PARTY=d;DIG=d.dig||DIG;crewBoard=null;
+  try{
+    const r=await fetch("/api/crew/"+act,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body||{})});
+    const d=await r.json().catch(()=>null);
+    if(!d||d.error){toast((d&&d.error)||"The overseer didn't answer. Try again.");await loadParty();return null}
+    if(d.ok||d.disbanded){PARTY=null;rosterSeen=null}
+    else{PARTY=d;rosterSeen=(d.members||[]).map(m=>m.id)}
     if(okMsg)toast(okMsg);
-    renderParty();renderDig();render();
+    renderParty();render();
     return d;
   }catch(e){toast("Couldn't reach the overseer. Try again.");return null}
   finally{partyBusy=false}
 }
+
+async function partyCreate(){
+  if(!USER)return;
+  const d=await crewPost("create",{name:displayName()+"'s crew"},"Crew formed. Share the code to fill it.");
+  if(d)confetti(24);
+}
+async function partyJoin(){
+  if(!USER)return;
+  const code=await askText({title:"Join a crew",text:"Ask for their five-letter code. Yours sits at the top of this tab.",
+    placeholder:"K7QMD",ok:"Join crew",max:5,
+    // The server's alphabet drops I, O, 0 and 1 so codes survive being read aloud.
+    check:v=>!v?"Enter the code they gave you.":v.length<5?"Codes are five characters."
+      :!/^[A-HJ-NP-Za-hj-np-z2-9]{5}$/.test(v)?"That isn't a valid code — no I, O, 0 or 1.":"" });
+  if(code===null)return;
+  const d=await crewPost("join",{code:code.toUpperCase()},"You're on the crew.");
+  if(d)confetti(24);
+}
+async function partyLeave(){
+  if(!PARTY)return;
+  const last=(PARTY.members||[]).length<=1;
+  const warn=last?"You're the last one here, so the crew closes with you."
+    :isLead()?"The longest-standing member takes over as lead.":"You'll lose the crew's upgrades until you join another.";
+  if(!await ask("Leave the crew?",warn,"Leave crew"))return;
+  await crewPost("leave",{},"You left the crew.");
+}
+async function partyDisband(){
+  if(!isLead())return;
+  if(!await ask("Disband the crew?",`Everyone is removed and ${PARTY.name} is gone for good, along with its level and upgrades. This can't be undone.`,"Disband"))return;
+  await crewPost("disband",{},"The crew is disbanded.");
+}
 async function partyRename(){
   const cur=(PARTY&&PARTY.name)||"";
-  const name=await askText({
-    title:"Name the crew",
-    text:"Everyone in the crew sees this, and it's the name that shows on the crew board.",
+  const name=await askText({title:"Name the crew",text:"Everyone in the crew sees this.",
     value:cur,placeholder:"The East Gallery",ok:"Rename crew",max:24,
     // Mirrors the server's rule, so a rejection never comes as a surprise.
-    check:v=>!v?"Give the crew a name."
-      :v.length<2?"A little longer than that."
+    check:v=>!v?"Give the crew a name.":v.length<2?"A little longer than that."
       :!/^[A-Za-z0-9 '._-]+$/.test(v)?"Letters, numbers, spaces, and ' . _ - only."
-      :v===cur?"That's already the name.":"",
-  });
+      :v===cur?"That's already the name.":"" });
   if(name===null)return;
-  await crewPost("/api/crew/rename",{name},"Crew renamed.");
-}
-async function partyPromote(id){
-  const m=(PARTY.members||[]).find(x=>x.id===id);if(!m)return;
-  if(!await ask("Hand over the crew?",`${m.name} becomes the lead. You stay in the crew, but you won't be able to rename it or remove anyone after this.`,"Make lead"))return;
-  await crewPost("/api/crew/promote",{id},`${m.name} leads the crew now.`);
+  await crewPost("rename",{name},"Crew renamed.");
 }
 async function partyKick(id){
   const m=(PARTY.members||[]).find(x=>x.id===id);if(!m)return;
-  if(!await ask("Remove from the crew?",`${m.name} loses their share of the dig and the crew's upgrades. They can be invited back with the code.`,"Remove"))return;
-  await crewPost("/api/crew/kick",{id},`${m.name} is off the crew.`);
+  if(!await ask("Remove from the crew?",`${m.name} loses the crew's upgrades and their share of the dig. They can come back with the code.`,"Remove"))return;
+  await crewPost("kick",{id},`${m.name} is off the crew.`);
+}
+async function partyRank(id,rank){
+  const m=(PARTY.members||[]).find(x=>x.id===id);if(!m)return;
+  if(rank==="lead"){
+    if(!await ask("Hand over the crew?",`${m.name} becomes lead. You drop to foreman and won't be able to rename, disband, or set ranks after this.`,"Hand over"))return;
+    return crewPost("rank",{id,rank},`${m.name} leads the crew now.`);
+  }
+  await crewPost("rank",{id,rank},rank==="foreman"?`${m.name} is a foreman.`:`${m.name} is back to hand.`);
+}
+async function partyUpgrade(id){
+  const u=CREW_UPS.find(x=>x.id===id);if(!u)return;
+  await crewPost("upgrade",{id},`${u.name} upgraded.`);
 }
 
 function partyGainXp(){if(PARTY)partyXpBuf+=5}
 
-// ---- crew dig ----
-let DIG=null,digBuf=0;
+// ---- the weekly dig ----
+let digBuf=0;
 function digGain(n){if(PARTY&&n>0)digBuf+=n}
 async function digSync(amount){
-  if(!USER||!PARTY)return;
-  try{const r=await fetch("/api/crew/dig",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({amount:amount||0})});
-    const d=await r.json();if(d.error)return;
-    PARTY=d;DIG=d.dig||null;
-    if(d.justFinished){toast(`The crew cleared it: ${DIG.name}. Everyone's share of the xp is in.`);confetti(50)}
-    renderDig();renderParty();
-  }catch(e){if(amount)digBuf+=amount}
+  if(!PARTY)return;
+  try{
+    const r=await fetch("/api/crew/dig",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({amount})});
+    const d=await r.json().catch(()=>null);
+    if(!d||d.error)return;
+    const done=d.justFinished;PARTY=d;
+    if(done){toast(`The crew cleared ${d.dig.name}. The pool is paid.`);confetti(40)}
+    renderParty();
+  }catch(e){}
 }
 setInterval(()=>{if(!PARTY||digBuf<=0)return;const a=Math.floor(digBuf);digBuf=0;digSync(a)},30000);
+setInterval(async()=>{
+  if(!PARTY||partyXpBuf<=0||partyBusy)return;
+  const a=Math.floor(partyXpBuf);partyXpBuf=0;
+  try{const r=await fetch("/api/crew/xp",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({amount:a})});
+    const d=await r.json().catch(()=>null);
+    if(d&&!d.error){const before=PARTY&&PARTY.lv;PARTY=d;
+      if(before&&d.lv>before){toast(`The crew reached level ${d.lv}.`);confetti(28)}
+      renderParty()}
+  }catch(e){}
+},15000);
+addEventListener("visibilitychange",()=>{if(!document.hidden&&USER&&PARTY)loadParty()});
+setInterval(()=>{if(!document.hidden&&USER&&PARTY&&$("tab-gang").classList.contains("on"))loadParty()},20000);
 
-// Crew standing: the one thing a crew builds that a single player can't.
-const CREW_RANKS=[[0,"A new"],[1,"A working"],[3,"A steady"],[6,"A named"],[12,"A famous"],[24,"A legendary"]];
-function crewRank(c){const d=(c&&c.digsDone)||0;let r=CREW_RANKS[0];for(const x of CREW_RANKS)if(d>=x[0])r=x;
-  const nx=CREW_RANKS.find(x=>x[0]>d);
-  return {name:r[1],next:nx?nx[0]-d:0,nextName:nx?nx[1]:null}}
-const agoShort=t=>{if(!t)return "not seen yet";const s=Math.floor((Date.now()-t)/1000);
-  if(s<3600)return "here now";const hr=Math.floor(s/3600);if(hr<24)return hr+"h ago";
-  const d=Math.floor(hr/24);return d+"d ago"};
+const agoShort=t=>{if(!t)return"not seen yet";const s=Math.floor((Date.now()-t)/1000);
+  if(s<120)return"here now";if(s<3600)return Math.floor(s/60)+"m ago";
+  if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"};
+
+function renderRoster(){
+  const mem=PARTY.members||[],seen=PARTY.seen||{},lead=isLead(),meR=myRank();
+  $("ptyCount").textContent=`${mem.length}/${PARTY.max||4}`;
+  $("gangRoster").innerHTML=mem.map(m=>{
+    const me=USER&&m.id===USER.id,r=m.rank||"hand";
+    const acts=[];
+    if(lead&&!me){
+      if(r!=="foreman")acts.push(`<button class="btn" data-rank="foreman" data-id="${esc(m.id)}">Make foreman</button>`);
+      else acts.push(`<button class="btn" data-rank="hand" data-id="${esc(m.id)}">Make hand</button>`);
+      acts.push(`<button class="btn" data-rank="lead" data-id="${esc(m.id)}">Make lead</button>`);
+      acts.push(`<button class="btn d" data-kick="${esc(m.id)}">Remove</button>`);
+    }else if(meR==="foreman"&&!me&&r==="hand"){
+      acts.push(`<button class="btn d" data-kick="${esc(m.id)}">Remove</button>`);
+    }
+    return `<div class="cmem${me?" me":""}">
+      <span class="cav" style="background:${esc(m.shirt||"#3aa0c8")}">${esc((m.name||"?").slice(0,1).toUpperCase())}</span>
+      <div class="cnm"><b>${esc(m.name||"Miner")}${me?" <em>you</em>":""}</b>
+        <small>${agoShort(seen[m.id])}</small></div>
+      <span class="cbadge r-${r}">${RANKN[r]}</span>
+      ${acts.length?`<div class="cacts">${acts.join("")}</div>`:""}
+    </div>`}).join("");
+  const open=(PARTY.max||4)-mem.length;
+  if(open>0)$("gangRoster").innerHTML+=`<div class="cmem open"><span class="cav ghost">+</span><div class="cnm"><b>${open} seat${open>1?"s":""} open</b><small>Share the code to fill ${open>1?"them":"it"}</small></div></div>`;
+  $("gangRoster").querySelectorAll("[data-kick]").forEach(b=>b.onclick=()=>partyKick(b.dataset.kick));
+  $("gangRoster").querySelectorAll("[data-rank]").forEach(b=>b.onclick=()=>partyRank(b.dataset.id,b.dataset.rank));
+}
+
+function renderUps(){
+  const lv=PARTY.lv||1,xp=PARTY.xp||0;
+  $("ptyUps").innerHTML=CREW_UPS.map(u=>{
+    const at=(PARTY.ups||{})[u.id]||0,maxed=at>=u.max,shut=lv<u.need;
+    const cost=u.cost(at);
+    const btn=shut?`<button class="buy" disabled>Level ${u.need}</button>`
+      :maxed?`<button class="buy" disabled>Maxed</button>`
+      :`<button class="buy${xp>=cost?"":" short"}" data-up="${u.id}"${xp>=cost?"":" disabled"}>${cost.toLocaleString()} xp</button>`;
+    return `<div class="row${shut?" locked":""}">
+      <div><div class="name">${u.name}<em>${at}/${u.max}</em></div>
+      <div class="desc">${shut?`Opens at crew level ${u.need}. `:""}${u.desc} ${at?`<b style="color:var(--lamp2)">${u.fx(at)}</b> now.`:""}</div></div>
+      ${btn}</div>`}).join("");
+  $("ptyUps").querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>partyUpgrade(b.dataset.up));
+  const mates=partyMates();
+  $("ptyBond").textContent=mates
+    ?`Crew bond: +${mates*4}% swing power and worker income for digging alongside ${mates} other${mates>1?"s":""}. Fill the crew for +12%.`
+    :"Crew bond: nothing yet. Every other miner on the roster is +4% swing power and worker income for all of you.";
+}
 
 function renderDig(){
-  const el=$("lgDig");if(!el)return;
-  if(!USER){el.innerHTML='<h4>The crew dig</h4><p class="seamnote">Sign in with Discord and join a crew to take a share of the weekly dig.</p>';return}
-  if(!PARTY){el.innerHTML='<h4>The crew dig</h4><p class="seamnote">You have no crew. Four of you working one seam clears it in a week; one of you does not. A crew keeps its own standing, and it only goes up while people keep showing up.</p><p class="seamnote"><a href="#" id="lgCrewGo" style="color:var(--lamp)">Find a crew &rsaquo;</a></p>';const g=$("lgCrewGo");if(g)g.onclick=e=>{e.preventDefault();switchTab("gang")};return}
-  if(!DIG){el.innerHTML='<h4>The crew dig</h4><p class="seamnote">Fetching this week&rsquo;s job from the overseer&hellip;</p>';digSync(0);return}
-  const pct=Math.min(100,DIG.total/DIG.need*100);
-  const rows=(PARTY.members||[]).map(m=>{
-    const v=(DIG.by&&DIG.by[m.id])||0,seen=(PARTY.seen&&PARTY.seen[m.id])||0;
-    return `<div class="digmem ${v<=0?'idle':''}"><span>${logEsc(m.name)}${m.id===(USER&&USER.id)?" (you)":""} <em style="font-style:normal;color:#7a6e58;font-size:12px">${agoShort(seen)}</em></span><span>${v>0?DIG.verb+" "+fmt(v):"nothing yet"}</span></div>`;
-  }).join("");
-  const rank=crewRank(PARTY);
-  const everyone=(PARTY.members||[]).every(m=>((DIG.by||{})[m.id]||0)>0);
-  el.innerHTML=`<h4>${logEsc(DIG.name)}</h4>`+
-    `<p class="seamnote">${rank.name} crew · ${PARTY.digsDone||0} dig${(PARTY.digsDone||0)===1?"":"s"} cleared`+
-      `${PARTY.fullWeeks?` · ${PARTY.fullWeeks} with every hand on it`:""}</p>`+
-    `<p class="seamnote">The crew owes ${fmt(DIG.need)} this week. ${DIG.total>=DIG.need?"Cleared.":fmt(Math.max(0,DIG.need-DIG.total))+" left."}</p>`+
-    `<div class="lbar"><i style="width:${pct}%"></i></div>${rows}`+
-    (everyone?`<p class="seamnote"><b>Every hand on it this week.</b> Clear it and the week counts double toward the crew's standing.</p>`
-      :`<p class="seamnote">A week where all of you put something in counts double toward the crew's standing.</p>`);
+  const d=PARTY&&PARTY.dig,w=$("ptyDig");if(!w)return;
+  if(!d){w.innerHTML=`<p class="note" style="margin:0">This week's job hasn't been set yet. Swing once and the overseer will write it up.</p>`;return}
+  const pct=Math.min(100,d.total/d.need*100),mem=PARTY.members||[];
+  w.innerHTML=`<b style="font-size:15px">${esc(d.name)}</b>
+    <div class="prog" style="margin:8px 0 6px"><i style="width:${pct}%"></i></div>
+    <div class="meta"><span>${fmt(d.total).slice(1)} / ${fmt(d.need).slice(1)} ${esc(d.verb)}</span><span>${Math.floor(pct)}%${d.paid?" · paid":""}</span></div>
+    <div class="digby">`+mem.map(m=>{
+      const by=(d.by||{})[m.id]||0,share=d.total?by/d.total*100:0;
+      return `<div><small>${esc(m.name||"Miner")}</small><b>${by?fmt(by):"—"}</b><i><span style="width:${share}%"></span></i></div>`}).join("")+
+    `</div><p class="note" style="margin:10px 0 0">Clearing it pays the whole crew's pool. A week where everyone put something in counts double toward the crew's record.</p>`;
 }
-// Crew sync. This used to bail whenever there was no xp to send, and xp only builds
-// while you are swinging - so anyone sat idle (which is most of the time, and exactly
-// what you are doing while waiting for a friend to accept a code) never spoke to the
-// server at all. Joins, leaves, renames and promotions only appeared after a reload.
-// Now a quiet tick still refreshes the roster.
-setInterval(async()=>{
-  if(!PARTY)return;
-  if(partyXpBuf>0){
-    const amt=partyXpBuf;partyXpBuf=0;
-    try{const r=await fetch("/api/crew/xp",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({amount:amt})});
-      const d=await r.json();if(!d.error){announceRoster(d);PARTY=d;render()}
-    }catch(e){partyXpBuf+=amt}
-    return;
-  }
-  if(document.hidden)return;            // no point polling a tab nobody is looking at
-  try{const r=await fetch("/api/crew");const d=await r.json().catch(()=>null);
-    if(r.ok&&d&&!d.error){announceRoster(d);PARTY=d;renderParty()}
-  }catch(e){}
-},3000);
-// A leader who tabs away while someone joins should see them on the way back in.
-addEventListener("visibilitychange",()=>{if(!document.hidden&&USER&&PARTY)loadParty()});
-$("ptyLeave").onclick=partyLeave;$("gUp0Btn").onclick=()=>partyUpgrade(0);$("gUp1Btn").onclick=()=>partyUpgrade(1);
+
 function renderParty(){
   const gate=$("ptyGate"),body=$("ptyBody"),mg=$("mgCard");
   if(!USER){mg.style.display="none";gate.style.display="";body.style.display="none";
-    gate.innerHTML=`<p class="note" style="margin:0 0 10px">Sign in with Discord to team up with friends.</p><a href="/api/login" class="btn p" style="display:inline-flex;align-items:center;text-decoration:none;background:#5865F2;border-color:#5865F2;color:#fff">Sign in with Discord</a>`;
+    gate.innerHTML=`<p class="note" style="margin:0 0 10px">Sign in with Discord to dig alongside up to three friends.</p><a href="/api/login" class="btn p" style="display:inline-flex;align-items:center;text-decoration:none;background:#5865F2;border-color:#5865F2;color:#fff">Sign in with Discord</a>`;
     return}
   mg.style.display="";
   if(!PARTY){gate.style.display="";body.style.display="none";
-    gate.innerHTML=`<p class="note" style="margin:0 0 10px">You're not in a crew yet. Create one and share the code, or join a friend's.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="buy" id="ptyCreate">Create a crew</button><button class="btn" id="ptyJoinBtn">Join with a code</button></div>`;
+    gate.innerHTML=`<p class="note" style="margin:0 0 10px">You're not in a crew. Start one and hand out the code, or join a friend's.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="buy" id="ptyCreate">Start a crew</button><button class="btn" id="ptyJoinBtn">Join with a code</button></div>`;
     $("ptyCreate").onclick=partyCreate;$("ptyJoinBtn").onclick=partyJoin;
-    $("mgLvl").textContent="—";$("mgMem").textContent="0/4";$("mgFill").style.width="0%";$("mgProg").textContent="Not in a crew";$("mgPct").textContent="";
+    $("mgLvl").textContent="—";$("mgMem").textContent="0/4";$("mgFill").style.width="0%";
+    $("mgProg").textContent="Not in a crew";$("mgPct").textContent="";
     return}
   gate.style.display="none";body.style.display="";
-  const mem=PARTY.members||[];
-  if(!mem.length){PARTY=null;renderParty();return}
-  const lvl=Math.floor((PARTY.xp||0)/4000)+1,base=(lvl-1)*4000,cap=lvl*4000,pct=Math.min(100,((PARTY.xp||0)-base)/(cap-base)*100);
-  $("ptyName").textContent=PARTY.name||"Crew";$("ptyCode").textContent=PARTY.id||"";
-  $("gangLvl").textContent="Lv "+lvl;$("gangFill").style.width=pct+"%";
-  $("gangProg").textContent=Math.floor(PARTY.xp||0)+" / "+cap+" xp";$("gangPct").textContent=Math.floor(pct)+"%";
-  const iLead=USER&&PARTY.owner===USER.id;
-  $("gangRoster").innerHTML=mem.map(m=>{
-    const me=USER&&m.id===USER.id,lead=m.id===PARTY.owner;
-    const seen=(PARTY.seen&&PARTY.seen[m.id])||0;
-    // A member with no name would throw on .slice and take the whole render loop down
-    // with it - the roster, the mine, everything - so never trust it to be there.
-    const nm=(m.name||"").trim()||"Miner";
-    return `<div class="rmem"><div class="av">${esc(nm.slice(0,2).toUpperCase())}</div>
-      <div class="who"><div>${esc(nm)}${me?" (you)":""}</div>
-      <div>${lead?"Lead":"Crew"}${seen?" · "+agoShort(seen):""}</div></div>
-      ${iLead&&!me?`<div class="acts"><button data-prom="${m.id}" title="Hand the crew over">Make lead</button><button class="danger" data-kick="${m.id}">Remove</button></div>`:""}</div>`}).join("")
-    +Array.from({length:4-mem.length}).map(()=>`<div style="border:1px dashed var(--line2);border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px;opacity:.7"><div style="width:34px;height:34px;border-radius:50%;border:1px dashed var(--line2);display:flex;align-items:center;justify-content:center;color:var(--mute)">+</div><div style="font-size:12px;color:var(--mute)">Open slot</div></div>`).join("");
-  const rn=$("ptyRename");
-  rn.style.display=iLead?"":"none";
-  rn.onclick=partyRename;
-  $("gangRoster").querySelectorAll("[data-prom]").forEach(b=>b.onclick=()=>partyPromote(b.dataset.prom));
-  $("gangRoster").querySelectorAll("[data-kick]").forEach(b=>b.onclick=()=>partyKick(b.dataset.kick));
-  $("gUp0Lvl").textContent=PARTY.pick?"Lv "+PARTY.pick:"";$("gUp1Lvl").textContent=PARTY.shift?"Lv "+PARTY.shift:"";
-  $("gUp0Btn").textContent=Math.round(6000*((PARTY.pick||0)+1)).toLocaleString()+" xp";$("gUp1Btn").textContent=Math.round(12000*((PARTY.shift||0)+1)).toLocaleString()+" xp";
-  $("gUp0Btn").disabled=(PARTY.xp||0)<6000*((PARTY.pick||0)+1);$("gUp1Btn").disabled=(PARTY.xp||0)<12000*((PARTY.shift||0)+1);
-  $("mgLvl").textContent="Lv "+lvl;$("mgMem").textContent=mem.length+"/4";
-  $("mgFill").style.width=pct+"%";$("mgProg").textContent=Math.floor(PARTY.xp||0)+" / "+cap;$("mgPct").textContent=Math.floor(pct)+"%"}
+  const mem=PARTY.members||[],lv=PARTY.lv||1,tot=PARTY.xpTotal||0;
+  const at=lvFloor(lv),next=lvFloor(lv+1),pct=Math.max(0,Math.min(100,(tot-at)/Math.max(1,next-at)*100));
+
+  $("ptyName").textContent=PARTY.name||"Crew";
+  $("ptyMyRank").textContent=RANKN[myRank()];
+  $("ptyMyRank").className="cbadge r-"+myRank();
+  $("ptySub").textContent=`${mem.length} of ${PARTY.max||4} · ${RANKWHY[myRank()]}`;
+  $("ptyCode").textContent=PARTY.id||"";
+  $("ptyLv").textContent=lv;
+  $("ptyXp").textContent=(PARTY.xp||0).toLocaleString();
+  $("gangFill").style.width=pct+"%";
+  $("gangProg").textContent=`${(tot-at).toLocaleString()} / ${(next-at).toLocaleString()} xp`;
+  $("gangPct").textContent=`Level ${lv+1} at ${next.toLocaleString()}`;
+
+  $("ptyActs").innerHTML=(isLead()
+    ?`<button class="btn" id="ptyRename">Rename</button><button class="btn d" id="ptyDisband">Disband</button>`
+    :"")+`<button class="btn" id="ptyLeave">Leave</button>`;
+  if(isLead()){$("ptyRename").onclick=partyRename;$("ptyDisband").onclick=partyDisband}
+  $("ptyLeave").onclick=partyLeave;
+
+  renderRoster();renderUps();renderDig();
+
+  $("mgLvl").textContent="Lv "+lv;
+  $("mgMem").textContent=`${mem.length}/${PARTY.max||4}`;
+  $("mgFill").style.width=pct+"%";
+  $("mgProg").textContent=PARTY.name||"Crew";
+  $("mgPct").textContent=Math.floor(pct)+"%";
+}
+$("ptyCopy").onclick=async()=>{
+  if(!PARTY)return;
+  try{await navigator.clipboard.writeText(PARTY.id);toast("Invite code copied.")}
+  catch(e){toast("Your code is "+PARTY.id)}
+};
+
 // ---- tutorial ----
 const TOUR=[
   {tab:"mine",el:null,ic:"⚖",t:"You owe Lord Ashcombe",p:"Fifty million, and no way to pay it. So his men put you at the bottom of his mine to work it off. Everything down here starts with one swing."},
@@ -3746,7 +3854,7 @@ function mine(e,auto){
     st.classList.toggle("hot",c>1.4);}
   {const step=Math.max(4,10-perkLv("rhythm"));
    $("streakBar").style.width=(comboMult()>1?(combo%5)*20:(streak%step)/step*100)+"%"}
-  if(Math.random()<LAYERS[S.depth].gem*(1+perkLv("lucky")*.25+(FX.gem||0))){
+  if(Math.random()<LAYERS[S.depth].gem*(1+perkLv("lucky")*.25+(FX.gem||0)+partyGemBonus())){
     let r=Math.random()*100,g=GEMS[0];for(const x of GEMS){if(r<x.w){g=x;break}r-=x.w}
     const v=(p*g.mult+cps()*g.mult/10)*(termNow().id==="blood"?10:1);earn(v);S.gems++;pop(`${g.name}! +${fmt(v)}`,e,"gem");
   }
@@ -3931,14 +4039,7 @@ const esc=x=>String(x).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"
 let boardMode="all",boardData=null,boardSeason="all";
 // Two top-level views now, Seasons and Crews. Which season you're looking at is a choice
 // within Seasons rather than a tab of its own, so adding season 3 doesn't add a tab.
-function setBoardMode(m){
-  const top=m==="crews"?"crews":"all";
-  boardMode=top==="crews"?"crews":boardSeason;
-  document.querySelectorAll("[data-board]").forEach(x=>x.classList.toggle("on",x.dataset.board===top));
-  const sp=$("seasonPick");if(sp)sp.style.display=top==="crews"?"none":"";
-  if(boardMode==="crews"&&!crewBoard)loadCrewBoard();else renderBoard();
-}
-document.querySelectorAll("[data-board]").forEach(b=>b.onclick=()=>setBoardMode(b.dataset.board));
+function setBoardMode(){boardMode=boardSeason;renderBoard()}
 document.querySelectorAll("[data-season]").forEach(b=>b.onclick=()=>{
   boardSeason=b.dataset.season;
   document.querySelectorAll("[data-season]").forEach(x=>x.classList.toggle("on",x===b));
@@ -3957,31 +4058,7 @@ async function loadBoard(){
   renderBoard();
   if(S.depth===4)drawScene();   // the wall carvings are real names — refresh them
 }
-async function loadCrewBoard(){
-  try{const r=await fetch("/api/crews");const d=await r.json();
-    if(d.error)throw new Error(d.error);
-    crewBoard=d.crews||[];crewBoardErr="";
-  }catch(e){crewBoardErr=String(e.message||e)}
-  renderBoard();
-}
-function renderCrewBoard(){
-  const rows=$("boardRows");
-  $("boardSub").textContent="Crews ranked by weekly digs cleared together";
-  $("champs").innerHTML="";$("nudge").textContent="";
-  if(crewBoardErr){rows.innerHTML=`<tr><td colspan="3" style="color:var(--red)">The crew board couldn't be loaded &mdash; ${esc(crewBoardErr)}</td></tr>`;return}
-  if(!crewBoard){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">Loading&hellip;</td></tr>`;return}
-  if(!crewBoard.length){rows.innerHTML=`<tr><td colspan="3" style="color:var(--dim)">No crew has cleared a dig yet. Yours could be first.</td></tr>`;return}
-  rows.innerHTML=`<tr><td colspan="3" style="padding:0;border:0">`+crewBoard.map((c,i)=>{
-    const mine=PARTY&&PARTY.id===c.id;
-    return `<div class="crewrow ${i<3?'p'+(i+1):''}" style="${mine?'background:rgba(255,176,31,.06)':''}">
-      <span class="r">${i+1}</span>
-      <span class="nm"><b style="${i===0?'color:#ffd76a;text-shadow:0 0 14px rgba(255,215,106,.5)':i===1?'color:#dfe4ea':i===2?'color:#e2a06a':''}">${esc(c.name)}</b>
-      <small>${c.size}/4 · led by ${esc(c.lead)}${c.full?` · ${c.full} full week${c.full>1?"s":""}`:""}${mine?" · your crew":""}</small></span>
-      <span class="dg"><b>${c.digs}</b><small>dig${c.digs===1?"":"s"}</small></span></div>`}).join("")+`</td></tr>`;
-}
-
 function renderBoard(){
-  if(boardMode==="crews")return renderCrewBoard();
   const rows=$("boardRows"),list=boardMode==="legacy"?(boardData.legacy||[]):boardData.all;
   $("boardSub").textContent=boardMode==="legacy"
     ?(boardData.legacyName||"Beta")+" · closed, kept as it finished"
