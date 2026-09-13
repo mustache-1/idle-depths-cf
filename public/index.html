@@ -3721,7 +3721,8 @@ function pop(txt,e,cls){const p=document.createElement("div");p.className="pop"+
 
 function mine(e,auto){
   const me=document.querySelector(".me .arm");if(me){me.style.transform="rotate(-55deg)";setTimeout(()=>me.style.transform="",90)}
-  const now=Date.now();streak=now-lastSwing<1500?streak+1:1;lastSwing=now;if(!auto&&streak>(S.bestStreak||0))S.bestStreak=streak;
+  const now=Date.now();streak=(autoOn()||now-lastSwing<1500)?streak+1:1;lastSwing=now;
+  if(streak>(S.bestStreak||0))S.bestStreak=streak;
   if(!auto&&autoOn()){combo=now-lastManual<1200?combo+1:1;lastManual=now}
   if(boss){const dmg=clickPower()*streakMult()*(auto?1:comboMult())*(1+perkLv("slayer")*.4+(FX.boss||0));boss.hp-=dmg;S.swings++;partyGainXp();if(!auto)pop("-"+fmt(dmg).slice(1),e,"hit");const w=document.querySelector(".wyrm");if(w){w.classList.remove("hit");void w.offsetWidth;w.classList.add("hit")}bossRender();if(boss.hp<=0)bossEnd(true);render();return}
   const p=clickPower()*streakMult()*(auto?1:comboMult());earn(p);S.swings++;if(!auto)lastTap=Date.now();partyGainXp();S.rockHp-=p;rockJolt();if(!auto){pop("+"+fmt(p),e,comboMult()>1.4?"hot":"");chips()}
@@ -3729,7 +3730,8 @@ function mine(e,auto){
   {const c=comboMult();
     $("streakN").innerHTML=c>1?`×${(streakMult()*c).toFixed(2)}<em>overtime ×${c.toFixed(1)}</em>`:"×"+streakMult().toFixed(2)+(streakMult()>=1.5?" MAX":"")+(autoOn()?" auto":"");
     st.classList.toggle("hot",c>1.4);}
-  $("streakBar").style.width=(autoOn()?(combo%5*20):(streak%10*10))+"%";
+  {const step=Math.max(4,10-perkLv("rhythm"));
+   $("streakBar").style.width=(comboMult()>1?(combo%5)*20:(streak%step)/step*100)+"%"}
   if(Math.random()<LAYERS[S.depth].gem*(1+perkLv("lucky")*.25+(FX.gem||0))){
     let r=Math.random()*100,g=GEMS[0];for(const x of GEMS){if(r<x.w){g=x;break}r-=x.w}
     const v=(p*g.mult+cps()*g.mult/10)*(termNow().id==="blood"?10:1);earn(v);S.gems++;pop(`${g.name}! +${fmt(v)}`,e,"gem");
