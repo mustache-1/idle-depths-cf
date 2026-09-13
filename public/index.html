@@ -1418,13 +1418,13 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer through the first nine and earn keepsakes. Mining uncovers clues.</li><li><b>Wardens</b> stand at the mouth of every layer down to 30. Press descend and you fight instead of paying — your cash is only spent once it's down. Losing costs nothing, and a win gives ×1.25 to everything for two minutes. Each door only has to be opened once, ever.</li><li><b>Below the Warm Dark</b> — forty-one more layers, no story and no mercy. Each pays ×2.2, and the descend costs are tuned so a floor takes about an hour near the top of the deep and several days near the bottom. New crew and picks unlock every three floors.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Auto-swinger</b> — hire a hand from the Upgrades tab any time: 12 hours on the pick at 4 swings a second, <b>Your first one is free and runs at 8 a second</b>, once ever. After that it costs a fifth of what you currently owe Ashcombe, so the price climbs with every debt you pay. It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
+    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer through the first nine and earn keepsakes. Mining uncovers clues.</li><li><b>Wardens</b> stand at the mouth of every layer down to 30. Press descend and you fight instead of paying — your cash is only spent once it's down. Losing costs nothing, and a win gives ×1.25 to everything for two minutes. Each door only has to be opened once, ever.</li><li><b>Below the Warm Dark</b> — forty-one more layers, no story and no mercy. Each pays ×2.2, and the descend costs are tuned so a floor takes about an hour near the top of the deep and several days near the bottom. New crew and picks unlock every three floors.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Auto-swinger</b> — hire a hand from the Upgrades tab any time: 12 hours on the pick at 6 swings a second. <b>Your first one is free and runs at 8 a second</b>, once ever. After that it costs a fifth of what you currently owe Ashcombe, so the price climbs with every debt you pay. It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
     <h4>Fair play</h4>
     <p>Idle Depths has a shared leaderboard, so the rules are simple:</p>
-    <ul><li><b>No automation.</b> Autoclickers, macros, scripts, or anything that taps for you.</li><li><b>No tampering.</b> Editing saves, memory, requests, or the page to change your numbers.</li><li><b>No exploiting bugs.</b> If something pays out wrong, stop and report it. Fixed bugs may roll back gains.</li><li><b>One account per person.</b> Don't run alts to farm the weekly board.</li><li><b>Keep names clean.</b> Display names that are offensive, impersonate others, or contain links will be changed.</li></ul>
+    <ul><li><b>No automation.</b> Autoclickers, macros, scripts, or anything that taps for you. The mine watches the rhythm of your swings and will say something if it looks machine-made.</li><li><b>No tampering.</b> Editing saves, memory, requests, or the page to change your numbers.</li><li><b>No exploiting bugs.</b> If something pays out wrong, stop and report it. Fixed bugs may roll back gains.</li><li><b>One account per person.</b> Don't run alts to farm the weekly board.</li><li><b>Keep names clean.</b> Display names that are offensive, impersonate others, or contain links will be changed.</li></ul>
     <p>Breaking these can mean removal from the leaderboard, a reset, or a ban. Calls are made by the developer and are final. Play straight and none of this matters.</p>
   </div>
   <div class="hsec" id="hs-terms">
@@ -1604,6 +1604,12 @@
   <p class="note" style="margin-bottom:16px">Sign in with Discord to save to the cloud, keep your progress on any device, and get on the leaderboard. It only asks for your name.</p>
   <a href="/api/login" class="btn p" style="display:flex;align-items:center;justify-content:center;height:46px;text-decoration:none;background:#5865F2;border-color:#5865F2;color:#fff">Sign in with Discord</a>
   <div class="btns" style="justify-content:center;margin-top:8px"><button class="btn" id="lmLater" style="border:0;color:var(--dim)">Remind me later</button></div>
+</div></div>
+<div class="modal" id="afModal" style="z-index:72"><div class="dlg" style="max-width:440px">
+  <header><h3>That looked automated</h3><button class="x" id="afClose" aria-label="Close">×</button></header>
+  <p class="note" style="font-size:14px;color:var(--ink);margin-bottom:10px" id="afWhy"></p>
+  <p class="note" style="margin-bottom:14px">Idle Depths has a shared leaderboard, so anything that swings for you &mdash; autoclickers, macros, scripts &mdash; is against the fair play rules. Nothing has been taken from you and nothing has been reported. If you want the pick moving on its own, hire an auto-swinger from the Upgrades tab: it is built for exactly that, and it counts.</p>
+  <div class="btns"><button class="btn" id="afRules">Read the rules</button><button class="btn p" id="afOk">Understood</button></div>
 </div></div>
 <div class="toast" id="toast"></div>
 
@@ -2147,8 +2153,16 @@ async function load(){
   // Anyone mid-shift across this change is still on the old daily pace. Lift them to the
   // current one rather than leaving them at a rate the game no longer offers - after the
   // offline catch-up above, so no one is paid for time away at a rate they did not have.
-  if(autoOn()&&(S.autoRate||0)<AUTO_SWINGS){S.autoRate=AUTO_SWINGS;
-    toast(`The overseer put a fresh hand on your pick — ${AUTO_SWINGS} swings a second for the rest of the shift.`)}
+  // A running shift keeps the rate it was hired at, so changing the figures would strand
+  // everyone mid-shift on the old pace — including anyone who already spent their one free
+  // claim at the old rate. The free claim stamps autoBought and autoFreeUsed in the same
+  // call, which is how a free shift is told apart from a paid one after the fact.
+  if(autoOn()){
+    const wasFree=S.autoFreeUsed&&Math.abs((S.autoBought||0)-S.autoFreeUsed)<2000;
+    const want=autoSwingsFor(!!wasFree);
+    if((S.autoRate||0)<want){S.autoRate=want;
+      toast(`The overseer put a fresh hand on your pick — ${want} swings a second for the rest of the shift.`)}
+  }
   if(d&&S.seen&&!d.tips&&(S.lifetime||0)>1e5){S.tips={};for(const t of TIPS){let ok=false;try{ok=t.when()}catch(e){}if(ok)S.tips[t.id]=1}}
   const today=new Date().toISOString().slice(0,10);if(S.lastDay!==today){S.lastDay=today;S.days=(S.days||0)+1}
   S.ach=S.ach||{};S.tips=S.tips||{};S.story=S.story||{active:null,prog:{},done:{},pick:{},keeps:[]};S.story.keeps=S.story.keeps||[];ensureLedger();
@@ -2765,7 +2779,7 @@ const AUTO_PCT=.20;
 const AUTO_COST=()=>{const n=S.debts||0;
   return Math.floor(REBIRTH_BASE*Math.pow(1.6,n)*Math.pow(1.05,n*n)*AUTO_PCT)};
 const AUTO_H=12;                // hours per hire
-const AUTO_SWINGS=4;            // a paid hire
+const AUTO_SWINGS=6;            // a paid hire
 // The one on the house swings twice as hard as anything you can buy. It is the only
 // free shift a miner ever gets, so it should be the best one they ever see - the point
 // is to show what the pick can do, not to hand out a weaker sample of it.
@@ -3872,7 +3886,7 @@ function descend(){const L=LAYERS[S.depth],nx=LAYERS[S.depth+1];if(L.rank&&(S.de
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
-  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,dailyNext:S.dailyNext,dailyTaken:S.dailyTaken,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,guards:S.guards,guardsBeat:S.guardsBeat,wardUntil:S.wardUntil,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,autoFreeUsed:S.autoFreeUsed,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,bestVein:S.bestVein,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
+  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,dailyNext:S.dailyNext,dailyTaken:S.dailyTaken,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,guards:S.guards,guardsBeat:S.guardsBeat,wardUntil:S.wardUntil,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,autoFreeUsed:S.autoFreeUsed,afFlags:S.afFlags,afLast:S.afLast,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,bestVein:S.bestVein,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
   toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);feedPost("debt",S.debts);drawScene();render();save();
 }
@@ -4018,7 +4032,7 @@ $("rivalModal").onclick=e=>{if(e.target===$("rivalModal"))$("rivalModal").classL
 
 (function(){const r=$("rock");let sx=0,sy=0,st=0,moved=false,lastFire=0;
   r.style.touchAction="none";
-  const fire=e=>{if(Date.now()-lastFire<30)return;lastFire=Date.now();mine(e)};
+  const fire=e=>{if(Date.now()-lastFire<30)return;lastFire=Date.now();automationWatch(e);mine(e)};
   r.addEventListener("pointerdown",e=>{if(!e.isPrimary)return;sx=e.clientX;sy=e.clientY;st=Date.now();moved=false;
     if(e.pointerType==="touch")fire(e);                       // touch: fire immediately on contact
     try{r.setPointerCapture(e.pointerId)}catch(_){}} ,{passive:true});
@@ -4027,6 +4041,42 @@ $("rivalModal").onclick=e=>{if(e.target===$("rivalModal"))$("rivalModal").classL
     if(!moved&&Date.now()-st<700)fire(e)},{passive:true});
   r.addEventListener("contextmenu",e=>e.preventDefault());
 })();
+// ---- automation watch ----
+// The board is shared, so Fair play bans anything that taps for you. This cautions, it
+// does not enforce: nothing is taken away and nothing is reported, because a wrong call
+// against a genuinely fast tapper costs more than a missed macro does.
+//
+// Two independent tells, and the cadence one needs a long window before it will speak:
+//  - isTrusted false — the event was synthesised inside the page. No input device does that.
+//  - rhythm — a macro fires off a timer, so its gaps barely vary. A hand is erratic even
+//    at speed, so the test is regularity rather than raw speed: fast AND even, or evener
+//    than a hand can be at any speed at all.
+const AF_WIN=40;   // swings weighed before the cadence test will fire
+let afTimes=[],afShown=0;
+function automationWatch(e){
+  if(e&&e.isTrusted===false){afWarn("scripted");return}
+  afTimes.push(Date.now());if(afTimes.length>AF_WIN)afTimes.shift();
+  if(afTimes.length<AF_WIN)return;
+  const gaps=[];for(let i=1;i<afTimes.length;i++)gaps.push(afTimes[i]-afTimes[i-1]);
+  const mean=gaps.reduce((a,b)=>a+b,0)/gaps.length;
+  if(mean>400)return;
+  const cv=Math.sqrt(gaps.reduce((a,g)=>a+(g-mean)*(g-mean),0)/gaps.length)/mean;
+  if((mean<110&&cv<.12)||cv<.05)afWarn("cadence");   // fast and even, or uncannily even at any pace
+}
+function afWarn(why){
+  afTimes=[];
+  if(Date.now()-afShown<6e5)return;   // at most once every ten minutes
+  afShown=Date.now();
+  S.afFlags=(S.afFlags||0)+1;S.afLast=Date.now();
+  $("afWhy").textContent=why==="scripted"
+    ?"That swing was generated by a script running in the page, not by a real click."
+    :"Your swings have been landing on an exact rhythm — faster and steadier than a hand manages.";
+  $("afModal").classList.add("on");
+  save();
+}
+$("afOk").onclick=()=>$("afModal").classList.remove("on");
+$("afClose").onclick=()=>$("afModal").classList.remove("on");
+$("afRules").onclick=()=>{$("afModal").classList.remove("on");openHelp("fair")};
 $("rock").onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();mine({})}};
 $("descend").onclick=descend;
 $("drop").onclick=e=>{e.stopPropagation();dropClaim()};
