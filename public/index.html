@@ -828,15 +828,14 @@
   .keep small{display:block;font-size:12px;color:var(--dim);margin:2px 0 10px}
   .keep span{font-size:12px;color:var(--green)}
   .keep .btn{width:100%;height:36px;font-size:13px}
-  .shifts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .shift{background:var(--panel2);border:1px solid var(--line2);border-radius:12px;padding:16px 12px;color:var(--ink);text-align:center;cursor:pointer;transition:border-color .15s,transform .1s}
-  .shift:hover{border-color:var(--lamp);transform:translateY(-1px)}
-  .shift b{display:block;font-size:24px;font-weight:600;color:var(--lamp2)}
-  .shift small{display:block;font-size:12px;color:var(--dim);margin-top:4px}
-  .shift.lock{opacity:.45;cursor:not-allowed}
-  .shift.lock:hover{border-color:var(--line2);transform:none}
-  .shift em{display:block;font-style:normal;font-size:11px;color:var(--dim);margin-top:8px}
-  .shift em.new{color:var(--green);font-weight:600}
+  /* The one big-ticket purchase on the Upgrades page. Same .row skeleton as every pick
+     and hire so it reads as part of the shop, lit by the lamp so it reads as the headline. */
+  .arow{margin-bottom:16px;border-color:rgba(255,176,31,.38);
+    background:linear-gradient(180deg,rgba(255,176,31,.07),var(--panel))}
+  .arow .name{font-size:16px}
+  .arow .buy{min-width:170px}
+  .arow .buff{box-shadow:none}
+  @media(max-width:560px){.arow{grid-template-columns:1fr}.arow .buy{width:100%}}
   .terms{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
   @media(max-width:600px){.terms{grid-template-columns:1fr}}
   .term{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;cursor:pointer;transition:border-color .15s}
@@ -1279,6 +1278,13 @@
 <div class="panel" id="tab-upgrades">
   <div class="titlebar"><h2>Upgrades</h2><span>Pickaxes hit harder. Workers earn while you're away.</span></div>
   <div class="balbar"><div><small>Your balance</small><b id="upCash">$0</b></div><div><small>Income</small><b id="upCps" style="color:var(--ore)">$0/sec</b></div><div><small>Per swing</small><b id="upClick" style="color:var(--lamp2)">$1</b></div></div>
+  <div class="row arow" id="autoCard">
+    <div>
+      <div class="name">Auto-swinger<span class="buff" id="autoState" style="display:none">working</span></div>
+      <div class="desc" id="autoDesc">A hired hand works your pick, even with the game closed.</div>
+    </div>
+    <button class="buy" id="autoBtn">&mdash;</button>
+  </div>
   <div class="cols">
     <section><h3>Pickaxes</h3><div id="picks"></div></section>
     <section><h3>Workers &amp; machines</h3>
@@ -1408,7 +1414,7 @@
     <h4>The short version</h4>
     <p>You owe Lord Ashcombe $50M. Tap the mine to swing your pick. Cash buys pickaxes (hit harder) and crew (earn every second, even while you're away). Save up to descend — every layer pays more. Pay the debt to walk out, then go back down with lantern oil for a permanent bonus.</p>
     <h4>Things worth knowing</h4>
-    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer through the first nine and earn keepsakes. Mining uncovers clues.</li><li><b>Wardens</b> stand at the mouth of every layer down to 30. Press descend and you fight instead of paying — your cash is only spent once it's down. Losing costs nothing, and a win gives ×1.25 to everything for two minutes. Each door only has to be opened once, ever.</li><li><b>Below the Warm Dark</b> — forty-one more layers, no story and no mercy. Each pays ×2.2, and the descend costs are tuned so a floor takes about an hour near the top of the deep and several days near the bottom. New crew and picks unlock every three floors.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free shift</b> — every 24 hours you can put a hand on the pick for 6 hours at 2 swings/sec, at no cost. The clock starts when you claim, so claiming late never wastes a day.</li><li><b>Auto-swinger</b> — for $10M, a hired hand works the pick for you, any time. Choose 3h (3 swings/sec), 6h (2/sec), 9h (1.5/sec), or 12h (1/sec). It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
+    <ul><li><b>Tips</b> — the game explains each system the moment it becomes relevant, once each. Replay the intro any time with the tour button.</li><li><b>Streaks</b> — tap fast for up to +50% per swing. During an auto shift your streak stays maxed, and tapping along stacks an extra overtime bonus up to +100%.</li><li><b>Contracts</b> refresh every 6 hours. Progress counts while you're away.</li><li><b>Stories</b> unlock per layer through the first nine and earn keepsakes. Mining uncovers clues.</li><li><b>Wardens</b> stand at the mouth of every layer down to 30. Press descend and you fight instead of paying — your cash is only spent once it's down. Losing costs nothing, and a win gives ×1.25 to everything for two minutes. Each door only has to be opened once, ever.</li><li><b>Below the Warm Dark</b> — forty-one more layers, no story and no mercy. Each pays ×2.2, and the descend costs are tuned so a floor takes about an hour near the top of the deep and several days near the bottom. New crew and picks unlock every three floors.</li><li><b>The Deep Wyrm</b> surfaces at random. Kill it in 30s for a 5-minute ×2 pick.</li><li><b>Free shift</b> — every 24 hours you can put a hand on the pick for 6 hours at 2 swings/sec, at no cost. The clock starts when you claim, so claiming late never wastes a day.</li><li><b>Auto-swinger</b> — hire a hand from the Upgrades tab any time: 12 hours on the pick at 4 swings a second, twice the pace of the daily shift. <b>Your first one is free</b>, once ever. After that it costs a fifth of what you currently owe Ashcombe, so the price climbs with every debt you pay. It runs even with the game closed.</li><li><b>Offline</b> — crew works at half pace for up to 8h (more with a better bunk).</li><li><b>The Warden's wheel</b> — spin for up to 50×. Stake up to 25% of your cash, about a second between spins. The house keeps a small cut, so it's a thrill, not an income.</li></ul>
     <div class="btns" style="justify-content:flex-start"><button class="btn p" id="helpTour">Replay the tutorial</button></div>
   </div>
   <div class="hsec" id="hs-fair">
@@ -1570,7 +1576,7 @@
   </div>
 </div>
 <div class="tour" id="tour"><div class="hole" id="hole"></div><div class="tip" id="tip"><div class="tiphead"><span class="tipic" id="tipIc">✦</span><div><small id="tipStep"></small><b id="tipTitle"></b></div></div><p id="tipText"></p><div class="tipdots" id="tipDots"></div><div class="btns"><button class="btn" id="tipSkip" style="margin-right:auto">Skip tour</button><button class="btn" id="tipBack">← Back</button><button class="btn p" id="tipNext">Next →</button></div></div></div>
-<div class="modal" id="ask" style="z-index:70"><div class="dlg" style="max-width:420px"><h3 id="askTitle" style="font-size:18px;font-weight:600;margin-bottom:8px"></h3><p class="note" id="askText" style="font-size:14px;color:var(--ink)"></p><div class="btns"><button class="btn" id="askNo">Cancel</button><button class="btn p" id="askYes">Confirm</button></div></div></div>
+<div class="modal" id="ask" style="z-index:70"><div class="dlg" style="max-width:420px"><h3 id="askTitle" style="font-size:18px;font-weight:600;margin-bottom:8px"></h3><p class="note" id="askText" style="font-size:14px;color:var(--ink);white-space:pre-line"></p><div class="btns"><button class="btn" id="askNo">Cancel</button><button class="btn p" id="askYes">Confirm</button></div></div></div>
 <div class="modal" id="askt" style="z-index:71"><div class="dlg" style="max-width:420px">
   <h3 id="asktTitle" style="font-size:18px;font-weight:600;margin-bottom:8px"></h3>
   <p class="note" id="asktText" style="font-size:14px;color:var(--ink);margin-bottom:12px"></p>
@@ -1586,11 +1592,6 @@
   <ul class="shiftlog" id="awLog"></ul>
   <p class="note" id="awNote" style="font-size:13px">Your earnings are already in your mine.</p>
   <div class="btns"><button class="btn p" id="awayBack" style="width:100%;height:46px">Back to the mine →</button></div>
-</div></div>
-<div class="modal" id="shiftModal" style="z-index:66"><div class="dlg" style="max-width:440px">
-  <header><h3>Start a shift</h3><button class="x" id="shiftClose" aria-label="Close">×</button></header>
-  <p class="note" style="margin-bottom:12px">Costs $10M, any time — no waiting, no daily limit. Shorter shifts swing faster, longer ones last through the night. Every shift keeps your streak at max (+50%). Tap along while it runs to stack an overtime bonus up to +100% on top. It keeps going even if you close the game.</p>
-  <div class="shifts" id="shiftList"></div>
 </div></div>
 <div class="modal" id="loginModal" style="z-index:64"><div class="dlg" style="max-width:420px;text-align:center">
   <div style="width:56px;height:56px;border-radius:14px;margin:4px auto 12px;background:#5865F2;display:flex;align-items:center;justify-content:center;color:#fff;font-size:26px;font-weight:700">D</div>
@@ -1842,7 +1843,7 @@ const RANK_UNLOCKS=[
 ];
 const BET_MAX_PCT=.10,BET_MIN=10,BET_COOLDOWN=4000;
 
-const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,oilFound:0,dockUntil:0,shelf:[],tips:{},last:Date.now()});
+const fresh=()=>({cash:0,pick:0,daily:0,seen:false,autoUntil:0,autoBought:0,autoRate:3,autoFreeUsed:0,shiftsUsed:0,buffUntil:0,bosses:0,bestStreak:0,wheelWins:0,bigSpins:0,days:0,lastDay:"",deepest:0,debts:0,ach:{},bunk:0,exc:0,throne:false,perks:{},terms:"none",nextTerms:"none",contracts:null,story:{active:null,prog:{},done:{},pick:{},keeps:[]},crew:CREW.map(()=>0),depth:0,rockHp:LAYERS[0].hp,swings:0,gems:0,clears:0,crewEarned:0,quest:null,questsDone:0,oilFound:0,dockUntil:0,shelf:[],tips:{},last:Date.now()});
 // ---- season epoch ----
 // Wiping KV does not reset anybody on its own. /api/load returns null, and load() then
 // falls back to the copy in this browser's localStorage - so every player's mine walks
@@ -1994,7 +1995,6 @@ const throneMult=()=>S.throne?1.25:1;
 // additive one did, so a fixed $100M tithe target would now complete almost immediately.
 const EXC_GOAL=4e8,EXC_TITHE=.15;
 const EXC_TEXT=[[0,"Something is buried under the throne. Every coin the crew earns down here, 15% goes into the dig."],[.25,"The crew has cleared the rubble. The seat isn't stone. It's older than the mine."],[.5,"There are names carved beneath the seat. One of them is Ashcombe."],[.75,"The floor beneath the throne is hollow. Something answers when the picks strike."],[1,"The throne is empty, and it always was. The lord was never the one you owed. What's beneath pays better than he ever did."]];
-const SHIFTS=[{h:3,rate:3},{h:6,rate:2},{h:9,rate:1.5},{h:12,rate:1}];  // paid, available any time; longer shifts swing slower
 const AUTO_RATE=()=>(S.autoRate||3)*(1+perkLv("foreman")*.35);
 const autoOn=()=>Date.now()<(S.autoUntil||0);
 
@@ -2757,16 +2757,58 @@ function renderStories(){
 // story clues also uncover from plain mining
 const _earn=earn;earn=function(n){_earn(n);if(S.story&&S.story.active&&n>0)storyClueRaw(n);digGain(n)};
 function storyClueRaw(n){storyClue(n)}
-// ---- auto-swinger (paid, pick a shift, available any time) ----
-const AUTO_COST=10e6;
-const autoReady=()=>!autoOn()&&S.cash>=AUTO_COST;
-function openShift(){if(autoOn()){toast(`The auto-swinger is on shift — ${eta2(S.autoUntil-Date.now())} left.`);return}
-  if(!autoReady()){toast(`Hiring an auto-swinger costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`);return}
-  const tier=SHIFTS.length-1;
-  $("shiftList").innerHTML=SHIFTS.map((x,i)=>{const locked=i>tier;return `<button class="shift ${locked?'lock':''}" data-shift="${x.h}" ${locked?'disabled':''}><b>${x.h}h</b><small>${x.rate}/sec · ~${fmt(clickPower()*x.rate*x.h*3600)}</small></button>`}).join("");
-  document.querySelectorAll("[data-shift]:not([disabled])").forEach(b=>b.onclick=()=>{if(S.cash<AUTO_COST){toast("Not enough cash.");return}const x=SHIFTS.find(z=>z.h==b.dataset.shift);S.cash-=AUTO_COST;S.autoRate=x.rate;S.autoBought=Date.now();S.autoUntil=Date.now()+x.h*3600*1000*partyShiftMult();S.shiftsUsed=(S.shiftsUsed||0)+1;$("shiftModal").classList.remove("on");toast(`Hired an auto-swinger for a ${x.h}-hour shift (${fmt(AUTO_COST)}). It keeps swinging even if you close the game.`);confetti(20);render();save()});
-  $("shiftModal").classList.add("on")}
-$("dailyPill").onclick=claimDaily;if($("autoBtn"))$("autoBtn").onclick=openShift;$("shiftClose").onclick=()=>$("shiftModal").classList.remove("on");
+// ---- auto-swinger (paid, available any time) ----
+// One length at one price. The old version sold four shift lengths out of a modal, which
+// turned the headline purchase in the shop into a menu rather than a decision.
+//
+// The price is a share of the ledger rather than a flat figure. A flat $10M was a wall at
+// debt 0 and pocket change by debt 5; pinned to what Ashcombe is currently asking, the
+// hire costs the same slice of a run at every rank. It is built from the debt curve
+// directly and not from debtCost(), so "double or nothing" tripling the debt does not
+// also triple the shift — that term is meant to cost you at the ledger, not at the shop.
+//
+// AUTO_PCT is the one number to turn. At .20 the debt-0 price lands on $10M, exactly
+// where the flat cost used to sit, so nobody's first run changes.
+const AUTO_PCT=.20;
+const AUTO_COST=()=>{const n=S.debts||0;
+  return Math.floor(REBIRTH_BASE*Math.pow(1.6,n)*Math.pow(1.05,n*n)*AUTO_PCT)};
+const AUTO_H=12;                  // hours per hire
+const AUTO_SWINGS=DAILY_RATE*2;   // twice the pace of the free shift, by definition
+// ---- the first one is on the house ----
+// $10M is a wall to anyone who has not paid a debt yet, so the shift was a thing you read
+// about rather than a thing you used. Everyone gets one full hire free, once ever, to see
+// what twelve hours on the pick is actually worth before deciding whether to buy another.
+// It survives paying the debt on purpose — "one time" means one time per miner, not one
+// per run — and old saves have no flag set, so existing players get theirs too.
+const autoFree=()=>!S.autoFreeUsed;
+const autoReady=()=>!autoOn()&&(autoFree()||S.cash>=AUTO_COST());
+async function hireShift(){
+  if(autoOn()){toast(`The auto-swinger is on shift — ${eta2(S.autoUntil-Date.now())} left.`);return}
+  const free=autoFree(),cost=free?0:AUTO_COST();
+  if(!free&&S.cash<cost){toast(`Hiring an auto-swinger costs ${fmt(cost)}. You need ${fmt(cost-S.cash)} more.`);return}
+  const hours=AUTO_H*partyShiftMult(),len=eta2(hours*3600*1000);
+  const ok=free
+    ? await ask("Your free shift — one time only",
+        `FREE, ONE TIME ONLY. The overseer puts a hand on your pick for ${len} at ${AUTO_SWINGS} swings a second, twice the pace of the daily shift, and it keeps swinging even if you close the game.\n\nThis is the only free one you will ever get. Every hire after it costs a fifth of what you owe Ashcombe — ${fmt(AUTO_COST())} at your rank right now. Spend it now?`,
+        "Use my free shift")
+    : await ask("Hire an auto-swinger?",
+        `${fmt(cost)} for ${len} on the pick at ${AUTO_SWINGS} swings a second — twice the pace of the free shift. It keeps swinging even if you close the game.`,
+        "Hire — "+fmt(cost));
+  if(!ok)return;
+  // Both can move while the prompt sits open: the asking price climbs the moment a debt is
+  // paid, and the free one is gone if it was spent in another tab.
+  if(autoFree()!==free){render();return}
+  if(!free&&S.cash<AUTO_COST()){toast("The price moved while you were deciding. Take another look.");render();return}
+  if(free)S.autoFreeUsed=Date.now();else S.cash-=AUTO_COST();
+  S.autoRate=AUTO_SWINGS;S.autoBought=Date.now();
+  S.autoUntil=Date.now()+hours*3600*1000;
+  S.shiftsUsed=(S.shiftsUsed||0)+1;
+  toast(free
+    ?`Free shift claimed — ${len} at ${AUTO_SWINGS} swings a second. That was the only one on the house.`
+    :`Auto-swinger hired — ${len} at ${AUTO_SWINGS} swings a second.`);
+  confetti(free?36:20);render();save();
+}
+$("dailyPill").onclick=claimDaily;$("autoBtn").onclick=hireShift;
 
 // ---- crew (real multiplayer: create/join by code, xp synced to the server) ----
 let PARTY=null,partyXpBuf=0,partyBusy=false;
@@ -3182,10 +3224,16 @@ function render(){
   }
   {const on=autoOn();$("autoBadge").style.display=on?"":"none";$("autoBadge").textContent="auto · "+eta2(S.autoUntil-Date.now());
    if($("autoState")){
-     $("autoState").textContent=on?"working":"";
-     if(on){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${AUTO_RATE()} swings/sec.`;$("autoBtn").textContent="On shift";$("autoBtn").disabled=true}
-     else if(S.cash<AUTO_COST){$("autoDesc").textContent=`Costs ${fmt(AUTO_COST)}. You need ${fmt(AUTO_COST-S.cash)} more.`;$("autoBtn").textContent=fmt(AUTO_COST);$("autoBtn").disabled=true}
-     else{$("autoDesc").textContent=`Ready. A 3-hour shift earns about ${fmt(clickPower()*3*3*3600)} at your current swing.`;$("autoBtn").textContent="Hire — "+fmt(AUTO_COST);$("autoBtn").disabled=false}
+     const cost=AUTO_COST(),rate=AUTO_RATE();
+     $("autoState").style.display=on?"":(autoFree()?"":"none");
+     $("autoState").textContent=on?"working":"free";
+     if(on){$("autoDesc").textContent=`On shift — ${eta2(S.autoUntil-Date.now())} left at ${(+rate.toFixed(1))} swings a second.`;
+       $("autoBtn").textContent="On shift";$("autoBtn").disabled=true}
+     else{const worth=fmt(clickPower()*1.5*AUTO_SWINGS*AUTO_H*3600*partyShiftMult());
+       if(autoFree()){$("autoDesc").textContent=`Your first one is free — ${AUTO_H} hours on the pick at ${AUTO_SWINGS} swings a second, worth about ${worth} at your swing. One time only; after that it costs a fifth of what you owe.`;
+         $("autoBtn").textContent="Claim free shift";$("autoBtn").disabled=false}
+       else{$("autoDesc").textContent=`${AUTO_H} hours on the pick at ${AUTO_SWINGS} swings a second, twice the free shift. About ${worth} at your swing. Costs a fifth of what you owe.`;
+         $("autoBtn").textContent=S.cash<cost?"Need "+fmt(cost-S.cash):"Hire — "+fmt(cost);$("autoBtn").disabled=S.cash<cost}}
    }}
   renderThrone();renderPerks();renderDebt();renderParty();
   renderContracts();renderStoryCard();contractWatch();if($("tab-quests").classList.contains("on"))renderStories();checkAch();
@@ -3196,7 +3244,7 @@ function render(){
    if(autoOn()){rp.classList.add("wait");rp.textContent=(sm?"⛏ ":"⛏ Swinging · ")+eta2(S.autoUntil-Date.now())}
    else if(dailyReady()){rp.classList.remove("wait");rp.textContent=sm?"🏮 Free":"🏮 Free shift ready"}
    else{rp.classList.add("wait");rp.textContent=sm?"🏮 "+eta2(dailyLeft()):"🏮 Free shift in "+eta2(dailyLeft())}}
-  {const np=PICKS[S.pick+1];let n=0;if(np&&S.cash>=np.cost)n++;CREW.forEach((c,i)=>{if(i>2&&!locked(c)&&S.cash>=crewCost(i))n++});const nb=BUNKS[(S.bunk||0)+1];if(nb&&S.cash>=nb.cost)n++;
+  {const np=PICKS[S.pick+1];let n=0;if(np&&S.cash>=np.cost)n++;CREW.forEach((c,i)=>{if(i>2&&!locked(c)&&S.cash>=crewCost(i))n++});const nb=BUNKS[(S.bunk||0)+1];if(nb&&$("bunkBtn")&&S.cash>=nb.cost)n++;if(autoReady())n++;
    const badge=$("upBadge");badge.textContent=n;badge.classList.toggle("on",n>0&&!$("tab-upgrades").classList.contains("on"));
    if(n>0&&!$("tab-upgrades").classList.contains("on")&&Date.now()-lastNudge>180000&&S.lifetime>500){lastNudge=Date.now();toast(`You can afford ${n} more upgrade${n>1?"s":""} — don't sit on your cash. Check Upgrades.`)}}
   {const on=$("tab-quests").classList.contains("on");
@@ -3823,7 +3871,7 @@ function descend(){const L=LAYERS[S.depth],nx=LAYERS[S.depth+1];if(L.rank&&(S.de
 async function rebirth(){
   if(S.cash<debtCost())return;const o=oilOnSeal();
   const nt=TERMS.find(t=>t.id===(S.nextTerms||"none"));if(!await ask("Pay the debt?",`Pay Lord Ashcombe ${fmt(debtCost())} and go back down with +${o} lantern oil under ${nt.name.toLowerCase()}. Cash, pickaxe, crew and depth reset. Perks, trophies, stories and your bunk stay.`,"Pay & go back down"))return;
-  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,dailyNext:S.dailyNext,dailyTaken:S.dailyTaken,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,guards:S.guards,guardsBeat:S.guardsBeat,wardUntil:S.wardUntil,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,bestVein:S.bestVein,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
+  S={...fresh(),oil:S.oil+o,lifetime:S.lifetime,profile:S.profile,questsDone:S.questsDone,daily:S.daily,dailyNext:S.dailyNext,dailyTaken:S.dailyTaken,seen:true,tips:S.tips,ledger:S.ledger,buffUntil:S.buffUntil,bosses:S.bosses,guards:S.guards,guardsBeat:S.guardsBeat,wardUntil:S.wardUntil,autoUntil:S.autoUntil,autoBought:S.autoBought,autoRate:S.autoRate,autoFreeUsed:S.autoFreeUsed,shiftsUsed:S.shiftsUsed,bestStreak:S.bestStreak,bestVein:S.bestVein,wheelWins:S.wheelWins,bigSpins:S.bigSpins,days:S.days,lastDay:S.lastDay,deepest:S.deepest,debts:(S.debts||0)+1,ach:S.ach,bunk:S.bunk,exc:S.exc,throne:S.throne,perks:S.perks,contracts:S.contracts,story:S.story,terms:S.nextTerms||"none",nextTerms:"none"};
   if(perkLv("headstart")){S.depth=perkLv("headstart");S.deepest=Math.max(S.deepest||0,S.depth);S.rockHp=LAYERS[S.depth].hp}
   toast(`Debt ${S.debts} paid. You walk out free — and back in with ${S.oil} flasks of lantern oil, under ${termNow().name.toLowerCase()}.`);feedPost("debt",S.debts);drawScene();render();save();
 }
@@ -4590,9 +4638,12 @@ setInterval(maybeNagLogin,15000);
 let shown=0;
 setInterval(()=>{const t=S.cash;if(Math.abs(t-shown)<0.01)return;shown+=(t-shown)*0.35;if(Math.abs(t-shown)<1)shown=t;$("cash").textContent=fmt(shown);$("upCash").textContent=fmt(shown);$("eqCash").textContent=fmt(shown);document.title=fmt(t)+" · Idle Depths"},80);
 let tick=0;
-let autoTick=0;
+// Swings are accumulated as a fraction of a tick rather than counted with a modulo.
+// Math.round(10/rate) could only ever land on whole tick counts, so 4/sec quietly became
+// 3.33/sec and every Foreman's whip level was rounded away. This delivers the rate asked for.
+let autoAcc=0;
 setInterval(()=>{const c=cps()/10;earn(c);S.crewEarned=(S.crewEarned||0)+c;
-  if(autoOn()&&++autoTick%Math.round(10/AUTO_RATE())===0)mine({},true);
+  if(autoOn()){autoAcc+=AUTO_RATE()/10;while(autoAcc>=1){autoAcc-=1;mine({},true)}}else autoAcc=0;
   if(S.depth>=6&&!S.throne){S.exc=(S.exc||0)+c*EXC_TITHE;if(S.exc>=EXC_GOAL){S.throne=true;S.oil=(S.oil||0)+5;toast("The throne is empty. Its blessing is yours: +25% to everything, forever, and 5 flasks of lantern oil.");drawScene();render();save()}}
   dropTick();
   faultTick();
