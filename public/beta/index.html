@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Idle Depths</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0d0d0c;--surface:#171716;--surface2:#1d1b18;--line:#302d27;--text:#e4dbc8;--muted:#817b72;--amber:#e4ad37;--blue:#5968ed;--green:#67d2a1}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 25%,#211a12 0,#0d0d0c 43%,#0b0b0a 100%);color:var(--text);font:13px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+    button{font:inherit;color:inherit;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.45}a{color:inherit}.mono{font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace}.eyebrow{color:#a68c5d;font-size:9px;letter-spacing:.15em;text-transform:uppercase}.muted{color:var(--muted)}
+    .topbar{height:55px;border-bottom:1px solid #292b34;background:#0b0d12;display:flex;align-items:center}.topbar-inner{width:min(1075px,calc(100% - 32px));margin:auto;display:flex;align-items:center;gap:14px}.brand{display:flex;align-items:center;gap:10px;min-width:305px}.brand-mark{width:34px;height:34px;border-radius:9px;background:#d99e2e;display:grid;place-items:center;color:#21180d;position:relative;overflow:hidden}.brand-mark:before{content:"";width:7px;height:28px;background:#25190a;transform:rotate(45deg);position:absolute}.brand-mark:after{content:"";width:26px;height:7px;background:#171411;transform:rotate(-13deg);position:absolute}.brand-name{font-size:14px;font-weight:700}.brand-sub{font-size:10px;color:#7f8190}.metrics{display:flex;gap:0;border-left:1px solid #292b34}.metric{padding:0 16px;border-right:1px solid #292b34}.metric-label{color:#747785;font-size:9px}.metric-value{color:#e0a532;font-size:12px;margin-top:1px}.metric-value.green{color:#65d39e}.metric-value.purple{color:#b084f2}.top-actions{display:flex;align-items:center;gap:7px;margin-left:auto}.btn{border:1px solid transparent;border-radius:6px;padding:9px 14px;font-size:12px;transition:.18s transform,.18s filter}.btn:hover{filter:brightness(1.12);transform:translateY(-1px)}.btn-amber{background:#efb235;color:#251b0e}.btn-blue{background:var(--blue);color:white}.btn-ghost{background:#151922;border-color:#374052;color:#c6c9d5}.btn-help{width:30px;padding:7px 0;text-align:center;background:#151922;border-color:#374052}.btn-dark{background:#151515;border-color:#403a2c;color:#cdb16b}
+    .landing{width:min(830px,calc(100% - 32px));margin:0 auto;padding:160px 0 100px;text-align:center}.landing h1{font-size:54px;line-height:1.06;letter-spacing:-.05em;margin:0 0 13px;color:#f3e7c7}.landing-copy{max-width:520px;margin:0 auto 25px;color:#9c9eac;font-size:16px;line-height:1.55}.scene{height:360px;border:1px solid #39404c;border-radius:15px;background:#111315;position:relative;overflow:hidden;margin:0 auto 21px;box-shadow:0 20px 65px #0008}.scene:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,#59452b55,transparent 39%),linear-gradient(140deg,transparent 0 45%,#05060766 46% 100%)}.stone{position:absolute;inset:22px 42px 30px;border:8px solid #25282e;box-shadow:inset 0 0 0 2px #44424a,0 8px 30px #0008}.stone:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 26px,#55586222 27px 28px),repeating-linear-gradient(90deg,transparent 0 54px,#55586222 55px 56px)}.shaft{position:absolute;left:31%;right:31%;top:76px;bottom:37px;background:linear-gradient(#0d0e0f,#030404);border:8px solid #4b3720;border-bottom:0;box-shadow:inset 0 20px 50px #000}.lamp{position:absolute;left:50%;top:79px;width:4px;height:65px;background:#6e552f}.lamp:after{content:"";position:absolute;top:58px;left:-8px;width:20px;height:22px;background:#d9a634;box-shadow:0 0 35px #e3ab3e88}.miner{position:absolute;left:48%;bottom:40px;width:20px;height:58px;background:linear-gradient(#f0bb43 0 14px,#d1b899 15px 29px,#3671a4 30px 47px,#34323a 48px);border-radius:3px}.rock{position:absolute;right:24%;bottom:48px;width:69px;height:49px;border-radius:48% 53% 36% 42%;background:#404149;transform:skew(-18deg) rotate(-9deg);box-shadow:inset 12px 8px #676872}.landing-actions{display:flex;justify-content:center;gap:10px}.landing-note{font-size:11px;color:#6f7481;margin-top:18px}
+    .app{width:min(1075px,calc(100% - 32px));margin:0 auto;padding:20px 0 65px}.layout{display:grid;grid-template-columns:165px minmax(0,1fr);gap:20px}.side-title{margin:0 0 10px}.nav{border-right:1px solid var(--line);padding-right:16px}.nav button{width:100%;display:flex;align-items:center;gap:9px;border:0;background:none;color:#928f88;text-align:left;padding:9px 10px;border-radius:4px;font-size:12px}.nav button:hover,.nav button.active{background:#332a1b;color:#e6b449}.status{border-top:1px solid var(--line);margin-top:22px;padding-top:16px;color:#7c827c;font-size:11px}.status i{display:inline-block;width:6px;height:6px;background:#6bd5a5;border-radius:50%;margin-right:6px}.main-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:15px}.main-head h2{font-size:25px;margin:4px 0 0;letter-spacing:-.04em}.depth-copy{color:#8f8a82;font-size:11px}.streak{color:#e5b343;text-align:right}.streak strong{font-size:15px;display:block}.mine-art{height:330px;border:1px solid #3a3a35;border-radius:10px;overflow:hidden;position:relative;background:radial-gradient(circle at 55% 29%,#4e3c2355,transparent 27%),linear-gradient(135deg,#17181a,#090a0a 70%)}.mine-art:before{content:"";position:absolute;inset:0;opacity:.32;background:repeating-linear-gradient(0deg,transparent 0 23px,#5b5c5c 24px 25px),repeating-linear-gradient(90deg,transparent 0 49px,#43464c 50px 51px)}.mine-frame{position:absolute;inset:65px 15% 30px;border:8px solid #27272a;box-shadow:inset 0 0 0 2px #484541}.mine-tunnel{position:absolute;inset:8px 18%;background:#080909;box-shadow:inset 0 20px 35px #000}.mine-lamp{position:absolute;left:50%;top:39px;width:4px;height:71px;background:#745a2f}.mine-lamp:after{content:"";position:absolute;top:62px;left:-8px;width:20px;height:20px;background:#e1aa35;box-shadow:0 0 38px #e1aa3588}.mine-worker{position:absolute;left:47%;bottom:28px;width:21px;height:56px;background:linear-gradient(#f0bd4a 0 15px,#d5c0a5 16px 29px,#356c99 30px 45px,#312e2c 46px)}.mine-rock{position:absolute;right:24%;bottom:34px;width:65px;height:42px;border-radius:50%;background:#414148;transform:rotate(-11deg);box-shadow:inset 12px 7px #686a72}.event{margin-top:13px;padding:12px;border:1px solid #35322a;border-radius:8px;background:#1b1a16;display:flex;align-items:center;gap:10px}.event-icon{color:#d2a338}.event-main{flex:1}.event-title{font-weight:600;font-size:12px}.event-copy{font-size:10px;color:#858078}.event-time{font-size:11px;color:#d9a738}.bar{height:6px;background:#343027;border-radius:4px;overflow:hidden;margin-top:8px}.bar span{display:block;height:100%;background:#dca936;width:86%}.bottom-grid{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;margin-top:18px}.panel{border:1px solid #2e2d29;border-radius:9px;background:#171716;padding:16px}.panel-head{display:flex;align-items:center;justify-content:space-between}.panel-title{font-size:12px;font-weight:700}.panel-copy{font-size:11px;color:#8a857e;margin-top:3px}.live{font-size:9px;color:#64d29d}.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:15px}.stat{border:1px solid #302e29;padding:10px 8px}.stat-label{font-size:9px;color:#857f76;margin-top:5px}.stat-value{font-size:12px;color:#dfad3b}.progress{height:7px;background:#2a2925;border-radius:4px;margin-top:14px;overflow:hidden}.progress span{display:block;width:0;height:100%;background:#dfa936}.feed{list-style:none;padding:0;margin:12px 0 0}.feed li{font-size:10px;color:#908c85;padding:8px 0;border-bottom:1px solid #272622}.feed li:before{content:"•";color:#d8a331;margin-right:7px}.tab-page{display:grid;gap:14px}.card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.upgrade{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid #353229;background:#191815;border-radius:6px}.upgrade .grow{flex:1}.upgrade h3{font-size:12px;margin:0}.upgrade p{color:#817d75;font-size:10px;margin:4px 0 0}.small{padding:7px 10px;font-size:10px}.notice{border:1px solid #49402c;background:#211c11;padding:10px;color:#cdbb8c;font-size:11px;border-radius:6px}
+    @media(max-width:900px){.brand{min-width:auto}.brand-sub,.metrics{display:none}.top-actions{gap:4px}.top-actions .btn-ghost{display:none}.landing{padding-top:100px}.landing h1{font-size:44px}.layout{grid-template-columns:1fr}.nav{border-right:0;border-bottom:1px solid var(--line);padding:0 0 10px;display:flex;gap:4px;overflow-x:auto}.nav button{width:auto;white-space:nowrap}.nav .side-title,.status{display:none}.bottom-grid{grid-template-columns:1fr}}
+    @media(max-width:560px){.topbar-inner,.app,.landing{width:calc(100% - 22px)}.topbar{height:52px}.brand-mark{width:29px;height:29px}.brand-name{font-size:12px}.landing{padding-top:70px}.landing h1{font-size:37px}.landing-copy{font-size:14px}.scene{height:245px}.stone{inset:14px 16px 22px;border-width:5px}.shaft{left:28%;right:28%;top:52px;bottom:25px;border-width:5px}.mine-art{height:250px}.mine-frame{inset:45px 7% 22px;border-width:5px}.mine-tunnel{inset:6px 14%}.mine-lamp{top:27px;height:55px}.main-head h2{font-size:21px}.stat-grid{grid-template-columns:repeat(2,1fr)}.card-grid{grid-template-columns:1fr}.landing-actions{flex-direction:column}.landing-actions .btn{width:100%}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><div class="brand-mark"></div><div><div class="brand-name">Idle Depths</div><div class="brand-sub">Work off the debt. Dig past it.</div></div></div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Cash</div><div id="cash" class="metric-value">$0</div></div>
+        <div class="metric"><div class="metric-label">Per second</div><div id="perSecond" class="metric-value green">$0</div></div>
+        <div class="metric"><div class="metric-label">Lantern oil</div><div class="metric-value purple">× 1.0</div></div>
+      </div>
+      <div class="top-actions"><button class="btn btn-blue" data-message="Discord sign-in is optional in this local replica.">Discord</button><button class="btn btn-help" data-message="Your crew keeps digging every second.">?</button><button class="btn btn-ghost">◉ Bunkhouse ›</button><button class="btn btn-blue" data-message="Sign-in is not needed to play locally.">Sign in with Discord</button></div>
+    </div>
+  </header>
+
+  <main id="landing" class="landing">
+    <h1>Fifty million. Good luck.</h1>
+    <p class="landing-copy">You couldn't pay Lord Ashcombe, so you're in his mine. Swing the pick, hire a crew, dig deeper than the ledger — and find what's under the throne.</p>
+    <div class="scene"><div class="stone"></div><div class="shaft"></div><div class="lamp"></div><div class="miner"></div><div class="rock"></div></div>
+    <div class="landing-actions"><button id="start" class="btn btn-amber">⚒ Start digging</button><button class="btn btn-blue" data-message="Sign-in is not needed to play locally.">Sign in with Discord</button></div>
+    <div class="landing-note">Free to play. Sign in to save your mine and appear on the leaderboard.</div>
+  </main>
+
+  <main id="app" class="app" hidden>
+    <div class="layout">
+      <aside class="nav"><div class="side-title eyebrow">BUNKHOUSE</div><div id="nav"></div><div class="status"><i></i>Crew working</div></aside>
+      <section>
+        <div id="content"></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const key = "idle-depths-standalone-save";
+      const pickaxes = [
+        {name:"Rusty pickaxe",detail:"The handle has seen better days.",cost:0,power:1},
+        {name:"Ashwood pickaxe",detail:"Balanced for long shifts.",cost:80,power:3},
+        {name:"Blacksteel pickaxe",detail:"Forged below the old furnace.",cost:420,power:9},
+        {name:"Wyrm-bone pickaxe",detail:"It hums near the deepest stone.",cost:1800,power:25}
+      ];
+      const tabNames = ["Mine","Upgrades","Gear","Quests","Debt","Crew","Leaderboard","Board","Support","Help","Progress"];
+      const initial = {cash:0,total:0,depth:0,pickaxe:1,crew:0,auto:false,debt:0,streak:1,feed:["The shaft is quiet. Lord Ashcombe is not.","Your ledger is waiting at the surface."]};
+      let state = {...initial,...JSON.parse(localStorage.getItem(key)||"{}")};
+      let tab = "Mine";
+      const $ = id => document.getElementById(id);
+      const money = n => n >= 1000000 ? "$"+(n/1000000).toFixed(2)+"M" : n >= 1000 ? "$"+(n/1000).toFixed(n<10000?1:0)+"K" : "$"+Math.floor(n);
+      const power = () => pickaxes[state.pickaxe]?.power || 1;
+      const income = () => power() + state.crew * (1 + state.pickaxe) + (state.auto ? 4 : 0);
+      const save = () => localStorage.setItem(key,JSON.stringify(state));
+      const update = fn => { state=fn({...state}); save(); render(); };
+      const message = text => { alert(text); };
+      const pushFeed = text => state.feed = [text,...state.feed].slice(0,7);
+      function renderHeader(){ $("cash").textContent=money(state.cash); $("perSecond").textContent=money(income()); }
+      function scene(){
+        return `<div class="mine-art"><div class="mine-frame"></div><div class="mine-tunnel"></div><div class="mine-lamp"></div><div class="mine-worker"></div><div class="mine-rock"></div></div>`;
+      }
+      function mine(){
+        return `<div class="main-head"><div><div class="eyebrow">CURRENT DEPTH</div><h2>The Cutting</h2><div class="depth-copy">Depth ${state.depth}m · <b style="color:#ddb044">×${(1+state.depth/40).toFixed(2)}</b> extraction multiplier</div></div><div class="streak"><span class="eyebrow">STREAK</span><strong>${state.streak} shifts 🔥</strong></div></div>
+          ${scene()}<div class="event"><div class="event-icon">⚔</div><div class="event-main"><div class="event-title">Deep Wyrm</div><div class="event-copy">An event is active below your crew.</div><div class="bar"><span></span></div></div><div class="event-time mono">1:48<br><small>REMAINING</small></div></div>
+          <div class="bottom-grid"><div class="panel"><div class="panel-head"><div><div class="eyebrow">THE WALL</div><div class="panel-title" style="margin-top:4px">The crew is digging automatically</div></div><div class="live">● LIVE</div></div><div class="stat-grid"><div class="stat"><div class="stat-value">${money(power())}</div><div class="stat-label">Per swing</div></div><div class="stat"><div class="stat-value">${money(state.crew*(1+state.pickaxe))}/s</div><div class="stat-label">Worker income</div></div><div class="stat"><div class="stat-value">${money(state.total)}</div><div class="stat-label">Total mined</div></div><div class="stat"><div class="stat-value">${500-(state.total%500)} ore</div><div class="stat-label">Next depth</div></div></div><div class="muted" style="font-size:9px;margin-top:13px">Depth progress</div><div class="progress"><span style="width:${(state.total%500)/5}%"></span></div></div>
+          <div class="panel"><div class="panel-head"><div><div class="eyebrow">MINE FEED</div><div class="panel-title" style="margin-top:4px">Recent activity</div></div><span class="muted">♧</span></div><ul class="feed">${state.feed.map(x=>`<li>${x}</li>`).join("")}</ul></div></div>
+          <div style="display:flex;gap:9px;margin-top:15px"><button class="btn btn-dark" data-tab="Upgrades">↗ Improve the operation</button><button class="btn btn-ghost" data-tab="Debt">▥ View the ledger</button></div>`;
+      }
+      function upgrades(){
+        const autoCost=120, crewCost=40, next=pickaxes[Math.min(state.pickaxe+1,pickaxes.length-1)];
+        return `<div class="main-head"><div><div class="eyebrow">THE MINE</div><h2>Upgrades</h2><div class="depth-copy">Pickaxes hit harder. Workers earn while you're away.</div></div></div><div class="notice">Your balance <b>${money(state.cash)}</b> · Income <b>${money(income())}/sec</b> · Production is fully idle.</div><div class="card-grid"><div class="panel"><div class="panel-title">Operation upgrades</div><div class="upgrade" style="margin-top:12px"><div style="font-size:22px;color:#d9a532">⚡</div><div class="grow"><h3>Auto-swinger</h3><p>A mechanism that never asks for a break.</p></div><button class="btn btn-amber small" ${state.auto?"disabled":state.cash<autoCost?"disabled":""} data-buy="auto">${state.auto?"CLAIMED":"$120"}</button></div><div class="upgrade" style="margin-top:8px"><div style="font-size:22px;color:#d9a532">♙</div><div class="grow"><h3>Hire a crew member</h3><p>More hands, more cash every second.</p></div><button class="btn btn-amber small" ${state.cash<crewCost?"disabled":""} data-buy="crew">$40</button></div></div><div class="panel"><div class="panel-title">Tiered pickaxes</div>${pickaxes.map((p,i)=>`<div class="upgrade" style="margin-top:8px"><div style="font-size:18px;color:#d9a532">⚒</div><div class="grow"><h3>${p.name}</h3><p>${p.detail} · ${money(p.power)}/swing</p></div>${i<state.pickaxe?`<span style="color:var(--green);font-size:10px">owned</span>`:i===state.pickaxe?`<button class="btn btn-amber small" ${state.cash<p.cost?"disabled":""} data-buy="pick">$${p.cost}</button>`:`<span class="muted" style="font-size:10px">${money(p.cost)}</span>`}</div>`).join("")}</div></div>`;
+      }
+      function generic(){
+        const titles={Gear:["Gear","Your equipment"],Quests:["Quests","Mining uncovers clues as you dig."],Debt:["The debt","Fifty million is a number designed to outlast you."],Crew:["Crew","Workers earn while you're away."],Leaderboard:["Leaderboard","The deepest runs in the mine."],Board:["Board","Notes from the bunkhouse."],Support:["Support","Local controls and backups."],Help:["Help","How production works."],Progress:["Progress","Your mine keeps moving forward."]};
+        const [title,copy]=titles[tab]||["Idle Depths","Keep the lantern fed and the crew paid."];
+        return `<div class="main-head"><div><div class="eyebrow">BUNKHOUSE</div><h2>${title}</h2><div class="depth-copy">${copy}</div></div></div><div class="card-grid"><div class="panel"><div class="panel-title">${tab==="Debt"?"Lord Ashcombe's ledger":"Current operation"}</div><p class="muted">${tab==="Debt"?"Remaining balance: "+money(Math.max(0,50000000-state.debt)):"The mine is producing automatically."}</p><div class="stat-value" style="font-size:24px;margin-top:17px">${tab==="Crew"?state.crew+" crew members":money(income())+" / sec"}</div></div><div class="panel"><div class="panel-title">Next milestone</div><p class="muted">${500-(state.total%500)} ore to the next depth.</p><button class="btn btn-dark small" data-tab="Upgrades">View upgrades</button></div></div>`;
+      }
+      function render(){
+        renderHeader();
+        $("nav").innerHTML=tabNames.map(t=>`<button class="${tab===t?"active":""}" data-tab="${t}">${t}</button>`).join("");
+        $("content").innerHTML=tab==="Mine"?mine():tab==="Upgrades"?upgrades():generic();
+        document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render()});
+        document.querySelectorAll("[data-message]").forEach(b=>b.onclick=()=>message(b.dataset.message));
+        document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const buy=b.dataset.buy;if(buy==="auto")update(s=>({...s,cash:s.cash-120,auto:true,feed:["Auto-swinger claimed. The mine works through the night.",...s.feed]}));if(buy==="crew")update(s=>({...s,cash:s.cash-40,crew:s.crew+1,feed:[`Crew member ${s.crew+1} hired for the shift.`,...s.feed]}));if(buy==="pick")update(s=>({...s,cash:s.cash-pickaxes[s.pickaxe].cost,pickaxe:Math.min(pickaxes.length-1,s.pickaxe+1),feed:[`${pickaxes[s.pickaxe].name} equipped.`,...s.feed]}))});
+      }
+      $("start").onclick=()=>{state={...state,started:true};save();$("landing").hidden=true;$("app").hidden=false;render()};
+      if(state.started){$("landing").hidden=true;$("app").hidden=false}
+      render();
+      setInterval(()=>{if(!state.started)return;const gain=income();state={...state,cash:state.cash+gain,total:state.total+gain,depth:Math.min(100,Math.floor((state.total+gain)/500)),streak:Math.min(99,state.streak+1)};if(Math.floor(state.total/500)>Math.floor((state.total-gain)/500))pushFeed(`The crew broke through to depth ${state.depth}m.`);save();render()},1000);
+    })();
+  </script>
+</body>
+</html>
