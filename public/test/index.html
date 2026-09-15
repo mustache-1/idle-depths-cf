@@ -271,6 +271,36 @@ textarea,input[type=text]{width:100%;background:#050d1c;border:1px solid var(--l
 }
 .mobonly{display:none}
 @media (max-width:860px){.mobonly{display:block}}
+/* ---------------- update banner ---------------- */
+.updatebar{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;z-index:95;
+  width:calc(100% - 28px);max-width:430px;display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-radius:15px;overflow:hidden;
+  border:1px solid var(--lantern-b,#ffc23f);
+  background:linear-gradient(120deg,#2a1c06,#1a1330 60%,#0d1730);
+  box-shadow:0 14px 44px rgba(0,0,0,.65),0 0 34px rgba(255,194,63,.28);
+  animation:upin .45s cubic-bezier(.2,1.5,.4,1)}
+@media (max-width:860px){.updatebar{bottom:80px}}
+@keyframes upin{from{opacity:0;transform:translateX(-50%) translateY(24px) scale(.94)}
+  to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+.updatebar.out{animation:upout .3s ease forwards}
+@keyframes upout{to{opacity:0;transform:translateX(-50%) translateY(20px) scale(.95)}}
+.updatebar .sweep{position:absolute;top:0;bottom:0;width:36%;left:-45%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,194,63,.18),transparent);
+  animation:sweep 4.5s ease-in-out infinite}
+.updatebar .lamp{font-size:26px;flex:none;animation:swing 2.8s ease-in-out infinite;transform-origin:50% 0%;
+  filter:drop-shadow(0 0 14px rgba(255,194,63,.85))}
+@keyframes swing{0%,100%{transform:rotate(-11deg)}50%{transform:rotate(11deg)}}
+.updatebar .txt{flex:1;min-width:0}
+.updatebar .txt b{display:block;font-family:var(--pixel);font-size:11px;color:#ffd98a;letter-spacing:.4px}
+.updatebar .txt span{display:block;font-size:11.5px;font-weight:700;color:var(--mist);margin-top:3px}
+.updatebar .go{flex:none;padding:9px 13px;border-radius:10px;font-family:var(--pixel);font-size:10px;
+  color:#2a1400;background:linear-gradient(180deg,#ffd06b,#e0921b);border:1px solid #ffdf9c;
+  box-shadow:0 3px 0 #8a5405}
+.updatebar .go:active{transform:translateY(3px);box-shadow:none}
+.updatebar .later{flex:none;width:28px;height:28px;border-radius:8px;color:var(--dim);font-size:15px;
+  border:1px solid rgba(255,255,255,.12)}
+.updatebar .later:hover{color:var(--ink)}
+
 /* ---------------- season badge ---------------- */
 .seasonbadge{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:11.5px;font-weight:900;
   border:1px solid var(--sc,var(--gold));background:linear-gradient(90deg,color-mix(in srgb,var(--sc,var(--gold)) 26%,transparent),transparent);
@@ -1838,6 +1868,69 @@ function offlineCatchUp(){
 }
 
 /* ============================================================
+   UPDATE WATCH
+   Bump BUILD whenever you deploy. The page asks the server what
+   build it is serving every couple of minutes; if that stops
+   matching what's loaded, the lantern comes up.
+   Works three ways so it fits whatever the Worker exposes:
+     1. /api/version  -> {"build":"..."}
+     2. /version.json -> {"build":"..."}
+     3. no endpoint at all -> falls back to the ETag / Last-Modified
+        header on index.html itself
+   ============================================================ */
+const BUILD="2026-09-14a";
+let liveTag=null, updateShown=false, updateSnoozed=0;
+
+async function probeBuild(){
+  for(const url of ["/api/version","/version.json"]){
+    try{
+      const r=await fetch(url,{cache:"no-store"});
+      if(!r.ok)continue;
+      const d=await r.json();
+      if(d&&(d.build||d.version))return String(d.build||d.version);
+    }catch(e){}
+  }
+  try{
+    const r=await fetch(location.pathname+"?_v="+Date.now(),{method:"HEAD",cache:"no-store"});
+    const tag=r.headers.get("etag")||r.headers.get("last-modified");
+    if(tag)return "tag:"+tag;
+  }catch(e){}
+  return null;
+}
+async function checkUpdate(){
+  if(updateShown)return;
+  if(Date.now()<updateSnoozed)return;
+  const tag=await probeBuild();
+  if(!tag)return;
+  if(tag.indexOf("tag:")===0){
+    if(liveTag===null){ liveTag=tag; return; }     /* first read is the baseline */
+    if(tag!==liveTag)showUpdate();
+  } else if(tag!==BUILD){
+    showUpdate();
+  }
+}
+function showUpdate(){
+  if(updateShown||$("updatebar"))return;
+  updateShown=true;
+  save();
+  const el=document.createElement("div");
+  el.className="updatebar"; el.id="updatebar";
+  el.innerHTML='<div class="sweep"></div><div class="lamp">🏮</div>'+
+    '<div class="txt"><b>NEW TIDE IN</b><span>A newer build is on the dock. Your voyage is saved — refresh to come aboard.</span></div>'+
+    '<button class="go" id="upGo">REFRESH</button>'+
+    '<button class="later" id="upLater" title="Later">✕</button>';
+  document.body.appendChild(el);
+  ping(660,.18);
+  $("upGo").onclick=()=>{ save(); setTimeout(()=>location.reload(true),120); };
+  $("upLater").onclick=()=>{
+    el.classList.add("out");
+    setTimeout(()=>el.remove(),300);
+    updateShown=false; updateSnoozed=Date.now()+15*60e3;   /* ask again in 15 min */
+    toast("Reminder snoozed for 15 minutes");
+  };
+}
+
+/* ============================================================
    BOOT
    ============================================================ */
 function boot(){
@@ -1860,6 +1953,9 @@ function boot(){
     },300);
   }
   requestAnimationFrame(tick);
+  checkUpdate();
+  setInterval(checkUpdate,120000);
+  document.addEventListener("visibilitychange",()=>{ if(!document.hidden)checkUpdate(); });
   window.addEventListener("beforeunload",save);
   document.addEventListener("visibilitychange",()=>{ if(document.hidden)save(); });
 }
