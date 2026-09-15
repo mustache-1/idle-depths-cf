@@ -164,17 +164,16 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .empty{padding:22px 13px;color:var(--dim);font-size:13px;text-align:center;font-weight:700}
 
 /* ---------------- tabs & shop ---------------- */
-.tabs{display:flex;gap:5px;padding:8px;overflow-x:auto;scrollbar-width:none;
+.tabs{display:flex;flex-wrap:wrap;gap:5px;padding:8px;
   background:linear-gradient(90deg,#0b1c3c,#0c1631);border:1px solid var(--line);border-bottom:none;border-radius:14px 14px 0 0}
-.tabs::-webkit-scrollbar{display:none}
-.tab{padding:8px 11px;border-radius:9px;font-family:var(--pixel);font-size:10px;color:var(--dim);white-space:nowrap;border:1px solid transparent}
+.tab{padding:7px 9px;flex:1 1 auto;text-align:center;border-radius:9px;font-family:var(--pixel);font-size:10px;color:var(--dim);white-space:nowrap;border:1px solid transparent}
 .tab.on{color:#04101f;background:linear-gradient(180deg,var(--tc,var(--cyan)),color-mix(in srgb,var(--tc,var(--cyan)) 70%,#0b1b3a));
   border-color:var(--tc,var(--cyan));box-shadow:0 0 18px color-mix(in srgb,var(--tc,var(--cyan)) 45%,transparent)}
 .tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin-left:5px;vertical-align:middle;
   box-shadow:0 0 8px var(--gold);animation:blink 1.4s ease-in-out infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .panelbody{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
-  border-radius:0 0 14px 14px;max-height:calc(100dvh - 158px);overflow-y:auto}
+  border-radius:0 0 14px 14px;max-height:calc(100dvh - 210px);overflow-y:auto}
 @media (max-width:860px){.panelbody{max-height:none}}
 
 .item{display:flex;gap:11px;align-items:center;padding:12px 13px;width:100%;text-align:left;position:relative;
@@ -232,7 +231,7 @@ button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 .boss p{color:var(--mist);font-size:12.5px;font-weight:700;margin-bottom:14px}
 .tug{height:22px;border-radius:11px;background:#050c1e;border:1px solid var(--line2);overflow:hidden;position:relative}
 .tug i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--cyan),var(--gold));transition:width .12s linear}
-.tug span{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--pixel);font-size:10px;color:#04101f;mix-blend-mode:difference}
+.tugtxt{font-family:var(--pixel);font-size:10px;color:var(--mist);margin-bottom:6px;letter-spacing:1px}
 
 /* ---------------- modal / toast / nav ---------------- */
 .modalbg{position:fixed;inset:0;background:rgba(3,7,18,.82);backdrop-filter:blur(4px);z-index:60;display:grid;place-items:center;padding:16px;overflow-y:auto}
@@ -753,6 +752,7 @@ function freshState(){
     zoneCatch:{}, achs:{},
     frenzyEnd:0, nextFrenzy:Date.now()+90000,
     nextChest:Date.now()+rnd(40000,90000),
+    nextBoss:Date.now()+rnd(120000,180000),
     lastTick:Date.now(), started:Date.now(), playMs:0,
     lastDaily:0, streak:0,
     sound:true, user:null,
@@ -1076,11 +1076,17 @@ function driftCrate(){
    BOSS FISH — resolves itself on line strength
    ============================================================ */
 let bossActive=false;
+/* a boss is a moment, not a counter — gate it on time so a fast boat
+   doesn't get one every other second */
 function bossThreshold(){ return 130+(S.bosses||0)*45; }
+function scheduleBoss(){ S.nextBoss=Date.now()+rnd(150000,280000); }
 function lineStrength(){ return (1+G("rod")*0.22+G("hook")*0.12+G("lure")*0.08+G("net")*0.05)*sfx("boss"); }
 function maybeBoss(z){
   if(bossActive)return;
-  if((S.zoneCatch[z.id]||0)>=bossThreshold()){ S.zoneCatch[z.id]=0; runBoss(z); }
+  if(!S.nextBoss)scheduleBoss();
+  if(Date.now()<S.nextBoss)return;
+  if((S.zoneCatch[z.id]||0)<bossThreshold())return;
+  S.zoneCatch[z.id]=0; scheduleBoss(); runBoss(z);
 }
 function runBoss(z){
   bossActive=true;
@@ -1092,7 +1098,8 @@ function runBoss(z){
   $("overlay").innerHTML='<div class="bossbg"><div class="boss">'+
     '<div class="big">'+z.boss[0]+'</div><h2>'+z.boss[1]+'</h2>'+
     '<p>Something heavy took the line. The crew is hauling.</p>'+
-    '<div class="tug"><i id="tugBar"></i><span id="tugTxt">HAULING</span></div>'+
+    '<div class="tugtxt" id="tugTxt">HAULING</div>'+
+    '<div class="tug"><i id="tugBar"></i></div>'+
     '<div class="bossmeta">Line strength ×'+fmt(lineStrength())+'</div></div></div>';
   ping(180,.3);
   const start=performance.now(), dur=win?2700:2200;
