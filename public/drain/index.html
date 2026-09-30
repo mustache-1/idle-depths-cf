@@ -69,6 +69,25 @@ nav{position:fixed;left:0;right:0;bottom:0;background:var(--hull);border-top:1px
 nav button{border:0;background:none;text-align:center;padding:14px 4px;font:700 .8rem var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
 nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.viewport{position:relative;border:1px solid var(--line);background:var(--hull);overflow:hidden}
+.viewport canvas{display:block;width:100%;aspect-ratio:400/300}
+.hud{position:absolute;inset:0;pointer-events:none;padding:10px 12px;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto 1fr;align-items:start;text-shadow:0 1px 6px #000}
+.hud b{font-family:var(--display);font-weight:900;font-size:1.9rem;letter-spacing:.02em;line-height:1;text-transform:uppercase;display:block}
+.hud .lbl{color:#cfe6ee}
+.hud .bars{grid-column:1;display:grid;gap:6px;width:min(46%,150px)}
+.hud .bars b{font:500 .8rem var(--mono);display:inline}
+.hud .r{text-align:right}.hud .r b{color:#ffd76a}
+.meter i{transition:width .6s ease}
+.cap{position:absolute;left:10px;right:10px;bottom:10px;padding:8px 10px;background:rgba(6,18,26,.82);border:1px solid var(--line);font:400 .85rem/1.35 var(--mono);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
+.cap.on{opacity:1;transform:none}
+.snd{position:absolute;right:10px;bottom:10px;padding:5px 8px;font:500 .68rem var(--mono);letter-spacing:.1em;text-transform:uppercase;background:rgba(6,18,26,.7);z-index:2}
+.cap.on~.snd{display:none}
+.event.busy .choices,.event.busy>button{opacity:.35;pointer-events:none}
+.event .choices button{animation:pop .3s both}
+.event .choices button:nth-child(2){animation-delay:.07s}.event .choices button:nth-child(3){animation-delay:.14s}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.cell.drill{animation:cellhum 1.4s ease-in-out infinite}.cell.cool{animation:cellglow 2s ease-in-out infinite}
+@keyframes cellhum{50%{transform:translateY(1.5px)}}@keyframes cellglow{50%{box-shadow:0 0 10px #3fb6ff55}}
 </style>
 </head>
 <body>
@@ -80,11 +99,18 @@ nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
 
   <!-- DIVE -->
   <section class="panel on" id="p-dive">
-    <div class="stats">
-      <div class="stat"><span class="lbl">Depth</span><b id="sD">0m</b></div>
-      <div class="stat"><span class="lbl">Hull</span><b id="sH">-</b><div class="meter"><i id="mH" style="width:0"></i></div></div>
-      <div class="stat"><span class="lbl">Air</span><b id="sO">-</b><div class="meter air"><i id="mO" style="width:0"></i></div></div>
-      <div class="stat"><span class="lbl">Loot</span><b id="sL">0</b></div>
+    <div class="viewport">
+      <canvas id="cv" aria-label="The rig in the shaft"></canvas>
+      <div class="hud">
+        <div><span class="lbl">Depth</span><b id="sD">0 m</b></div>
+        <div class="r"><span class="lbl">Loot</span><b id="sL">0</b></div>
+        <div class="bars">
+          <div><span class="lbl">Hull </span><b id="sH">-</b><div class="meter"><i id="mH" style="width:0"></i></div></div>
+          <div><span class="lbl">Air </span><b id="sO">-</b><div class="meter air"><i id="mO" style="width:0"></i></div></div>
+        </div>
+      </div>
+      <div class="cap" id="cap"></div>
+      <button class="snd" id="mute">Sound on</button>
     </div>
     <div class="box event" id="dive"></div>
     <div class="log" id="log"></div>
@@ -93,6 +119,7 @@ nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
   <!-- RIG -->
   <section class="panel" id="p-rig">
     <div class="box">
+      <div class="viewport"><canvas id="cv2" aria-label="Your rig"></canvas></div>
       <div class="row"><span>Bank</span><b id="rBank">0</b></div>
       <div class="stats">
         <div class="stat"><span class="lbl">Loot x</span><b id="rM">1.0</b></div>
@@ -143,6 +170,7 @@ nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
 
 <script type="module">
 import * as E from "./engine.js";
+import { Scene, Sfx } from "./scene.js";
 
 const $ = id => document.getElementById(id);
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -189,37 +217,78 @@ const setWho = () => {
 };
 
 // ---- dive ----
+const scene = new Scene($("cv"));
+const preview = new Scene($("cv2"), { preview: true });
+const wait = ms => new Promise(r => setTimeout(r, ms));
+let busy = false, capTimer = 0;
+Sfx.muted = store.get("drain_mute") === true;
+const setMute = () => { $("mute").textContent = Sfx.muted ? "Sound off" : "Sound on"; if (Sfx.muted) Sfx.drill(false); };
+$("mute").onclick = () => { Sfx.init(); Sfx.muted = !Sfx.muted; store.set("drain_mute", Sfx.muted); setMute(); };
+setMute();
+function cap(t) { const c = $("cap"); clearTimeout(capTimer); if (t) { c.textContent = t; c.classList.add("on"); capTimer = setTimeout(() => c.classList.remove("on"), 3200); } else c.classList.remove("on"); }
+
 const weeklySeed = () => (me && me.seed) || "W:guest";
 const stats = () => E.rigStats(grid);
 
 function saveRun() { if (run && !run.done) store.set("drain_run", { seed: run.seed, choices: run.choices, weekly: run.weekly }); else store.set("drain_run", null); }
 
-function startRun(seed, weekly) {
+function hud() {
+  const s = run ? run.st : null, c = run ? run.stats : stats();
+  $("sD").textContent = (s ? s.d : 0) + " m"; $("sL").textContent = s ? fmt(s.l) : 0;
+  const h = s ? Math.max(0, s.h) : c.hullMax, o = s ? Math.max(0, s.o) : c.airMax;
+  $("sH").textContent = h; $("sO").textContent = o;
+  $("mH").style.width = h / c.hullMax * 100 + "%"; $("mO").style.width = o / c.airMax * 100 + "%";
+  scene.setVitals(h / c.hullMax, o / c.airMax);
+}
+
+async function startRun(seed, weekly) {
+  Sfx.init(); Sfx.click(); busy = true;
   const s = stats();
   run = { seed, weekly, choices: [], stats: s, st: E.newRun(s), done: false, result: null, log: [] };
-  saveRun(); renderDive();
+  saveRun(); scene.reset(); scene.setRig(grid); hud(); renderDive();
+  Sfx.drill(true); await scene.descend(0, 1100); Sfx.drill(false);
+  busy = false; showFork();
 }
+window.drainScene = scene;
+function showFork() {
+  cap(""); scene.showEvent(E.eventAt(run.seed, run.st.step).id); renderDive(); }
 function resumeRun() {
   const r = store.get("drain_run");
   if (!r || !r.seed || !Array.isArray(r.choices)) return false;
-  // the rig can't have changed mid-dive (it only applies to the next one), but the stored
-  // choices were made on whatever rig was live, so replay on the current grid
   const s = stats();
   let st = E.newRun(s);
   try { for (const i of r.choices) st = E.choose(st, r.seed, i, s).st; } catch { store.set("drain_run", null); return false; }
   run = { seed: r.seed, weekly: r.weekly, choices: r.choices, stats: s, st, done: st.over, result: null, log: [] };
-  if (run.done) finishRun(false);
+  scene.reset(); scene.setRig(grid); scene.dive = true; scene.vd = st.d + 22; scene.lastVd = scene.vd; hud();
+  if (run.done) finishRun(false); else showFork();
   return true;
 }
 function logLine(m, bad) { run.log.unshift([m, bad]); run.log.length = Math.min(run.log.length, 10); }
 
-function pick(i) {
-  const res = E.choose(run.st, run.seed, i, run.stats);
-  const d = { h: res.st.h - run.st.h, o: res.st.o - run.st.o };
-  run.choices.push(i); run.st = res.st;
-  logLine(res.msg, d.h < 0 || d.o < -4);
-  if (run.st.over) finishRun(false); else saveRun();
-  renderDive();
+async function pick(i) {
+  if (busy || run.done) return;
+  busy = true; Sfx.init(); Sfx.click();
+  const prev = run.st, res = E.choose(prev, run.seed, i, run.stats);
+  run.choices.push(i); run.st = res.st; saveRun();
+  const dh = res.st.h - prev.h, dO = res.st.o - prev.o, dl = res.st.l - prev.l;
+  logLine(res.msg, dh < 0 || dO < -5);
+  scene.hideEvent(); cap(res.msg);
+  if (dh < 0) scene.react("hurt", -dh); else if (dh > 0) scene.react("hull", dh);
+  if (dl > 0) scene.react("loot", dl);
+  if (dO > 0) scene.react("air", dO); else if (dO < -5) scene.react("loose", -dO);
+  hud(); renderDive();
+  await wait(1200);
+  const dead = run.st.over && (run.st.h <= 0 || run.st.o <= 0);
+  if (run.st.over) { await endRun(false); return; }
+  Sfx.drill(true); await scene.descend(run.st.d, 1500); Sfx.drill(false);
+  hud(); busy = false; showFork();
+}
+async function endRun(surfaced) {
+  busy = true; saveRun(); store.set("drain_run", null);
+  const dead = run.st.over && (run.st.h <= 0 || run.st.o <= 0);
+  cap(dead ? run.st.why : surfaced ? "Surfacing..." : run.st.why);
+  await scene.end(dead ? "dead" : "surface");
+  busy = false; finishRun(surfaced);
 }
 async function finishRun(surfaced) {
   run.done = true;
@@ -237,12 +306,8 @@ async function finishRun(surfaced) {
 }
 
 function renderDive() {
-  const box = $("dive"); box.innerHTML = "";
-  const s = run ? run.st : null, cap = run ? run.stats : stats();
-  $("sD").textContent = (s ? s.d : 0) + "m";
-  $("sH").textContent = s ? Math.max(0, s.h) : cap.hullMax; $("mH").style.width = (s ? Math.max(0, s.h) / cap.hullMax * 100 : 100) + "%";
-  $("sO").textContent = s ? Math.max(0, s.o) : cap.airMax; $("mO").style.width = (s ? Math.max(0, s.o) / cap.airMax * 100 : 100) + "%";
-  $("sL").textContent = s ? s.l : 0;
+  const box = $("dive"); box.innerHTML = ""; box.classList.toggle("busy", busy);
+  hud();
   const lg = $("log"); lg.innerHTML = "";
   if (run) for (const [m, bad] of run.log) lg.append(el("div", bad ? "b" : "g", m));
 
@@ -268,18 +333,18 @@ function renderDive() {
     if (run.saveErr) box.append(el("p", "err", run.saveErr));
     if (run.server && run.weekly) box.append(el("p", "note", "Your best this week: " + run.server.weekDepth + "m."));
     if (!me) box.append(el("p", "note", "Log in with Discord to bank loot and appear on the board."));
-    const again = el("button", "primary", "Back to the harbor"); again.onclick = () => { run = null; renderDive(); renderRig(); };
+    const again = el("button", "primary", "Back to the harbor"); again.onclick = () => { run = null; scene.reset(); scene.setRig(grid); renderDive(); renderRig(); };
     box.append(again);
     return;
   }
   const ev = E.eventAt(run.seed, run.st.step);
   box.append(el("p", "lbl", (run.weekly ? "Weekly shaft" : "Free dive") + " · fork " + (run.st.step + 1)));
-  box.append(el("p", "", ev.text));
+  box.append(el("p", "", busy && !scene.ev ? "..." : ev.text));
   const ch = el("div", "choices");
   ev.c.forEach((c, i) => { const b = el("button", "", c.label); b.append(el("small", "", c.hint)); b.onclick = () => pick(i); ch.append(b); });
   box.append(ch);
   const sb = el("button", "ghost", run.st.step === 0 ? "Abandon dive" : "Surface and bank " + run.st.l + " loot");
-  sb.onclick = () => { if (run.st.step === 0) { run = null; saveRun(); store.set("drain_run", null); renderDive(); } else finishRun(true); };
+  sb.onclick = () => { if (run.st.step === 0) { run = null; scene.reset(); store.set("drain_run", null); renderDive(); } else { Sfx.init(); endRun(true); } };
   box.append(sb);
 }
 
@@ -302,6 +367,7 @@ function renderRig() {
     }
   }
   [...g.children].forEach((b, i) => { b.className = "cell" + (grid[i] ? " " + grid[i] : ""); b.textContent = grid[i] ? SYM[grid[i]] : ""; });
+  preview.setRig(grid);
   const s = stats();
   $("rM").textContent = "x" + s.lootMult.toFixed(2); $("rH").textContent = s.hullMax; $("rA").textContent = s.airMax;
   $("rP").textContent = grid.filter(Boolean).length + "/" + pieces();
@@ -400,9 +466,9 @@ function renderStory() {
     const m = await api("load");
     me = m; grid = m.save.grid.slice();
   } catch { me = null; }
-  setWho();
-  if (!resumeRun()) run = null;
-  renderDive(); renderRig();
+  setWho(); scene.setRig(grid);
+  if (!resumeRun()) { run = null; renderDive(); }
+  renderRig();
 })();
 </script>
 </body>
