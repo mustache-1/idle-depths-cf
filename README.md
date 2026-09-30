@@ -26,3 +26,15 @@ public/manifest.json, icon-*.png, _headers
 - Saves: KV keys `save:<discord id>`; leaderboard rows `board:<discord id>`.
 - Board is cached 60s to stay inside the free KV read limit.
 - To update the game later, replace `public/index.html` and commit.
+
+## The Drain (idle-depths.com/drain)
+A full rework that lives beside the old game under `/drain`. Same Worker, same KV namespace, same Discord login and crews; its own keys (`dsave:`, `dboard:`, `dsec:`) so old saves are never touched.
+```
+public/drain/index.html   ← the game
+public/drain/engine.js    ← rules, shared: the browser plays with it, the Worker replays with it
+src/drain.js              ← /api/drain/* (load, run, rig, buy, push, sectors, board)
+```
+- Dives are checked server-side: the client sends the seed and the list of choices, the Worker replays them and only then banks loot and updates the board.
+- Weekly shaft: seed `W:<ISO week>`, same forks for everyone, ranks the weekly board.
+- Crew sectors reuse `/api/crew/*` for membership; last week's payout is claimed on the next `/api/drain/load`.
+- No new setup: nothing to configure in Cloudflare or Discord. Deploy as usual.

@@ -1,6 +1,7 @@
 // Idle Depths — Cloudflare Worker (static assets + /api routes)
 import { readSession, makeSession, cookieHeader, json } from "./_session.js";
 import { weekKey, weekEnds, prevWeekKey } from "./_week.js";
+import { handleDrain } from "./drain.js";
 
 // ---- seasons ----
 // The all-time board ranks on `lifetime`, which is written fresh from the player's save on
@@ -211,6 +212,9 @@ async function handle(request, env) {
 
     // ---- everything below needs a session ----
     const s = await readSession(request, env.SESSION_SECRET);
+
+    // The Drain (idle-depths.com/drain) has its own routes and its own KV keys.
+    if (p.startsWith("/api/drain/")) return handleDrain(p, request, env, s);
 
     if (p === "/api/me") return json(s ? { id: s.id, name: s.name } : null);
     if (!s) return json({ error: "not logged in" }, 401);
