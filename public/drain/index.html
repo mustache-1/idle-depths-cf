@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#06121a">
+<title>The Drain</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --abyss:#06121a;--hull:#0d212c;--plate:#143142;--line:#24485e;
+  --foam:#d9ecf2;--mute:#88a9b8;--lamp:#ff8a2b;--ok:#4fd1a5;--bad:#ff5a5f;--ice:#6fd3ff;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--abyss);color:var(--foam);font:16px/1.5 var(--body)}
+body{min-height:100vh;padding:0 16px calc(84px + env(safe-area-inset-bottom,0px))}
+main{max-width:640px;margin:0 auto;padding-block:18px}
+h1,h2,h3{font-family:var(--display);text-transform:uppercase;letter-spacing:.02em;line-height:.95;margin:0}
+h1{font-size:2rem;font-weight:900}h2{font-size:1.7rem;font-weight:900}h3{font-size:1.2rem;font-weight:700}
+p{margin:0}
+.lbl{font:500 .7rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.lamp{color:var(--lamp)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:6px 14px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.top .who{font:500 .8rem var(--mono);color:var(--mute);text-align:right}
+.panel{display:none;gap:14px}.panel.on{display:grid}
+.box{background:var(--hull);border:1px solid var(--line);padding:14px;display:grid;gap:10px;min-width:0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--hull);border:1px solid var(--line);padding:8px 10px;min-width:0}
+.stat b{display:block;font:500 1.1rem var(--mono);font-variant-numeric:tabular-nums}
+.meter{height:6px;background:var(--plate);margin-top:4px}.meter i{display:block;height:100%;background:var(--ok)}
+.meter.air i{background:var(--ice)}
+button,.btn{font:600 .95rem var(--body);background:var(--plate);color:var(--foam);border:1px solid var(--line);padding:10px 14px;cursor:pointer;text-align:left;text-decoration:none;display:block}
+button:hover:not(:disabled){border-color:var(--lamp)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,.btn:focus-visible,input:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+.primary{background:var(--lamp);color:#1a0d00;border-color:var(--lamp);text-align:center}
+.ghost{background:none}
+small{display:block;font:400 .75rem var(--mono);color:var(--mute);margin-top:2px}
+.choices{display:grid;gap:8px}
+.event p{font-size:1.05rem}
+.log{font:400 .8rem/1.5 var(--mono);color:var(--mute);display:grid;gap:3px;max-height:180px;overflow:auto}
+.log .g{color:var(--ok)}.log .b{color:var(--bad)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg button{text-align:center}.seg .on{border-color:var(--lamp);box-shadow:inset 0 0 0 1px var(--lamp)}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.cell{aspect-ratio:1;padding:0;text-align:center;display:grid;place-items:center;font:700 1rem var(--mono);background:var(--hull)}
+.cell.drill{background:#3a2412;color:var(--lamp)}.cell.cool{background:#0f3340;color:var(--ice)}
+.cell.relay{background:#15362b;color:var(--ok)}.cell.plate{background:#2c2c3a;color:#b7b7d8}.cell.tank{background:#10303a;color:#9fe3f2}
+.tools{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.tools button{text-align:center;padding:8px 4px}.tools .on{border-color:var(--lamp);box-shadow:inset 0 0 0 1px var(--lamp)}
+.row{display:flex;justify-content:space-between;gap:10px;font:500 .8rem var(--mono)}
+.stack{display:flex;height:10px;background:var(--plate)}.stack i{display:block;height:100%}
+.c0{background:var(--lamp)}.c1{background:var(--ice)}.c2{background:#b48cff}.c3{background:var(--ok)}
+.sector{display:grid;gap:6px;padding:10px 12px;background:var(--abyss);border:1px solid var(--line)}
+.sector.mine{border-color:var(--lamp)}
+table{width:100%;border-collapse:collapse;font-size:.95rem}
+td,th{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{font:500 .7rem var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+td.n{font-family:var(--mono);text-align:right}
+input{font:500 1rem var(--body);background:var(--abyss);color:var(--foam);border:1px solid var(--line);padding:10px;width:100%;min-width:0}
+.frag{border-left:3px solid var(--lamp);padding-left:14px}
+.frag.lock{border-color:var(--line);color:var(--mute)}
+.note{font-size:.9rem;color:var(--mute)}
+.err{color:var(--bad);font:500 .8rem var(--mono)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--hull);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{border:0;background:none;text-align:center;padding:14px 4px;font:700 .8rem var(--display);text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div><p class="lbl">Year 41 after</p><h1>The <span class="lamp">Drain</span></h1></div>
+    <div class="who" id="who">Checking in...</div>
+  </div>
+
+  <!-- DIVE -->
+  <section class="panel on" id="p-dive">
+    <div class="stats">
+      <div class="stat"><span class="lbl">Depth</span><b id="sD">0m</b></div>
+      <div class="stat"><span class="lbl">Hull</span><b id="sH">-</b><div class="meter"><i id="mH" style="width:0"></i></div></div>
+      <div class="stat"><span class="lbl">Air</span><b id="sO">-</b><div class="meter air"><i id="mO" style="width:0"></i></div></div>
+      <div class="stat"><span class="lbl">Loot</span><b id="sL">0</b></div>
+    </div>
+    <div class="box event" id="dive"></div>
+    <div class="log" id="log"></div>
+  </section>
+
+  <!-- RIG -->
+  <section class="panel" id="p-rig">
+    <div class="box">
+      <div class="row"><span>Bank</span><b id="rBank">0</b></div>
+      <div class="stats">
+        <div class="stat"><span class="lbl">Loot x</span><b id="rM">1.0</b></div>
+        <div class="stat"><span class="lbl">Hull</span><b id="rH">100</b></div>
+        <div class="stat"><span class="lbl">Air</span><b id="rA">100</b></div>
+        <div class="stat"><span class="lbl">Pieces</span><b id="rP">0</b></div>
+      </div>
+      <div class="tools" id="tools">
+        <button data-t="drill" class="on">Drill<small>loot</small></button>
+        <button data-t="cool">Coolant<small>+50%</small></button>
+        <button data-t="relay">Relay<small>+2</small></button>
+        <button data-t="plate">Plate<small>+10 hull</small></button>
+        <button data-t="tank">Tank<small>+10 air</small></button>
+      </div>
+      <div class="grid" id="grid"></div>
+      <p class="note">Drills love coolant and relays, and lose 30% for every drill they touch. Click a piece again to take it off. Changes save on their own and apply to your next dive.</p>
+      <button class="primary" id="buy">Buy a piece</button>
+      <p class="err" id="rErr"></p>
+    </div>
+  </section>
+
+  <!-- CREW -->
+  <section class="panel" id="p-crew">
+    <div class="box" id="crewBox"></div>
+    <div class="box" id="secBox"></div>
+  </section>
+
+  <!-- BOARD -->
+  <section class="panel" id="p-board">
+    <div class="box"><h3>Deepest this week</h3><p class="note" id="bWeek"></p><div id="bW"></div></div>
+    <div class="box"><h3>Deepest ever</h3><div id="bA"></div></div>
+  </section>
+
+  <!-- STORY -->
+  <section class="panel" id="p-story">
+    <div class="box frag"><p class="lbl">The harbor, year 41</p><p>The ocean pulled back from the Hollow Coast in one night and left a shaft a mile wide. The towns kept their boats and gave them drills. Something at the bottom hums. The bank will lend anyone a rig.</p></div>
+    <div id="frags" style="display:grid;gap:14px"></div>
+  </section>
+</main>
+
+<nav id="nav">
+  <button data-p="dive" class="on">Dive</button>
+  <button data-p="rig">Rig</button>
+  <button data-p="crew">Crew</button>
+  <button data-p="board">Board</button>
+  <button data-p="story">Story</button>
+</nav>
+
+<script type="module">
+import * as E from "./engine.js";
+
+const $ = id => document.getElementById(id);
+const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const fmt = n => Math.round(n).toLocaleString();
+const api = async (path, body) => {
+  const r = await fetch("/api/drain/" + path, body === undefined ? {} : { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || "Something went wrong.");
+  return j;
+};
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+// ---- state ----
+let me = null;                         // {save, seed, week, weekEnds, name, nextPiece} when logged in
+let grid = Array(E.GRID_N).fill(null);
+let tool = "drill";
+let run = null;                        // {seed, choices, st, stats, weekly, done, result}
+let mode = "weekly";
+const FRAGS = [
+  [0, "Fragment 1", "The first crews described the Hum as a drill bit on stone. Every crew since describes something different."],
+  [120, "Fragment 2", "Three notes, always the same three. A crewman at 120 metres wrote them on the wall of his cabin and then could not remember writing them."],
+  [280, "Fragment 3", "The glass is not glass. It is warm because something on the other side is warm."],
+  [480, "Fragment 4", "Below 480 the radios stop working and the lamps do not. Nobody has explained this and nobody has gone back to ask."],
+  [720, "Fragment 5", "There is a road along the wall. The stones are cut. The markers count down, and they count down in a base nobody on the coast uses."],
+  [1000, "Fragment 6", "The gate answers when you hum. It has been answering for a very long time. The crews who came before you were not lost. They were let in."],
+  [1600, "Fragment 7", "The bottom is not the bottom. It is a door, and the harbor has been paying the bank to open it."],
+];
+
+// ---- top bar + tabs ----
+$("nav").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  for (const x of $("nav").children) x.classList.toggle("on", x === b);
+  for (const p of document.querySelectorAll(".panel")) p.classList.toggle("on", p.id === "p-" + b.dataset.p);
+  const k = b.dataset.p;
+  if (k === "crew") renderCrew(); if (k === "board") renderBoard(); if (k === "story") renderStory(); if (k === "rig") renderRig();
+});
+const setWho = () => {
+  const w = $("who"); w.innerHTML = "";
+  if (me) { w.append(el("div", "", me.name), el("div", "lamp", fmt(me.save.bank) + " loot")); }
+  else { const a = el("a", "btn primary", "Log in with Discord"); a.href = "/api/login"; w.append(a); }
+};
+
+// ---- dive ----
+const weeklySeed = () => (me && me.seed) || "W:guest";
+const stats = () => E.rigStats(grid);
+
+function saveRun() { if (run && !run.done) store.set("drain_run", { seed: run.seed, choices: run.choices, weekly: run.weekly }); else store.set("drain_run", null); }
+
+function startRun(seed, weekly) {
+  const s = stats();
+  run = { seed, weekly, choices: [], stats: s, st: E.newRun(s), done: false, result: null, log: [] };
+  saveRun(); renderDive();
+}
+function resumeRun() {
+  const r = store.get("drain_run");
+  if (!r || !r.seed || !Array.isArray(r.choices)) return false;
+  // the rig can't have changed mid-dive (it only applies to the next one), but the stored
+  // choices were made on whatever rig was live, so replay on the current grid
+  const s = stats();
+  let st = E.newRun(s);
+  try { for (const i of r.choices) st = E.choose(st, r.seed, i, s).st; } catch { store.set("drain_run", null); return false; }
+  run = { seed: r.seed, weekly: r.weekly, choices: r.choices, stats: s, st, done: st.over, result: null, log: [] };
+  if (run.done) finishRun(false);
+  return true;
+}
+function logLine(m, bad) { run.log.unshift([m, bad]); run.log.length = Math.min(run.log.length, 10); }
+
+function pick(i) {
+  const res = E.choose(run.st, run.seed, i, run.stats);
+  const d = { h: res.st.h - run.st.h, o: res.st.o - run.st.o };
+  run.choices.push(i); run.st = res.st;
+  logLine(res.msg, d.h < 0 || d.o < -4);
+  if (run.st.over) finishRun(false); else saveRun();
+  renderDive();
+}
+async function finishRun(surfaced) {
+  run.done = true;
+  run.result = E.finish(run.st, surfaced);
+  if (!me) store.set("drain_best", Math.max(store.get("drain_best") || 0, run.st.d));
+  store.set("drain_run", null);
+  run.saving = !!me;
+  renderDive();
+  if (!me) return;
+  try {
+    const j = await api("run", { seed: run.seed, choices: run.choices, surface: surfaced });
+    me.save = j.save; run.server = j; run.saving = false; setWho();
+  } catch (e) { run.saving = false; run.saveErr = e.message; }
+  renderDive();
+}
+
+function renderDive() {
+  const box = $("dive"); box.innerHTML = "";
+  const s = run ? run.st : null, cap = run ? run.stats : stats();
+  $("sD").textContent = (s ? s.d : 0) + "m";
+  $("sH").textContent = s ? Math.max(0, s.h) : cap.hullMax; $("mH").style.width = (s ? Math.max(0, s.h) / cap.hullMax * 100 : 100) + "%";
+  $("sO").textContent = s ? Math.max(0, s.o) : cap.airMax; $("mO").style.width = (s ? Math.max(0, s.o) / cap.airMax * 100 : 100) + "%";
+  $("sL").textContent = s ? s.l : 0;
+  const lg = $("log"); lg.innerHTML = "";
+  if (run) for (const [m, bad] of run.log) lg.append(el("div", bad ? "b" : "g", m));
+
+  if (!run) {
+    box.append(el("p", "lbl", "Choose a dive"));
+    const seg = el("div", "seg");
+    const a = el("button", mode === "weekly" ? "on" : "", "Weekly shaft"); a.append(el("small", "", "Same forks for everyone. Ranks on the board."));
+    const b = el("button", mode === "free" ? "on" : "", "Free dive"); b.append(el("small", "", "Random shaft. Loot only."));
+    a.onclick = () => { mode = "weekly"; renderDive(); }; b.onclick = () => { mode = "free"; renderDive(); };
+    seg.append(a, b); box.append(seg);
+    const go = el("button", "primary", "Launch the rig");
+    go.onclick = () => startRun(mode === "weekly" ? weeklySeed() : "F:" + Math.random().toString(36).slice(2, 10), mode === "weekly");
+    box.append(go);
+    box.append(el("p", "note", me ? "Dying costs you 75% of the haul, but the depth still counts. Surface to keep everything." : "You can dive as a guest, but loot and the board need a Discord login."));
+    return;
+  }
+  if (run.done) {
+    const r = run.result;
+    box.append(el("p", "lbl", r.safe ? "Surfaced" : "Lost"));
+    box.append(el("h2", "", r.depth + " metres"));
+    box.append(el("p", "", (run.st.why ? run.st.why + " " : "") + (r.safe ? `You bank all ${fmt(r.banked)} loot.` : `Rescue recovers ${fmt(r.banked)} of ${fmt(run.st.l)} loot.`)));
+    if (run.saving) box.append(el("p", "note", "Filing the run with the harbor..."));
+    if (run.saveErr) box.append(el("p", "err", run.saveErr));
+    if (run.server && run.weekly) box.append(el("p", "note", "Your best this week: " + run.server.weekDepth + "m."));
+    if (!me) box.append(el("p", "note", "Log in with Discord to bank loot and appear on the board."));
+    const again = el("button", "primary", "Back to the harbor"); again.onclick = () => { run = null; renderDive(); renderRig(); };
+    box.append(again);
+    return;
+  }
+  const ev = E.eventAt(run.seed, run.st.step);
+  box.append(el("p", "lbl", (run.weekly ? "Weekly shaft" : "Free dive") + " · fork " + (run.st.step + 1)));
+  box.append(el("p", "", ev.text));
+  const ch = el("div", "choices");
+  ev.c.forEach((c, i) => { const b = el("button", "", c.label); b.append(el("small", "", c.hint)); b.onclick = () => pick(i); ch.append(b); });
+  box.append(ch);
+  const sb = el("button", "ghost", run.st.step === 0 ? "Abandon dive" : "Surface and bank " + run.st.l + " loot");
+  sb.onclick = () => { if (run.st.step === 0) { run = null; saveRun(); store.set("drain_run", null); renderDive(); } else finishRun(true); };
+  box.append(sb);
+}
+
+// ---- rig ----
+const SYM = { drill: "D", cool: "C", relay: "R", plate: "P", tank: "T" };
+let saveTimer = 0;
+function renderRig() {
+  const g = $("grid");
+  if (!g.children.length) {
+    for (let i = 0; i < E.GRID_N; i++) {
+      const b = el("button", "cell"); b.setAttribute("aria-label", "Rig cell " + (i + 1));
+      b.onclick = () => {
+        if (run && !run.done) { $("rErr").textContent = "Finish the dive first. Changes apply to the next one."; return; }
+        if (grid[i]) grid[i] = null;
+        else if (grid.filter(Boolean).length < pieces()) grid[i] = tool;
+        $("rErr").textContent = "";
+        renderRig(); clearTimeout(saveTimer); saveTimer = setTimeout(pushRig, 700);
+      };
+      g.append(b);
+    }
+  }
+  [...g.children].forEach((b, i) => { b.className = "cell" + (grid[i] ? " " + grid[i] : ""); b.textContent = grid[i] ? SYM[grid[i]] : ""; });
+  const s = stats();
+  $("rM").textContent = "x" + s.lootMult.toFixed(2); $("rH").textContent = s.hullMax; $("rA").textContent = s.airMax;
+  $("rP").textContent = grid.filter(Boolean).length + "/" + pieces();
+  $("rBank").textContent = me ? fmt(me.save.bank) : "log in";
+  const buy = $("buy");
+  buy.disabled = !me || !me.nextPiece || me.save.bank < me.nextPiece;
+  buy.textContent = !me ? "Log in to upgrade" : me.nextPiece ? `Buy a piece · ${fmt(me.nextPiece)} loot` : "Rig is full";
+}
+const pieces = () => (me ? me.save.pieces : E.START_PIECES);
+async function pushRig() { if (!me) return; try { await api("rig", { grid }); me.save.grid = grid.slice(); } catch (e) { $("rErr").textContent = e.message; } }
+$("tools").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return; tool = b.dataset.t;
+  for (const x of $("tools").children) x.classList.toggle("on", x === b);
+});
+$("buy").onclick = async () => {
+  try { const j = await api("buy", {}); me.save = j.save; me.nextPiece = j.nextPiece; setWho(); renderRig(); $("rErr").textContent = ""; }
+  catch (e) { $("rErr").textContent = e.message; }
+};
+
+// ---- crew + sectors ----
+const countdown = t => { const m = Math.max(0, t - Date.now()) / 6e4; return Math.floor(m / 1440) + "d " + Math.floor(m % 1440 / 60) + "h"; };
+async function renderCrew() {
+  const cb = $("crewBox"), sb = $("secBox"); cb.innerHTML = ""; sb.innerHTML = "";
+  if (!me) { cb.append(el("h3", "", "Crews"), el("p", "note", "Log in with Discord to join a crew and hold sectors of the shaft.")); return; }
+  let crew = null, errMsg = "";
+  try { crew = await fetch("/api/crew").then(r => r.json()); } catch { errMsg = "Couldn't reach the harbor."; }
+  cb.append(el("h3", "", "Your crew"));
+  if (errMsg) cb.append(el("p", "err", errMsg));
+  const crewAct = async (act, body) => {
+    const r = await fetch("/api/crew/" + act, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body || {}) });
+    const j = await r.json().catch(() => ({})); if (!r.ok) { cb.append(el("p", "err", j.error || "That didn't work.")); return; }
+    renderCrew();
+  };
+  if (crew) {
+    cb.append(el("div", "row", crew.name), el("p", "note", "Crew code " + crew.id + " · share it so others can join"));
+    for (const m of crew.members) cb.append(el("div", "row", m.name + (m.id === crew.owner ? " (lead)" : "")));
+    const l = el("button", "ghost", "Leave crew"); l.onclick = () => crewAct("leave"); cb.append(l);
+  } else {
+    cb.append(el("p", "note", "Crews hold sectors together. Up to 4 members."));
+    const n = el("input"); n.placeholder = "Crew name"; n.id = "cName"; n.maxLength = 24;
+    const c = el("button", "primary", "Start a crew"); c.onclick = () => crewAct("create", { name: n.value });
+    const code = el("input"); code.placeholder = "Crew code"; code.id = "cCode"; code.maxLength = 5;
+    const j = el("button", "", "Join with a code"); j.onclick = () => crewAct("join", { code: code.value });
+    cb.append(n, c, code, j);
+  }
+  const data = await api("sectors").catch(() => null);
+  sb.append(el("h3", "", "The shaft"));
+  if (!data) { sb.append(el("p", "err", "Couldn't load sectors.")); return; }
+  const ch = me.save.charge;
+  sb.append(el("div", "row", "Charge " + ch + "/10"), el("p", "note", "Each push costs 2 charge and refills over time, even while you are away. Sectors reset in " + countdown(data.weekEnds) + ". A crew holding a sector at the end pays 120 loot to each member who pushed."));
+  data.sectors.forEach((s, i) => {
+    const d = el("div", "sector" + (s.held && s.held === data.mine ? " mine" : ""));
+    const tot = s.rows.reduce((a, r) => a + r.p, 0);
+    const top = s.rows[0];
+    d.append(el("div", "row", s.name), el("div", "row", top ? (s.held ? s.rows.find(r => r.cid === s.held).name + " holds" : "Contested") : "Unclaimed"));
+    const st = el("div", "stack"); s.rows.forEach((r, k) => { const x = el("i", "c" + k); x.style.width = (tot ? r.p / tot * 100 : 0) + "%"; st.append(x); }); d.append(st);
+    for (const r of s.rows) d.append(el("div", "row", (r.cid === data.mine ? "★ " : "") + r.name + " · " + r.p));
+    if (crew) {
+      const b = el("button", "", "Push this sector"); b.disabled = me.save.charge < 2;
+      b.onclick = async () => { try { const j = await api("push", { sector: i }); me.save.charge = j.charge; me.save.chargeAt = j.chargeAt; renderCrew(); } catch (e) { d.append(el("p", "err", e.message)); } };
+      d.append(b);
+    }
+    sb.append(d);
+  });
+}
+
+// ---- board ----
+async function renderBoard() {
+  const fill = (id, rows, key) => {
+    const t = $(id); t.innerHTML = "";
+    if (!rows.length) { t.append(el("p", "note", "Nobody yet.")); return; }
+    const tb = el("table"); rows.forEach((r, i) => { const tr = el("tr"); tr.append(el("td", "n", i + 1), el("td", "", r.name), el("td", "n", r[key] + "m")); tb.append(tr); });
+    t.append(tb);
+  };
+  try {
+    const d = await api("board");
+    $("bWeek").textContent = "Resets in " + countdown(d.weekEnds) + ". Everyone dives the same forks.";
+    fill("bW", d.week, "week"); fill("bA", d.all, "best");
+  } catch { $("bW").textContent = "Couldn't load the board."; }
+}
+
+// ---- story ----
+function renderStory() {
+  const best = me ? me.save.best : (store.get("drain_best") || 0);
+  const f = $("frags"); f.innerHTML = "";
+  for (const [d, t, txt] of FRAGS) {
+    const ok = best >= d, b = el("div", "box frag" + (ok ? "" : " lock"));
+    b.append(el("p", "lbl", t + " · " + d + "m"), el("p", "", ok ? txt : "Reach " + d + " metres to hear it."));
+    f.append(b);
+  }
+}
+
+// ---- boot ----
+(async function boot() {
+  try {
+    const m = await api("load");
+    me = m; grid = m.save.grid.slice();
+  } catch { me = null; }
+  setWho();
+  if (!resumeRun()) run = null;
+  renderDive(); renderRig();
+})();
+</script>
+</body>
+</html>
