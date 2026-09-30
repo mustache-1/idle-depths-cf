@@ -18,7 +18,7 @@ const PAL = [
   { d: 700,  bg: [10, 5, 18],  rock: [40, 22, 52], rim: [230, 100, 200], glint: [220, 130, 255] },
   { d: 1200, bg: [18, 4, 8],   rock: [58, 26, 28], rim: [255, 110, 70],  glint: [255, 120, 80] },
 ];
-function pal(d) {
+export function pal(d) {
   let i = 0; while (i < PAL.length - 2 && d > PAL[i + 1].d) i++;
   const a = PAL[i], b = PAL[i + 1], t = clamp((d - a.d) / (b.d - a.d), 0, 1);
   return { bg: mix(a.bg, b.bg, t), rock: mix(a.rock, b.rock, t), rim: mix(a.rim, b.rim, t), glint: mix(a.glint, b.glint, t) };
