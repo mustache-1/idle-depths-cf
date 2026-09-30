@@ -3,6 +3,7 @@
 // Crews are shared: /api/crew/* is reused as is.
 import { json } from "./_session.js";
 import { weekKey, prevWeekKey, weekEnds } from "./_week.js";
+import * as MINE from "../public/drain/mine.js";
 import { replay, rigStats, validGrid, pieceCost, START_PIECES, MAX_PIECES, GRID_N } from "../public/drain/engine.js";
 
 const CHARGE_MAX = 10, CHARGE_EVERY = 6 * 60 * 1000, PUSH_COST = 2, PUSH_POINTS = 8;
@@ -56,6 +57,7 @@ export async function handleDrain(p, request, env, s) {
     const data = {
       week: top(r => r.week === wk && r.weekDepth > 0, r => r.weekDepth),
       all: top(r => r.best > 0, r => r.best),
+      mine: rows.filter(r => r.life > 0).sort((a, b) => b.life - a.life).slice(0, 10).map(r => ({ id: r.id, name: r.name, life: r.life, lv: r.lv, emb: r.emb })),
       weekEnds: weekEnds(), seed,
     };
     await env.SAVES.put("cache:dboard", JSON.stringify({ at: Date.now(), data }), { expirationTtl: 120 });
@@ -110,6 +112,37 @@ export async function handleDrain(p, request, env, s) {
     save.bank -= cost; save.pieces++;
     await env.SAVES.put(key, JSON.stringify(save));
     return json({ ok: true, save, nextPiece: save.pieces < MAX_PIECES ? pieceCost(save.pieces) : null });
+  }
+
+  // ---- tycoon mine ----
+  // The client runs the mine, but the server refuses any save the economy could not have
+  // produced: cash can't exceed what was earned minus what the upgrades cost, and lifetime
+  // can't grow faster than the mine's own steady income allows.
+  if (p === "/api/drain/mine") {
+    const rec = await env.SAVES.get(`dmine:${s.id}`, { type: "json" });
+    return json({ mine: rec ? rec.st : null, at: rec ? rec.at : 0, now: Date.now() });
+  }
+  if (p === "/api/drain/mine/save" && post) {
+    const body = await request.json().catch(() => null);
+    const st = body && body.st;
+    if (!MINE.validState(st) || JSON.stringify(st).length > 4000) return json({ error: "bad mine" }, 400);
+    const rec = await env.SAVES.get(`dmine:${s.id}`, { type: "json" });
+    const now = Date.now(), prev = rec && rec.st;
+    if (prev && st.lifeAll < prev.lifeAll - 1) return json({ error: "stale", mine: prev, at: rec.at, now }, 409);
+    const dt = prev ? Math.min(36000, (now - rec.at) / 1000 + 5) : 600;
+    const rate = Math.max(MINE.steady(st), prev ? MINE.steady(prev) : 0);
+    const grew = st.lifeAll - (prev ? prev.lifeAll : 0);
+    if (grew > rate * dt * 1.6 + 5000) return json({ error: "That much loot doesn't add up.", mine: prev, at: rec ? rec.at : 0, now }, 422);
+    if (st.cash > st.lifetime - MINE.spent(st) + st.lifetime * 0.002 + 50) return json({ error: "The books don't balance.", mine: prev, at: rec ? rec.at : 0, now }, 422);
+    if (st.embers > MINE.potential(st.lifeAll)) return json({ error: "bad embers" }, 422);
+    await env.SAVES.put(`dmine:${s.id}`, JSON.stringify({ st, at: now }));
+    const row = (await env.SAVES.get(`dboard:${s.id}`, { type: "json" })) || { id: s.id, name: s.name, best: 0, runs: 0, week: "", weekDepth: 0, weekLoot: 0 };
+    // the board row only moves when something visible did, which spares the KV write budget
+    if (!row.life || st.lifeAll > row.life * 1.02 || row.lv !== st.levels.length || row.emb !== st.embers) {
+      row.life = st.lifeAll; row.lv = st.levels.length; row.emb = st.embers;
+      await env.SAVES.put(`dboard:${s.id}`, JSON.stringify(row));
+    }
+    return json({ ok: true, now });
   }
 
   if (p === "/api/drain/run" && post) {

@@ -38,3 +38,12 @@ src/drain.js              ← /api/drain/* (load, run, rig, buy, push, sectors, 
 - Weekly shaft: seed `W:<ISO week>`, same forks for everyone, ranks the weekly board.
 - Crew sectors reuse `/api/crew/*` for membership; last week's payout is claimed on the next `/api/drain/load`.
 - No new setup: nothing to configure in Cloudflare or Discord. Deploy as usual.
+
+### Tycoon mine (the Mine tab)
+The default tab is an idle-tycoon mine: shafts dig into deposits, an elevator carries ore up, a hauler takes it to market, and the slowest of the three sets your income. Foremen automate each area, milestones double output, and Descend resets the mine for permanent embers.
+```
+public/drain/mine.js       ← economy and simulation (pure; the Worker imports it too)
+public/drain/minescene.js  ← canvas drawing
+public/drain/mineui.js     ← controls, loop, save
+```
+`/api/drain/mine` and `/api/drain/mine/save` store `dmine:<id>`. The server refuses saves whose cash exceeds earnings minus what the upgrades cost, or whose lifetime grows faster than the mine's steady income allows.

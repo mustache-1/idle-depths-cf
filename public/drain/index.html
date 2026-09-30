@@ -88,6 +88,41 @@ nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
 @keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .cell.drill{animation:cellhum 1.4s ease-in-out infinite}.cell.cool{animation:cellglow 2s ease-in-out infinite}
 @keyframes cellhum{50%{transform:translateY(1.5px)}}@keyframes cellglow{50%{box-shadow:0 0 10px #3fb6ff55}}
+.mhud{max-width:480px;margin:0 auto 10px;display:grid;gap:8px}
+.mtop{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.mtop b{font-family:var(--display);font-weight:900;font-size:2.3rem;line-height:.9;display:block;color:#ffd76a;font-variant-numeric:tabular-nums}
+.mtop .r{text-align:right}.mtop .r b{font-size:1.3rem;color:var(--foam)}
+#mBottle{font:500 .72rem var(--mono);color:var(--mute);letter-spacing:.06em}
+#mBottle[data-k="Shafts"]{color:var(--ok)}#mBottle[data-k="Elevator"],#mBottle[data-k="Warehouse"]{color:var(--lamp)}
+.mbar{display:grid;grid-template-columns:auto 1fr;gap:8px}
+.mmode{display:flex;gap:4px}.mmode button{padding:8px 9px;text-align:center;font:600 .8rem var(--mono)}
+.mmode .on{border-color:var(--lamp);box-shadow:inset 0 0 0 1px var(--lamp);color:var(--lamp)}
+.mbar2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mbar2 button{text-align:center;padding:9px 6px;font-size:.85rem}
+.mscroll{max-width:480px;margin:0 auto;height:calc(100dvh - 300px);min-height:360px;overflow-y:auto;position:relative;border:1px solid var(--line);background:#06121a;overscroll-behavior:contain}
+.mcontent{position:relative}
+.mcontent canvas{position:sticky;top:0;display:block;width:100%}
+.mui{position:absolute;left:0;top:0;width:400px;transform-origin:0 0}
+.mrow{position:absolute;left:66px;right:4px;display:flex;align-items:center;gap:5px;min-width:0}
+.mrow.ctl{background:rgba(6,14,20,.72);border:1px solid var(--line);padding:0 5px}
+.mrow.lvr{background:rgba(6,14,20,.55);padding:0 3px}
+.minfo{flex:1;min-width:0;line-height:1.1}
+.minfo b{font:700 12px var(--display);text-transform:uppercase;letter-spacing:.04em;display:block;color:var(--foam)}
+.minfo small{font:400 8.5px var(--mono);color:var(--mute);margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.mrow button{padding:2px 6px;font:700 10px var(--body);text-align:center;line-height:1.15;min-width:54px}
+.mrow button small{font:400 8.5px var(--mono);margin:0;color:inherit;opacity:.85}
+.mrow .mup{background:#1c5a3f;border-color:#2c8a5f}.mrow .mup:disabled{background:var(--plate);border-color:var(--line)}
+.mrow .mfore{background:#3a2a16;border-color:#7a5a2a}.mrow .mfore:disabled{background:var(--plate);border-color:var(--line)}
+.mrow.ctl button{padding:5px 7px;min-height:34px}
+.munlock{position:absolute;padding:8px 14px;background:var(--lamp);color:#1a0d00;border-color:var(--lamp);font:800 12px var(--body);text-align:center}
+.munlock small{font:500 10px var(--mono);color:#3a1d00;margin:0}.munlock:disabled{background:var(--plate);color:var(--mute)}
+.mtap{position:absolute;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mtoast{position:fixed;left:50%;top:14px;transform:translate(-50%,-20px);background:var(--lamp);color:#1a0d00;font:700 .85rem var(--body);padding:8px 14px;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw}
+.mtoast.on{opacity:1;transform:translate(-50%,0)}
+.mmodal{position:fixed;inset:0;background:rgba(3,8,12,.8);display:none;place-items:center;z-index:25;padding:20px}
+.mmodal.on{display:grid}
+.mmodal>div{background:var(--hull);border:1px solid var(--lamp);padding:20px;max-width:360px;width:100%;display:grid;gap:12px}
+.mmodal .big{font-family:var(--display);font-size:2.6rem;font-weight:900;color:#ffd76a}
+nav{grid-template-columns:repeat(6,1fr)}nav button{font-size:.72rem;padding-inline:0}
 </style>
 </head>
 <body>
@@ -98,7 +133,16 @@ nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
   </div>
 
   <!-- DIVE -->
-  <section class="panel on" id="p-dive">
+  <section class="panel on" id="p-mine">
+    <div class="mhud">
+      <div class="mtop"><div><small class="lbl">Scrip</small><b id="mCash">$0</b></div><div class="r"><small class="lbl">Income</small><b id="mInc">$0/s</b></div></div>
+      <div class="row"><span id="mBottle"></span><span id="mEmb" class="lbl"></span></div>
+      <div class="mbar"><div class="mmode" id="mMode"><button data-m="1" class="on">×1</button><button data-m="10">×10</button><button data-m="100">×100</button><button data-m="max">Max</button></div><div class="mbar2"><button id="mOd">Overdrive</button><button id="mPrest" disabled>Descend</button></div></div>
+    </div>
+    <div class="mscroll" id="mScroll"><div class="mcontent" id="mContent"><canvas id="mCv" aria-label="The mine"></canvas><div class="mui" id="mUI"></div></div></div>
+  </section>
+
+  <section class="panel" id="p-dive">
     <div class="viewport">
       <canvas id="cv" aria-label="The rig in the shaft"></canvas>
       <div class="hud">
@@ -149,6 +193,7 @@ nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
 
   <!-- BOARD -->
   <section class="panel" id="p-board">
+    <div class="box"><h3>Richest mines</h3><div id="bM"></div></div>
     <div class="box"><h3>Deepest this week</h3><p class="note" id="bWeek"></p><div id="bW"></div></div>
     <div class="box"><h3>Deepest ever</h3><div id="bA"></div></div>
   </section>
@@ -159,9 +204,11 @@ nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
     <div id="frags" style="display:grid;gap:14px"></div>
   </section>
 </main>
+<div class="mtoast" id="mToast"></div><div class="mmodal" id="mWelcome"></div><div class="mmodal" id="mPrompt"></div>
 
 <nav id="nav">
-  <button data-p="dive" class="on">Dive</button>
+  <button data-p="mine" class="on">Mine</button>
+  <button data-p="dive">Dive</button>
   <button data-p="rig">Rig</button>
   <button data-p="crew">Crew</button>
   <button data-p="board">Board</button>
@@ -171,6 +218,8 @@ nav button.on{color:var(--lamp);box-shadow:inset 0 2px 0 var(--lamp)}
 <script type="module">
 import * as E from "./engine.js";
 import { Scene, Sfx } from "./scene.js";
+import { initMine } from "./mineui.js";
+import { fmt as nfmt } from "./mine.js";
 
 const $ = id => document.getElementById(id);
 const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -208,7 +257,7 @@ $("nav").addEventListener("click", e => {
   for (const x of $("nav").children) x.classList.toggle("on", x === b);
   for (const p of document.querySelectorAll(".panel")) p.classList.toggle("on", p.id === "p-" + b.dataset.p);
   const k = b.dataset.p;
-  if (k === "crew") renderCrew(); if (k === "board") renderBoard(); if (k === "story") renderStory(); if (k === "rig") renderRig();
+  if (k === "crew") renderCrew(); if (k === "board") renderBoard(); if (k === "story") renderStory(); if (k === "rig") renderRig(); if (k === "mine") mine.resize();
 });
 const setWho = () => {
   const w = $("who"); w.innerHTML = "";
@@ -219,6 +268,7 @@ const setWho = () => {
 // ---- dive ----
 const scene = new Scene($("cv"));
 const preview = new Scene($("cv2"), { preview: true });
+const mine = initMine({ api, getMe: () => me });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 let busy = false, capTimer = 0;
 Sfx.muted = store.get("drain_mute") === true;
@@ -446,6 +496,9 @@ async function renderBoard() {
     const d = await api("board");
     $("bWeek").textContent = "Resets in " + countdown(d.weekEnds) + ". Everyone dives the same forks.";
     fill("bW", d.week, "week"); fill("bA", d.all, "best");
+    const bm = $("bM"); bm.innerHTML = "";
+    if (!d.mine || !d.mine.length) bm.append(el("p", "note", "Nobody yet."));
+    else { const tb = el("table"); d.mine.forEach((r, i) => { const tr = el("tr"); tr.append(el("td", "n", i + 1), el("td", "", r.name), el("td", "n", "$" + nfmt(r.life))); tb.append(tr); }); bm.append(tb); }
   } catch { $("bW").textContent = "Couldn't load the board."; }
 }
 
@@ -466,7 +519,7 @@ function renderStory() {
     const m = await api("load");
     me = m; grid = m.save.grid.slice();
   } catch { me = null; }
-  setWho(); scene.setRig(grid);
+  setWho(); scene.setRig(grid); mine.load();
   if (!resumeRun()) { run = null; renderDive(); }
   renderRig();
 })();
