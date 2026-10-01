@@ -57,3 +57,11 @@ src/scam.js              ← POST /api/scam/talk
 ```
 - **Scripted mode** works out of the box, for everyone.
 - **AI mode** (callers are played by Claude Haiku): add an `ANTHROPIC_API_KEY` secret to the Worker. Only logged-in players get AI callers. Set `SCAM_AI=off` as a variable to switch it off. The server caps calls per player and rejects deals the character hasn't warmed up to.
+
+## v2 (idle-depths.com/v2)
+A playable preview of the next version, built on the real game's UI: a rebuilt Mine, a pixel-art Camp, a survival Dive, Forge, Guilds and the Audit, tied together by a status strip. It is a sandbox: it never reads or writes real saves (no /api calls, in-memory storage), so progress doesn't persist.
+```
+tools/v2/        sources (parts, css, panels) and build.py
+public/v2/       the generated page
+```
+Rebuild with `python3 tools/v2/build.py`. The output is a frozen copy of public/index.html plus the v2 additions; the Camp engine is public/drain/mine.js.

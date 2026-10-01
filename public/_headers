@@ -12,3 +12,7 @@
   Cache-Control: no-cache
 /icon-*.png
   Cache-Control: public, max-age=604800
+/v2/
+  Cache-Control: no-cache
+/v2/index.html
+  Cache-Control: no-cache

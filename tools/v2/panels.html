@@ -1,0 +1,84 @@
+<div class="panel" id="tab-camp">
+  <div class="v2-season" id="v2law"></div>
+  <div class="titlebar"><h2>The Camp</h2><span>Ore goes down a pipeline: shafts dig it, the lift hauls it, the warehouse sells it. Fix the slowest link.</span></div>
+  <div id="v2inc"></div>
+  <div class="v2-pipewrap"><div class="v2-pipe" id="v2pipe"></div><p class="v2-pmsg" id="v2pmsg"></p></div>
+  <div class="v2-camp2">
+    <div class="card v2-stage v2c-stage"><canvas id="v2ccv" aria-label="Your camp"></canvas><div class="v2-fx" id="v2cfx"></div></div>
+    <aside>
+      <div class="v2-stats" style="grid-template-columns:1fr 1fr;margin-bottom:10px"><div class="v2-stat"><small>Camp income</small><b id="v2inc2" style="color:var(--green)">$0/s</b></div><div class="v2-stat"><small>Balance</small><b id="v2bal" style="color:var(--lamp2)">$0</b></div></div>
+      <div class="v2-qty"><span class="note">Buy</span><button data-q="1" class="on">×1</button><button data-q="10">×10</button><button data-q="max">Max</button></div>
+      <div id="v2sys" style="display:grid;gap:14px"></div>
+    </aside>
+  </div>
+  <p class="note" style="margin-top:10px">Tap a shaft, the lift or the warehouse to run it once; a foreman runs it for you, even while you're away. Your Mine adds ore here too: every cleared seam goes into the warehouse.</p>
+</div>
+
+<div class="panel" id="tab-dive">
+  <svg class="v2-banner" id="v2bd" viewBox="0 0 700 56" preserveAspectRatio="xMidYMid slice"></svg>
+  <div class="titlebar"><h2>The Dive</h2><span>Three minutes in the dark. You move. Everything else swings itself.</span></div>
+  <div class="v2-dstage"><canvas id="v2dcv" aria-label="The dive"></canvas>
+    <div class="v2-dhud" id="v2dhud" hidden>
+      <div class="l"><div class="bar hp"><i id="v2dhp"></i><b id="v2dhpt">30</b></div><div class="bar xp"><i id="v2dxp"></i><b id="v2dlv">Lv 1</b></div></div>
+      <div class="c"><b id="v2dtime">3:00</b><small id="v2dobj">Survive</small></div>
+      <div class="r"><b id="v2dgold">0</b><small id="v2dkills">0 kills</small></div>
+    </div>
+    <div class="v2-bossbar" id="v2dboss" hidden><b>The Wyrm</b><div class="bb"><i id="v2dbossi"></i></div></div>
+    <div class="v2-dwl" id="v2dwl"></div>
+    <div class="v2-dctl" id="v2dctl" hidden><button id="v2dpb" aria-label="Pause">Pause</button><button id="v2ddash" class="dash" aria-label="Dash">Dash</button></div>
+    <div class="v2-dov" id="v2dpause" hidden><div class="v2-dbox"><h2>Paused</h2><p class="note">The dive is frozen. Take your time.</p><button class="buy" id="v2dresume" style="min-width:180px;height:44px">Resume</button><button class="big" id="v2dquit" style="width:100%">Give up and take half</button></div></div>
+    <div class="v2-dov" id="v2dstart"></div>
+    <div class="v2-dov" id="v2dlvl" hidden></div>
+    <div class="v2-dov" id="v2dend" hidden></div>
+  </div>
+  <p class="note" style="margin-top:8px">Move: WASD, arrow keys, or drag anywhere on the screen. You pick a perk at every level-up. Gold and shards go home with you.</p>
+</div>
+
+<div class="panel" id="tab-forge">
+  <svg class="v2-banner" id="v2br" viewBox="0 0 700 56" preserveAspectRatio="xMidYMid slice"></svg>
+  <div class="titlebar"><h2>The Forge</h2><span>The Camp's money becomes permanent gear. Relics change how a dive plays.</span></div>
+  <div class="v2-stats"><div class="v2-stat"><small>Cash</small><b id="v2fc" style="color:var(--green)">$0</b></div><div class="v2-stat"><small>Relic shards</small><b id="v2rs" style="color:var(--gem)">120</b></div><div class="v2-stat"><small>Equipped</small><b id="v2re">0/3</b></div><div class="v2-stat"><small>Sets</small><b id="v2rset">none</b></div></div>
+  <div class="v2-gwrap" style="align-items:start">
+    <div class="card v2-card"><h3>Permanent gear</h3><p>Paid in cash from your Camp. Every level helps every dive, forever.</p><div id="v2fg"></div></div>
+    <div style="display:grid;gap:14px">
+      <div class="card v2-card"><h3>Relic pedestals</h3><div class="v2-altar" id="v2sl"></div><p id="v2fx" style="margin-top:8px;color:var(--ink)">Nothing equipped.</p></div>
+    </div>
+  </div>
+  <h3 style="margin:18px 0 10px">Relics</h3>
+  <div class="v2-relgrid" id="v2rl"></div>
+</div>
+
+<div class="panel" id="tab-guilds">
+  <svg class="v2-banner" id="v2bg" viewBox="0 0 700 56" preserveAspectRatio="xMidYMid slice"></svg>
+  <div class="titlebar"><h2>The Guilds</h2><span>Four Guilds. Five galleries. One Sunday reckoning.</span></div>
+  <div class="v2-gpick" id="v2gp"></div>
+  <div id="v2raid"></div>
+  <div class="v2-gwrap">
+    <div class="card v2-stage"><svg id="v2gmap" viewBox="0 0 340 250" preserveAspectRatio="xMidYMin meet" aria-label="Claim map"></svg></div>
+    <div style="display:grid;gap:14px;align-content:start">
+      <div class="card v2-card" id="v2gsel"></div>
+      <div class="card v2-card"><h3>Guild line</h3><div id="v2gfeed" class="v2-feed"></div></div>
+    </div>
+  </div>
+  <div class="card v2-card" style="margin-top:14px"><h3>Your squad</h3><div id="v2sq"></div></div>
+</div>
+
+<div class="panel" id="tab-audit">
+  <svg class="v2-banner" id="v2ba" viewBox="0 0 700 56" preserveAspectRatio="xMidYMid slice"></svg>
+  <div class="titlebar"><h2>The Audit</h2><span>Season 1 · The Reckoning · week 3 of 8</span></div>
+  <div class="v2-grid">
+    <div style="display:grid;gap:14px;align-content:start">
+      <div class="card v2-card"><span class="v2-chip p">The story so far</span>
+        <div class="v2-story" style="margin-top:10px"><p>You paid Ashcombe. The ledger said <em>PAID IN FULL</em> and the whole mine went quiet. Then the Warm Dark sent its own bill.</p><p style="margin-top:8px">Ashcombe was never the creditor. He was a collector, and the debt was always owed to something under the Throne. It settles up once a season. Each time, it reads out new Terms, four Guilds fight for the galleries, and anyone who can't pay is written into the wall.</p><p style="margin-top:8px">You're not working off a debt anymore. You're deciding what the mine owes back.</p></div>
+      </div>
+      <div class="card v2-card"><h3>The Auditor's Terms</h3><p>Three Laws bend the whole mine until the season ends. They are live in this preview.</p><div id="v2terms"></div></div>
+      <div class="card v2-card"><h3>Chapters</h3><div id="v2ch"></div></div>
+    </div>
+    <div style="display:grid;gap:14px;align-content:start">
+      <div class="card v2-card"><h3>Orders</h3><p>Do the thing, take the reward. New orders every day.</p><div id="v2or"></div></div>
+      <div class="card v2-card"><h3>Season track</h3><div class="meta"><span id="v2tk">0 / 6 marks</span><span style="color:var(--lamp2)">Season 1 banner at the end</span></div><div class="v2-bar" style="margin-top:6px"><i id="v2tb" style="width:0"></i></div><div class="v2-track" id="v2tt"></div></div>
+      <div class="card v2-card"><h3>Season 1 · richest mines</h3><table class="v2-tbl" id="v2hl"></table></div>
+      <div class="card v2-card"><h3>Hall of Fame</h3><table class="v2-tbl"><tr><th>Season</th><th>Ruler</th></tr><tr><td>Founding</td><td>Ashcombe's Heir · maxed the old mine</td></tr><tr><td>Season 1</td><td>Not yet written</td></tr></table></div>
+    </div>
+  </div>
+</div>
