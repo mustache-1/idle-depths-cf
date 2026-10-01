@@ -2,6 +2,7 @@
 import { readSession, makeSession, cookieHeader, json } from "./_session.js";
 import { weekKey, weekEnds, prevWeekKey } from "./_week.js";
 import { handleDrain } from "./drain.js";
+import { handleScam } from "./scam.js";
 
 // ---- seasons ----
 // The all-time board ranks on `lifetime`, which is written fresh from the player's save on
@@ -212,6 +213,9 @@ async function handle(request, env) {
 
     // ---- everything below needs a session ----
     const s = await readSession(request, env.SESSION_SECRET);
+
+    // Cold Call Cove (idle-depths.com/scam). Guests get the scripted callers, so no login wall.
+    if (p === "/api/scam/talk") return handleScam(request, env, s);
 
     // The Drain (idle-depths.com/drain) has its own routes and its own KV keys.
     if (p.startsWith("/api/drain/")) return handleDrain(p, request, env, s);

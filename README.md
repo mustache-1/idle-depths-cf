@@ -47,3 +47,13 @@ public/drain/minescene.js  ← canvas drawing
 public/drain/mineui.js     ← controls, loop, save
 ```
 `/api/drain/mine` and `/api/drain/mine/save` store `dmine:<id>`. The server refuses saves whose cash exceeds earnings minus what the upgrades cost, or whose lifetime grows faster than the mine's steady income allows.
+
+## Cold Call Cove (idle-depths.com/scam)
+A solo prototype of a call-center comedy game: you cold-call fictional townspeople and sell them nonsense for pretend doubloons. Quota, boss patrols, peeking at a caller's screen, three days.
+```
+public/scam/index.html   ← the game
+public/scam/callers.js   ← cast + products (shared with the Worker)
+src/scam.js              ← POST /api/scam/talk
+```
+- **Scripted mode** works out of the box, for everyone.
+- **AI mode** (callers are played by Claude Haiku): add an `ANTHROPIC_API_KEY` secret to the Worker. Only logged-in players get AI callers. Set `SCAM_AI=off` as a variable to switch it off. The server caps calls per player and rejects deals the character hasn't warmed up to.

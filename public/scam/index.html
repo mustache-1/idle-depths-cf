@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0e2a2f">
+<title>Cold Call Cove</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&family=Karla:wght@400;600;800&family=VT323&display=swap">
+<style>
+/* A call-center desk in a harbor town. Teal wall, yellow legal pad, red phone, green CRT. */
+:root{
+  --wall:#0e2a2f;--wall2:#143a41;--desk:#5a3f28;--paper:#f3e3a4;--ink:#1d1a14;--phone:#d63a2f;
+  --crt:#8dffb0;--crt-bg:#06140d;--hot:#ff5a4f;--gold:#ffd23c;--mute:#8fb3b5;--line:#2a5a60;
+  --display:"Rubik Mono One","Arial Black",Impact,sans-serif;--body:"Karla",system-ui,sans-serif;--crt-font:"VT323","Courier New",monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--wall);color:#e8f4f2;font:16px/1.45 var(--body)}
+body{min-height:100vh;padding:0 14px calc(40px + env(safe-area-inset-bottom,0px))}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-transform:uppercase;margin:0;line-height:1.05;letter-spacing:.01em}
+p{margin:0}
+button{font:800 .95rem var(--body);cursor:pointer;border:2px solid var(--ink);background:var(--paper);color:var(--ink);padding:10px 14px;box-shadow:3px 3px 0 var(--ink);text-align:center}
+button:active:not(:disabled){transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hot{background:var(--hot);color:#fff}.gold{background:var(--gold)}
+.top{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding-block:12px 8px}
+.brand{font:400 .95rem var(--display);color:var(--gold);line-height:1.1}
+.brand small{display:block;font:600 .7rem var(--body);color:var(--mute);letter-spacing:.12em;text-transform:uppercase;margin-top:3px}
+.tags{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.tag{font:700 .7rem var(--body);letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);color:var(--mute)}
+.tag.ai{border-color:var(--crt);color:var(--crt)}
+.snd{padding:4px 8px;font-size:.7rem;box-shadow:none;background:none;color:var(--mute);border:1px solid var(--line)}
+.quota{display:grid;gap:4px;margin-bottom:10px}
+.quota .row{display:flex;justify-content:space-between;font:800 .8rem var(--body);letter-spacing:.06em;text-transform:uppercase}
+.qbar{height:16px;background:#071a1e;border:2px solid var(--ink);position:relative;overflow:hidden}
+.qbar i{display:block;height:100%;background:repeating-linear-gradient(45deg,var(--gold) 0 10px,#e0b21c 10px 20px);transition:width .8s cubic-bezier(.2,.9,.3,1)}
+.qbar b{position:absolute;right:6px;top:-2px;font:700 .8rem var(--crt-font)}
+.office{position:relative;height:64px;margin-bottom:12px;background:linear-gradient(#1c4a52,#143a41);border:2px solid var(--ink);overflow:hidden}
+.office .win{position:absolute;inset:6px 8px;background:#0a2126;border:2px solid #2a5a60}
+.office .floor{position:absolute;left:0;right:0;bottom:0;height:12px;background:#0b2024}
+.boss{position:absolute;bottom:10px;left:-60px;width:44px;height:56px;transition:left 3.2s linear}
+.boss.in{left:calc(100% - 70px)}
+.boss.warn .eye{fill:#ff5a4f}
+.sign{position:absolute;right:12px;top:8px;font:400 .7rem var(--display);color:var(--hot);opacity:0;transition:opacity .2s}
+.sign.on{opacity:1;animation:blink .5s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.desk{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:14px}
+@media(max-width:760px){.desk{grid-template-columns:1fr}}
+.card{background:var(--wall2);border:2px solid var(--ink);padding:14px;box-shadow:5px 5px 0 #071a1e;display:grid;gap:10px;align-content:start;min-width:0}
+.pad{background:var(--paper);color:var(--ink);border-color:var(--ink)}
+.pad h3,.pad h2{color:var(--ink)}
+.face{background:#0a2126;border:2px solid var(--ink);display:grid;place-items:center;padding:8px}
+.face svg{width:min(60%,150px);height:auto;display:block}
+.ring{animation:ring .4s infinite}
+@keyframes ring{25%{transform:translateX(-3px) rotate(-2deg)}75%{transform:translateX(3px) rotate(2deg)}}
+.eye{animation:bl 4s infinite}
+@keyframes bl{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.eye{transform-box:fill-box;transform-origin:center}
+.name{font:400 1.05rem var(--display);color:var(--gold)}
+.job{font-size:.85rem;color:var(--mute)}
+.meter{height:12px;background:#071a1e;border:2px solid var(--ink)}
+.meter i{display:block;height:100%;background:linear-gradient(90deg,var(--hot),var(--gold),var(--crt));transition:width .5s}
+.pips{display:flex;gap:4px}.pips i{width:100%;height:8px;background:#071a1e;border:1px solid var(--line)}.pips i.on{background:var(--gold)}
+.small{font:700 .7rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.pad .small{color:#6b5d2a}
+.crt{background:var(--crt-bg);border:3px solid var(--ink);box-shadow:inset 0 0 40px #000,5px 5px 0 #071a1e;color:var(--crt);font:1.35rem/1.15 var(--crt-font);padding:12px;display:grid;grid-template-rows:1fr auto auto;gap:10px;min-height:440px;min-width:0;position:relative}
+.crt::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);pointer-events:none}
+.chat{overflow-y:auto;max-height:340px;display:grid;gap:8px;align-content:start;padding-right:4px}
+.msg{max-width:92%;white-space:pre-wrap;word-break:break-word}
+.msg.c::before{content:attr(data-who) " > ";color:var(--gold)}
+.msg.p{justify-self:end;color:#cfe;text-align:right}
+.msg.p::before{content:"you > ";color:#5aa}
+.msg.sys{color:var(--mute);font-size:1.1rem}
+.cursor::after{content:"▮";animation:blink 1s steps(2) infinite}
+.tones{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.tones button{padding:7px 2px;font-size:.78rem;background:#0d2a1c;color:var(--crt);border-color:var(--crt);box-shadow:none}
+.tones button:hover:not(:disabled){background:var(--crt);color:#042}
+.inrow{display:grid;grid-template-columns:1fr auto;gap:8px}
+.inrow input{font:1.3rem var(--crt-font);background:#031008;color:var(--crt);border:2px solid var(--crt);padding:8px 10px;min-width:0}
+.inrow button{background:var(--crt);color:#042;border-color:#042;box-shadow:none}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stamp{position:absolute;inset:0;display:none;place-items:center;pointer-events:none;z-index:3}
+.stamp.on{display:grid}
+.stamp span{font:400 3rem var(--display);color:var(--hot);border:6px solid var(--hot);padding:6px 18px;transform:rotate(-10deg);animation:stamp .45s cubic-bezier(.2,1.6,.4,1) both;background:rgba(6,20,13,.82)}
+.stamp.good span{color:var(--crt);border-color:var(--crt)}
+@keyframes stamp{from{transform:rotate(-10deg) scale(3);opacity:0}to{transform:rotate(-10deg) scale(1);opacity:1}}
+.coin{position:fixed;width:16px;height:16px;border-radius:50%;background:var(--gold);border:2px solid #8a6a00;z-index:40;pointer-events:none;transition:transform .9s cubic-bezier(.5,0,.7,.3),opacity .9s}
+.modal{position:fixed;inset:0;background:rgba(3,12,14,.82);display:none;place-items:center;padding:18px;z-index:30}
+.modal.on{display:grid}
+.modal>div{max-width:560px;width:100%}
+.desktop{background:#1b4b88;border:3px solid var(--ink);padding:14px;display:grid;gap:12px;min-height:240px;color:#fff;font:600 .9rem var(--body)}
+.desktop .icons{display:flex;gap:18px;flex-wrap:wrap}
+.icon{background:none;border:0;box-shadow:none;color:#fff;text-align:center;padding:4px;width:84px}
+.icon i{display:block;width:44px;height:52px;background:#f3f3f3;margin:0 auto 4px;border:2px solid #222;position:relative}
+.icon i::after{content:"";position:absolute;left:6px;right:6px;top:10px;height:3px;background:#999;box-shadow:0 8px #999,0 16px #999}
+.win98{background:#d8d8d8;color:#111;border:2px solid #fff;border-right-color:#555;border-bottom-color:#555;padding:10px;font:1.1rem var(--crt-font)}
+.prog{height:12px;background:#fff;border:2px inset #888}.prog i{display:block;height:100%;background:#1b4b88;width:0;transition:width 1s linear}
+.sheet{background:#fff;color:#111;border:3px solid var(--ink);font:.8rem var(--body);display:grid;grid-template-columns:repeat(6,1fr);overflow:hidden;position:absolute;inset:0;z-index:5;align-content:start}
+.sheet div{border:1px solid #bbb;padding:3px 6px;white-space:nowrap;overflow:hidden}
+.sheet .h{background:#e4e4e4;font-weight:800}
+.review{display:grid;gap:12px}
+.big{font:400 2.2rem var(--display);color:var(--ink)}
+.ups{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.ups button{text-align:left;display:grid;gap:4px}.ups small{font-weight:600;font-size:.8rem}
+.toast{position:fixed;left:50%;top:14px;transform:translate(-50%,-30px);background:var(--hot);color:#fff;font:800 .9rem var(--body);padding:8px 14px;border:2px solid var(--ink);opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:92vw}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.toast.good{background:var(--crt);color:#042}
+.title{display:grid;gap:14px;justify-items:start}
+.title h1{font-size:clamp(2.2rem,8vw,4.4rem);color:var(--gold);text-shadow:4px 4px 0 var(--ink)}
+.note{color:var(--mute);font-size:.9rem;max-width:62ch}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">Bilge &amp; Sons<small>Debt Relief · Collections Floor</small></div>
+    <div class="tags"><span class="tag" id="aiTag">Callers: …</span><button class="snd" id="snd">Sound on</button></div>
+  </div>
+  <div class="quota" id="quota" hidden>
+    <div class="row"><span id="dayLbl">Day 1</span><span id="quotaLbl">0 / 350 doubloons</span></div>
+    <div class="qbar"><i id="qFill" style="width:0"></i></div>
+  </div>
+  <div class="office" id="office" aria-hidden="true">
+    <div class="win"></div><div class="floor"></div>
+    <svg class="boss" id="boss" viewBox="0 0 44 56"><rect x="8" y="20" width="28" height="34" fill="#243b66"/><path d="M18 20 L22 32 L26 20Z" fill="#fff"/><path d="M21 24 h2 v14 h-2z" fill="#d63a2f"/><circle cx="22" cy="12" r="10" fill="#e8c9a8"/><rect x="11" y="3" width="22" height="5" fill="#222"/><circle cx="18" cy="12" r="1.8" class="eye" fill="#111"/><circle cx="26" cy="12" r="1.8" class="eye" fill="#111"/><path d="M17 17 h10" stroke="#222" stroke-width="2"/></svg>
+    <div class="sign" id="sign">BOSS INCOMING</div>
+  </div>
+  <main id="screen"></main>
+</div>
+<div class="modal" id="peek"><div></div></div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { CALLERS, CALLER_IDS, PRODUCTS, TONES, TURNS } from "./callers.js";
+
+const $ = id => document.getElementById(id);
+const el = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x != null) e.textContent = x; return e; };
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+
+// ---- sound ----
+const Snd = { ctx: null, on: store.get("cc_snd") !== false,
+  init() { if (!this.ctx) { try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch {} } if (this.ctx && this.ctx.state === "suspended") this.ctx.resume(); },
+  tone(f, d, type = "square", v = .05, at = 0) { if (!this.on || !this.ctx) return; const c = this.ctx, o = c.createOscillator(), g = c.createGain(), t = c.currentTime + at; o.type = type; o.frequency.value = f; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g).connect(c.destination); o.start(t); o.stop(t + d + .02); },
+  blip() { this.tone(300 + Math.random() * 200, .04, "square", .025); },
+  ring() { for (let i = 0; i < 4; i++) { this.tone(880, .09, "square", .05, i * .14); this.tone(660, .09, "square", .05, i * .14 + .07); } },
+  ding() { this.tone(988, .12, "square", .06); this.tone(1319, .3, "square", .06, .1); },
+  buzz() { this.tone(110, .35, "sawtooth", .07); },
+  click() { this.tone(200, .05, "square", .05); },
+};
+$("snd").onclick = () => { Snd.init(); Snd.on = !Snd.on; store.set("cc_snd", Snd.on); $("snd").textContent = Snd.on ? "Sound on" : "Sound off"; };
+$("snd").textContent = Snd.on ? "Sound on" : "Sound off";
+function toast(m, good) { const t = $("toast"); t.textContent = m; t.className = "toast on" + (good ? " good" : ""); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on"), 2600); }
+
+// ---- the people: faces are drawn from the cast data ----
+function faceSVG(c) {
+  const hairBack = { bun: `<circle cx="60" cy="14" r="12" fill="${c.hair}"/>`, wrap: "", curly: "" }[c.style] || "";
+  const top = {
+    bun: `<path d="M26 56 C24 24 96 24 94 56 C84 38 36 38 26 56Z" fill="${c.hair}"/>`,
+    cap: `<path d="M24 50 C26 20 94 20 96 50Z" fill="${c.accent}"/><rect x="20" y="46" width="52" height="8" rx="3" fill="${c.accent}"/>`,
+    slick: `<path d="M26 54 C24 18 96 18 94 54 C86 34 40 32 26 54Z" fill="${c.hair}"/>`,
+    swoop: `<path d="M26 58 C22 16 100 14 94 52 C80 34 52 30 26 58Z" fill="${c.hair}"/>`,
+    curly: [..."0123456"].map((_, i) => `<circle cx="${30 + i * 10}" cy="${30 - Math.abs(3 - i) * 3}" r="10" fill="${c.hair}"/>`).join(""),
+    bob: `<path d="M24 80 C14 20 106 20 96 80 L88 80 C90 44 30 44 32 80Z" fill="${c.hair}"/>`,
+    wrap: `<path d="M24 52 C22 14 98 14 96 52Z" fill="${c.accent}"/><circle cx="60" cy="18" r="6" fill="${c.hair}"/>`,
+  }[c.style];
+  const hat = c.hat ? `<path d="M70 18 l22 -8 l-6 16Z" fill="${c.accent}"/>` : "";
+  const must = c.mustache ? `<path d="M44 72 C52 66 68 66 76 72 C68 76 52 76 44 72Z" fill="${c.hair}"/>` : "";
+  const beard = c.beard ? `<path d="M30 70 C34 110 86 110 90 70 C80 84 40 84 30 70Z" fill="${c.hair}"/>` : "";
+  const glasses = c.glasses ? `<g fill="none" stroke="#222" stroke-width="2.4"><circle cx="46" cy="58" r="9"/><circle cx="74" cy="58" r="9"/><path d="M55 58 h10"/></g>` : "";
+  return `<svg viewBox="0 0 120 140" aria-hidden="true">
+    <path d="M10 140 C12 108 34 100 60 100 C86 100 108 108 110 140Z" fill="${c.accent}"/>
+    <rect x="50" y="86" width="20" height="18" fill="${c.skin}" style="filter:brightness(.86)"/>${hairBack}
+    <ellipse cx="60" cy="58" rx="34" ry="38" fill="${c.skin}"/>${top}${hat}
+    <circle cx="46" cy="58" r="3.2" class="eye" fill="#1a1410"/><circle cx="74" cy="58" r="3.2" class="eye" fill="#1a1410"/>${glasses}
+    <path d="M40 46 h12 M68 46 h12" stroke="${c.hair}" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+    ${beard}<ellipse id="mouth" cx="60" cy="80" rx="9" ry="2.2" fill="#6b2a2a"/>${must}
+  </svg>`;
+}
+function setMouth(open) { const m = document.getElementById("mouth"); if (m) m.setAttribute("ry", open ? 6 : 2.2); }
+
+// ---- game state ----
+const QUOTAS = [350, 650, 1000], CALLS = 4;
+const UPS = { headset: { n: "Good headset", d: "Callers start with +10 trust." }, mug: { n: "Lucky mug", d: "Every deal pays 15% more." }, binder: { n: "Script binder", d: "Shows what each caller likes, without peeking." } };
+let G = null, aiMode = null;
+
+function newGame() { return { day: 0, earned: 0, total: 0, ups: {}, fines: 0, queue: [], idx: 0, product: null, call: null }; }
+function showTitle() {
+  G = null; $("quota").hidden = true;
+  const s = $("screen"); s.innerHTML = "";
+  const t = el("div", "title");
+  t.append(el("p", "small", "A comedy call-center game"), el("h1", "", "Cold Call Cove"));
+  t.append(el("p", "note", "Welcome to Bilge & Sons. You sell nonsense to the nicest, strangest people on the Hollow Coast, over the phone, for doubloons. Hit the quota or the boss will hear about it. Everything and everyone here is made up."));
+  const best = store.get("cc_best") || 0;
+  if (best) t.append(el("p", "small", "Best career: " + best + " doubloons"));
+  const go = el("button", "hot", "Clock in"); go.onclick = () => { Snd.init(); Snd.click(); G = newGame(); nextDay(); };
+  t.append(go);
+  s.append(t);
+}
+
+function setQuota() {
+  $("quota").hidden = false; const q = QUOTAS[G.day - 1];
+  $("dayLbl").textContent = "Day " + G.day + " of " + QUOTAS.length + " · call " + Math.min(G.idx + 1, CALLS) + "/" + CALLS;
+  $("quotaLbl").textContent = Math.round(G.earned) + " / " + q + " doubloons";
+  $("qFill").style.width = Math.min(100, G.earned / q * 100) + "%";
+}
+function nextDay() {
+  G.day++; G.earned = 0; G.idx = 0; G.fines = 0;
+  G.queue = shuffle(CALLER_IDS).slice(0, CALLS); G.product = pick(Object.keys(PRODUCTS));
+  setQuota();
+  const p = PRODUCTS[G.product], s = $("screen"); s.innerHTML = "";
+  const c = el("div", "card pad");
+  c.append(el("p", "small", "Morning briefing · Day " + G.day), el("h2", "", "Today we sell: " + p.name));
+  c.append(el("p", "", `It ${p.pitch}. List price ${p.price} doubloons. Your quota is ${QUOTAS[G.day - 1]}. You have ${CALLS} calls. Callers may haggle, stall, or hang up.`));
+  c.append(el("p", "small", "Boss patrols this floor. When he's on his way, hit Look Busy."));
+  const b = el("button", "hot", "Take the first call"); b.onclick = () => { Snd.init(); Snd.click(); ring(); };
+  c.append(b); s.append(c);
+}
+
+// ---- a call ----
+async function ring() {
+  const id = G.queue[G.idx], c = CALLERS[id]; setQuota();
+  const s = $("screen"); s.innerHTML = "";
+  const card = el("div", "card pad");
+  card.append(el("p", "small", "Incoming call"), el("h2", "", "Ring ring…"));
+  const f = el("div", "face ring"); f.innerHTML = faceSVG(c); card.append(f);
+  card.append(el("p", "", "Unknown caller from the Cove."));
+  const a = el("button", "hot", "Answer"); const stop = ringLoop(); a.onclick = () => { stop(); startCall(id); };
+  card.append(a); s.append(card);
+}
+function ringLoop() { let on = true; (async () => { while (on) { Snd.ring(); await wait(1500); } })(); return () => { on = false; }; }
+
+function startCall(id) {
+  Snd.init(); Snd.click();
+  const c = CALLERS[id], s = $("screen"); s.innerHTML = "";
+  const call = G.call = { id, turn: 0, trust: 15 + (G.ups.headset ? 10 : 0), history: [], busy: false, done: false, peeked: new Set(), patrol: null };
+  const wrap = el("div", "desk");
+  // left: the caller
+  const left = el("div", "card");
+  const face = el("div", "face"); face.innerHTML = faceSVG(c);
+  left.append(face, el("div", "name", c.name), el("div", "job", c.job));
+  left.append(el("p", "small", "Trust"));
+  const m = el("div", "meter"); const mi = el("i"); mi.style.width = call.trust + "%"; m.append(mi); left.append(m);
+  left.append(el("p", "small", "Patience"));
+  const pips = el("div", "pips"); for (let i = 0; i < TURNS; i++) pips.append(el("i", "on")); left.append(pips);
+  if (G.ups.binder) left.append(el("p", "note", `Likes ${c.weak}. Hates ${c.hates}.`));
+  const acts = el("div", "actions"); const peek = el("button", "", "Peek at screen"), busy = el("button", "gold", "Look busy"); acts.append(peek, busy); left.append(acts);
+  // right: the CRT
+  const crt = el("div", "crt");
+  const chat = el("div", "chat"); crt.append(chat);
+  const tones = el("div", "tones"); const labels = { charm: "Charm", flatter: "Flatter", pressure: "Pressure", facts: "Facts", silly: "Silly" };
+  TONES.forEach(t => { const b = el("button", "", labels[t]); b.dataset.t = t; tones.append(b); }); crt.append(tones);
+  const row = el("form", "inrow"); const inp = el("input"); inp.id = "line"; inp.placeholder = "Type your pitch, or tap a tone"; inp.maxLength = 200; inp.autocomplete = "off";
+  const sendBtn = el("button", "", "Send"); sendBtn.type = "submit"; row.append(inp, sendBtn); crt.append(row);
+  const stamp = el("div", "stamp"); crt.append(stamp);
+  const sheet = el("div", "sheet"); sheet.hidden = true; fillSheet(sheet); crt.append(sheet);
+  wrap.append(left, crt); s.append(wrap);
+  call.ui = { chat, mi, pips, tones, inp, sendBtn, stamp, sheet, face };
+  const lock = on => { call.busy = on; inp.disabled = sendBtn.disabled = on; for (const b of tones.children) b.disabled = on; };
+  call.lock = lock;
+
+  const hang = el("button", "", "Hang up"); hang.type = "button"; hang.onclick = () => endCall("You hung up.", false); row.append(hang);
+  row.style.gridTemplateColumns = "1fr auto auto";
+  call.lastTone = "charm";
+  tones.onclick = e => { const b = e.target.closest("button"); if (b && !call.busy) { call.lastTone = b.dataset.t; send(b.dataset.t, inp.value.trim()); } };
+  row.onsubmit = e => { e.preventDefault(); if (call.busy) return; send(call.lastTone, inp.value.trim()); };
+  peek.onclick = () => openPeek(c, call);
+  busy.onclick = () => toggleBusy();
+  window.onkeydown = e => { if (e.key === "Escape") toggleBusy(); };
+
+  say(call, c.greet, c.name).then(() => { lock(false); inp.focus(); });
+  lock(true); schedulePatrol(call);
+}
+
+function fillSheet(sh) {
+  sh.innerHTML = "";
+  const hdr = ["Account", "Region", "Q3", "Q4", "Var", "Notes"]; hdr.forEach(h => sh.append(el("div", "h", h)));
+  const rows = [["Brine-0417", "North", "1,204", "1,311", "+107", "ok"], ["Brine-0422", "Harbor", "904", "880", "-24", "check"], ["Kelp-0031", "Salt", "2,400", "2,455", "+55", "ok"], ["Kelp-0044", "Reef", "310", "301", "-9", "n/a"], ["Tide-1109", "North", "1,822", "1,990", "+168", "ok"], ["Tide-1120", "Dock", "77", "95", "+18", "ok"], ["Fog-0005", "Pier", "5,010", "5,100", "+90", "FINAL_v7"]];
+  rows.forEach(r => r.forEach(x => sh.append(el("div", "", x))));
+}
+function toggleBusy() { const call = G && G.call; if (!call || !call.ui) return; call.ui.sheet.hidden = !call.ui.sheet.hidden; Snd.click(); }
+
+async function say(call, text, who) {
+  const m = el("div", "msg c cursor"); m.dataset.who = who.split(" ").slice(-1)[0].toLowerCase();
+  call.ui.chat.append(m);
+  for (let i = 1; i <= text.length; i++) { m.textContent = text.slice(0, i); if (i % 2) { setMouth(text[i - 1] !== " "); Snd.blip(); } call.ui.chat.scrollTop = 1e6; await wait(24); }
+  setMouth(false); m.classList.remove("cursor");
+}
+const CANNED = {
+  charm: ["Good morning! You have such a lovely voice. Do you have a minute for a little something?", "Hello, friend! I'm calling about an exclusive offer made for people just like you."],
+  flatter: ["I can tell I'm speaking to a person of real taste and judgment. May I show you something special?", "People say you're the smartest in the Cove. I believe it already."],
+  pressure: ["This offer ends in ten minutes, and I can't hold it. Do you want it or not?", "Everyone on your street already signed up. Don't be the last one."],
+  facts: ["Studies show 9 in 10 harbor residents are not fully covered. The numbers are very clear.", "According to our records, you qualify. Here is exactly how it works."],
+  silly: ["Would you like to hear about a deal so good it's illegal in at least two puddles?", "Quick question: have you ever wanted to own a small piece of absolutely nothing?"],
+};
+
+async function send(tone, text) {
+  const call = G.call, c = CALLERS[call.id], prod = PRODUCTS[G.product];
+  if (call.busy || call.done) return;
+  if (!text) text = pick(CANNED[tone]);
+  call.ui.inp.value = ""; call.lock(true); Snd.click();
+  const pm = el("div", "msg p", text); call.ui.chat.append(pm); call.ui.chat.scrollTop = 1e6;
+  call.turn++; for (let i = 0; i < TURNS; i++) call.ui.pips.children[i].classList.toggle("on", i < TURNS - call.turn);
+  const thinking = el("div", "msg sys", "…"); call.ui.chat.append(thinking);
+  let r;
+  try {
+    const res = await fetch("/api/scam/talk", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ caller: call.id, product: G.product, history: call.history, text, tone, trust: Math.round(call.trust), turn: call.turn }) });
+    r = await res.json(); if (!res.ok) throw new Error(r.error);
+  } catch { r = { say: pick(c.lines), trust_delta: 0, deal: null, hangup: false, mode: "script" }; }
+  thinking.remove();
+  setAI(r.mode);
+  call.history.push({ r: "p", t: text }); call.history.push({ r: "c", t: r.say });
+  call.trust = Math.max(0, Math.min(100, call.trust + r.trust_delta)); call.ui.mi.style.width = call.trust + "%";
+  await say(call, r.say, c.name);
+  if (r.deal) { await closeDeal(call, r.deal); return; }
+  if (r.hangup) { await endCall(c.name + " hung up.", false); return; }
+  if (call.turn >= TURNS) { await endCall("Out of patience. " + c.name + " hung up.", false); return; }
+  call.lock(false); call.ui.inp.focus();
+}
+function setAI(mode) { if (!mode) return; aiMode = mode; const t = $("aiTag"); t.textContent = mode === "ai" ? "Callers: AI" : "Callers: scripted"; t.classList.toggle("ai", mode === "ai"); }
+
+async function closeDeal(call, amount) {
+  call.done = true; const pay = Math.round(amount * (G.ups.mug ? 1.15 : 1));
+  call.ui.stamp.innerHTML = ""; call.ui.stamp.className = "stamp on good"; call.ui.stamp.append(el("span", "", "SOLD +" + pay)); Snd.ding();
+  coins(call.ui.stamp); G.earned += pay; G.total += pay; setQuota();
+  await wait(1700); call.ui.stamp.className = "stamp"; afterCall("Deal closed: " + pay + " doubloons.");
+}
+async function endCall(msg, deal) {
+  const call = G.call; if (call.done) return; call.done = true; call.lock(true);
+  call.ui.stamp.innerHTML = ""; call.ui.stamp.className = "stamp on"; call.ui.stamp.append(el("span", "", "NO SALE")); Snd.buzz();
+  await wait(1400); call.ui.stamp.className = "stamp"; afterCall(msg);
+}
+function coins(from) {
+  const r = from.getBoundingClientRect(), q = $("qFill").getBoundingClientRect();
+  for (let i = 0; i < 12; i++) { const c = el("div", "coin"); c.style.left = r.left + r.width / 2 + "px"; c.style.top = r.top + r.height / 2 + "px"; document.body.append(c);
+    requestAnimationFrame(() => { c.style.transform = `translate(${q.left - r.left - r.width / 2 + Math.random() * 60}px,${q.top - r.top - r.height / 2}px) scale(.5)`; c.style.opacity = .1; }); setTimeout(() => c.remove(), 1000); }
+}
+function afterCall(msg) {
+  clearTimeout(G.call.patrolT); stopPatrol(); window.onkeydown = null;
+  G.idx++; setQuota();
+  const s = $("screen"); s.innerHTML = "";
+  const c = el("div", "card pad"); c.append(el("p", "small", "Call ended"), el("h2", "", msg));
+  const last = G.idx >= CALLS;
+  const b = el("button", "hot", last ? "End of shift" : "Next call"); b.onclick = () => { Snd.init(); Snd.click(); last ? review() : ring(); };
+  c.append(b); s.append(c);
+}
+
+// ---- the boss: he walks past, and if you aren't looking busy it costs you ----
+function schedulePatrol(call) { call.patrolT = setTimeout(() => patrol(call), 18000 + Math.random() * 16000); }
+async function patrol(call) {
+  if (!G || G.call !== call || call.done) return;
+  const boss = $("boss"), sign = $("sign"); sign.classList.add("on"); boss.classList.add("warn"); Snd.tone(220, .2, "square", .06);
+  boss.classList.add("in"); await wait(3300); sign.classList.remove("on");
+  if (!G || G.call !== call) { stopPatrol(); return; }
+  const busy = call.ui && !call.ui.sheet.hidden;
+  if (busy) { toast("Boss: 'Good. Busy.'", true); }
+  else if (!call.done) { G.earned = Math.max(0, G.earned - 40); G.fines += 40; setQuota(); Snd.buzz(); toast("Caught slacking! Fined 40 doubloons."); }
+  await wait(900); stopPatrol();
+  if (G && G.call === call && !call.done) schedulePatrol(call);
+}
+function stopPatrol() { const boss = $("boss"); boss.style.transition = "none"; boss.classList.remove("in", "warn"); $("sign").classList.remove("on"); void boss.offsetWidth; boss.style.transition = ""; }
+
+// ---- peeking at their screen ----
+function openPeek(c, call) {
+  const m = $("peek"), box = m.firstElementChild; box.innerHTML = "";
+  const d = el("div", "desktop"); d.append(el("b", "", "REMOTE VIEW · " + c.name + "'s computer"));
+  const icons = el("div", "icons"); const out = el("div", "win98", "Click a file to look inside.");
+  c.hints.forEach((h, i) => {
+    const b = el("button", "icon"); b.append(el("i"), el("span", "", ["diary", "browser", "files"][i]));
+    b.onclick = () => { out.innerHTML = ""; out.append(el("div", "", "Opening…")); const p = el("div", "prog"), pi = el("i"); p.append(pi); out.append(p); requestAnimationFrame(() => pi.style.width = "100%"); Snd.click();
+      setTimeout(() => { out.textContent = h; call.peeked.add(i); }, 1000); };
+    icons.append(b);
+  });
+  const close = el("button", "gold", "Close"); close.onclick = () => m.classList.remove("on");
+  d.append(icons, out, close); box.append(d); m.classList.add("on");
+}
+
+// ---- end of day ----
+function review() {
+  const q = QUOTAS[G.day - 1], ok = G.earned >= q, s = $("screen"); s.innerHTML = "";
+  const c = el("div", "card pad review");
+  c.append(el("p", "small", "Boss review · Day " + G.day), el("div", "big", ok ? "QUOTA MET" : "QUOTA MISSED"));
+  c.append(el("p", "", `You brought in ${Math.round(G.earned)} of ${q} doubloons${G.fines ? ` after ${G.fines} in fines` : ""}.`));
+  c.append(el("p", "", ok ? pick(["Mr. Gruel: 'Acceptable. Don't let it go to your head.'", "Mr. Gruel: 'You may keep your desk. And the mug.'", "Mr. Gruel: 'Sold some nonsense today. Proud of you.'"]) : pick(["Mr. Gruel: 'I've seen better numbers on a sinking ship.'", "Mr. Gruel: 'Pack your things. The crab is taking your desk.'"])));
+  if (!ok) {
+    const best = Math.max(store.get("cc_best") || 0, G.total); store.set("cc_best", best);
+    c.append(el("p", "small", "Career total: " + G.total + " doubloons"));
+    const b = el("button", "hot", "Back to the lobby"); b.onclick = showTitle; c.append(b);
+  } else if (G.day >= QUOTAS.length) {
+    const best = Math.max(store.get("cc_best") || 0, G.total); store.set("cc_best", best);
+    c.append(el("div", "big", "YOU WIN"), el("p", "", `Three days, ${G.total} doubloons, and the boss has run out of insults.`));
+    const b = el("button", "hot", "Play again"); b.onclick = showTitle; c.append(b);
+  } else {
+    c.append(el("p", "small", "Pick a raise"));
+    const ups = el("div", "ups");
+    Object.entries(UPS).filter(([k]) => !G.ups[k]).forEach(([k, u]) => { const b = el("button", "", u.n); b.append(el("small", "", u.d)); b.onclick = () => { G.ups[k] = 1; Snd.ding(); nextDay(); }; ups.append(b); });
+    if (!ups.children.length) { const b = el("button", "hot", "Next day"); b.onclick = nextDay; ups.append(b); }
+    c.append(ups);
+  }
+  s.append(c);
+}
+
+showTitle();
+</script>
+</body>
+</html>
