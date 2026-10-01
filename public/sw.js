@@ -46,7 +46,7 @@ self.addEventListener("fetch", e => {
   const url = new URL(req.url);
 
   // The Drain is its own app under /drain/. Its navigations must not be cached as "/".
-  if (url.origin === self.location.origin && url.pathname.startsWith("/drain")) return;
+  if (url.origin === self.location.origin && (url.pathname.startsWith("/drain") || url.pathname.startsWith("/scam"))) return;
 
   // 1. anything live stays live
   if (url.origin === self.location.origin && url.pathname.startsWith("/api/")) return;
