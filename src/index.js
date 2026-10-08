@@ -1,3 +1,5 @@
+import { handleLivingMine } from "./living-mine.js";
+export { LivingMinePlayer } from "./living-mine.js";
 // Idle Depths — Cloudflare Worker (static assets + /api routes)
 import { readSession, makeSession, cookieHeader, json } from "./_session.js";
 import { weekKey, weekEnds, prevWeekKey } from "./_week.js";
@@ -41,6 +43,7 @@ async function handle(request, env) {
   {
     const url = new URL(request.url);
     const p = url.pathname;
+    if (p.startsWith("/api/living-mine/")) return handleLivingMine(request, env);
     if (!p.startsWith("/api/")) return env.ASSETS.fetch(request);
 
     // ---- login ----
