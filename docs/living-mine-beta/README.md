@@ -72,3 +72,9 @@ Wrangler dry-run packaging passed. Local runtime testing was attempted but start
 ## Current settlement presentation
 
 At the user's request the default settlement now uses their exact supplied reference image, with five positioned facility selectors and live upgrade/construction badges. The Mine view remains side-on and is selectable separately. The supplied image is a static scene foundation, not a procedural sprite layer; changing a facility currently changes its gameplay effects and badge, not the painted furniture. Art-source provenance is recorded in assets/SCENE.md. Further development should extend this composition instead of replacing it with generic rooms.
+
+## Current unified settlement gameplay
+
+The newer worker pass supersedes the separate Mine view described above. There is no Mine option in the beta UI. `settlement-workers.js` paints original pixel workers, ore seams and haul carts on a transparent 768×419 layer aligned to the supplied scene. One worker renders for every owned miner (including all 40 at the cap). Position is derived from miner index, so hiring and loading preserves the roster. Animation does not own or award income; the existing shared elapsed-time engine continues to do that. Storage-full workers idle until the player dispatches carts. The original background remains static underneath these animated layers.
+
+The four ore hit targets run the existing manual mining action, using the same safe action path as the Swing pick button. They currently share the same ore economy rather than separate resource inventories. Gallery selection updates the settlement's selected resource target without opening another scene. The old renderer module is retained as unused source and is not imported by the active UI.

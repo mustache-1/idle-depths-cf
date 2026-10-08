@@ -14,3 +14,13 @@
 - Add Settlement / Mine view switching; gallery selection opens the existing side-view mine.
 - Preserve the supplied art as a background foundation for later layered animation and visual building upgrades. This image is user-supplied artwork, not a newly authored tileset.
 - Re-run Firefox gameplay, image loading, facility hotspot and mobile touch checks; preserve the current screenshot.
+
+## Workers mine directly in the settlement
+
+- Removed the separate Mine scene option from the beta interface.
+- Added an original pixel worker renderer over the exact supplied settlement background; every owned miner has a persistent, distinct slot, up to all 40 miners.
+- Workers swing picks at the scene's crystals and added coal/copper seams, take short hauling trips and pause when storage fills.
+- Added accessible clickable ore deposits tied to the existing manual mining action and visible hit feedback.
+- Added animated hauling cart, worker count/status, and reduced-motion poses; no frame-based rewards or save migration.
+- Surveying galleries stays inside the settlement and selects the related ore type instead of switching scenes.
+- Added animation/position tests and updated browser tests to assert worker spawning, motion, direct ore clicks and no Mine option.
