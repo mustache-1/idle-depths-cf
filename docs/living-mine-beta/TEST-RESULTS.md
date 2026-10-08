@@ -23,3 +23,5 @@ Run during implementation, 8 October 2026.
 | Production Cloudflare deployment / live regression | Not run; approval required |
 
 Cloudflare release gates remain in README. Browser screenshots show fixture progression, not claims about actual production player data. Node tests use a transaction test double; they do not establish Cloudflare-runtime persistence.
+
+Settlement scene follow-up: supplied JPEG matched byte-for-byte; Firefox reference-image loading, five facility selectors, view switching and mobile hotspot taps passed. Shared-rules suite still passes all 12 tests. Updated desktop renderer sample: 1.52ms per frame; exact run results printed by the browser suite. The supplied scene background remains static.
